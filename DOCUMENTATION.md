@@ -1,35 +1,61 @@
-# Folder Structure
+# UmEmployed Project Folder Structure
+
+## Overview
+This is the folder structure for the UmEmployed job portal platform. Below is a breakdown of each directory and its purpose.
 
 ## src/app/
-- Contains main pages for Job Seekers, Recruiters, Jobs, and Companies.
-- Each section has subfolders for specific pages.
+This folder contains the main pages of the application, structured as follows:
+- **dashboard/**: Job seeker dashboard with subpages for profile editing, resume upload, saved jobs, applications, and career resources.
+- **companies/**: Company listing, detailed pages, and company creation pages.
+- **jobs/**: Job listings, job details, assessments, and application pages.
+- **recruiter/**: Recruiter-specific pages, including onboarding, company/job creation, candidate management, and endorsements.
 
 ## src/components/
-- Reusable UI components like Headers, Footers, Job Cards, etc.
+This folder contains reusable UI components for different sections of the platform:
+- **common/**: Shared components like headers, footers, search bars, and buttons.
+- **job/**: Components specific to job listings, such as `JobCard.jsx`.
+- **company/**: Components for company-related sections, like `CompanyCard.jsx`.
+- **recruiter/**: Recruiter-related UI components, such as `CandidateCard.jsx`.
 
 ## src/context/
-- Manages global state (e.g., authentication, job filtering).
+This folder manages global state using React Context API:
+- `AuthContext.jsx`: Manages user authentication state.
+- `JobContext.jsx`: Manages job filtering and saved job states.
 
 ## src/hooks/
-- Custom React hooks to manage shared logic across the app.
+Custom React hooks for managing logic across the app:
+- `useAuth.js`: Handles authentication logic.
+- `useJobFilter.js`: Manages job filtering functionality.
 
 ## src/services/
-- Handles API calls related to authentication, jobs, and companies.
+Handles API calls and data fetching:
+- `authService.js`: Handles authentication API requests.
+- `jobService.js`: Fetches and manages job-related data.
+- `companyService.js`: Fetches and manages company-related data.
 
 ## src/styles/
-- Global and module-specific styles for maintaining UI consistency.
+Contains CSS files for styling:
+- `globals.css`: Global styles applied throughout the app.
+- `job.module.css`: Specific styles for job-related pages.
 
 ## src/utils/
-- Utility functions like date formatting and constants.
-
-## src/types/
-- Data type definitions for jobs, users, and companies.
+Utility functions and constants:
+- `formatDate.js`: Utility function to format dates.
+- `constants.js`: Stores reusable constants.
 
 ## src/app/api/
-- Server-side API routes for authentication, job listings, and companies.
+Backend API routes for handling requests:
+- **auth/**: Handles authentication (login, register).
+- **jobs/**: Handles job-related API requests.
+- **companies/**: Handles company-related API requests.
 
-## Public Folder
-- Static assets (logos, images, etc.)
+## public/
+Contains static assets such as images and logos.
 
-**Global Brand Color**: Use  or  for the brand color #1e90ff.
+## Environment Configuration
+- `.env.local`: Stores environment variables.
+- `.gitignore`: Excludes sensitive files from version control.
+
+## Global Brand Color
+- Use `bg-brand` or `text-brand` for styling elements with the primary color `#1e90ff`.
 
