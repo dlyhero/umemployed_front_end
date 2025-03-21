@@ -4,7 +4,7 @@ import Form from './Form'
 function Login() {
   return (
     <div>
-      <div className='container max-w-6xl mx-auto flex border border-red-400'>
+      <div className='container max-w-6xl mx-auto flex '>
         <div id='left-section'>
           <img src="/images/login.webp" alt="" />
         </div>
@@ -13,7 +13,7 @@ function Login() {
             <div className="top-section w-full text-center">
               <div className="border-gray-300 p-4 gap-2">
                 <div className="heading">
-                  <h1>Welcome</h1>
+                  <h1 className='text-gray-900 font-black'>Welcome Back!</h1>
                   <h2 className="text-gray-500">Please log in to your account</h2>
                 </div>
               </div>
@@ -37,6 +37,9 @@ function Login() {
             </div>
           <div className="bottom-section w-full">
            <Form />
+           <div className='mt-2 text-center'>
+            <span className='text-gray-5000'>Don't have an accoutn? </span><span className='text-[#1e90ff]'>Sign up</span>
+           </div>
           </div>
         </div>
       </div>
