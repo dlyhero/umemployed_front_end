@@ -16,7 +16,7 @@ export default function Home() {
             <h3 className="text-gray-800 ">
               Unlock new opportunities with our platform. <br/> Connect with leading companies, grow your career, and realize your potential.</h3>
           </div>
-          <div className="btnS my-4 flex flex-col w-[80%]">
+          <div className="btnS my-4 flex flex-col md:w-[80%]">
             <Button variant={'brand'} className={' mb-2 rounded-full'}>Sign In Now</Button>
             <div className="text-center my-4 flex items-center gap-4">
               <hr className="flex-1 border-gray-300"/>

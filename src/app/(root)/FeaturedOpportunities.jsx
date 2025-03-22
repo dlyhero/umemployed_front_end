@@ -123,7 +123,7 @@ const FeaturedOpportunities = () => {
       <div>
         <Slider {...settings}>
           {jobs.map((job) => (
-            <div key={job.id} className="px-2">
+            <div key={job.id} className="px-2 ">
               <div className="bg-white border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <img
