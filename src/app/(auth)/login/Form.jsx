@@ -1,5 +1,5 @@
 "use client"
-import { Button } from '@/components/ui/button'
+import { Button } from '@/src/components/ui/button'
 import React, { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
