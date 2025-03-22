@@ -1,14 +1,25 @@
+import { FaBuilding, FaUserTie } from "react-icons/fa";
+
 export default function NavLinks() {
   return (
     <ul className="hidden md:flex items-center gap-8">
       <li>
-        <a href="/company/companies/" className="font-semibold">
-          Companies
+        <a
+          href="/company/companies/"
+          className="font-semibold flex flex-col items-center group"
+        >
+          <FaBuilding className="text-gray-600 group-hover:text-brand text-sm transition-colors duration-300" />
+          <span className="mt-0.5 text-sm group-hover:text-brand transition-colors duration-300">
+            Companies
+          </span>
         </a>
       </li>
       <li>
-        <a href="#" className="font-semibold">
-          Hire Talent
+        <a href="#" className="font-semibold flex flex-col items-center group">
+          <FaUserTie className="text-gray-600 group-hover:text-brand text-sm transition-colors duration-300" />
+          <span className="mt-0.5 text-sm group-hover:text-brand transition-colors duration-300">
+            Hire Talent
+          </span>
         </a>
       </li>
     </ul>

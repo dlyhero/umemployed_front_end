@@ -10,7 +10,7 @@ export default function Header() {
   const pathName = usePathname(); // Get the current pathname
 
   return (
-    <header className={`border-b border-gray-200 bg-white`}
+    <header className={`border-gray-200 bg-white`}
     >
       <div className="p-1.5 py-3 flex items-center justify-between container max-w-6xl w-full mx-auto">
         <div className="flex items-center">
