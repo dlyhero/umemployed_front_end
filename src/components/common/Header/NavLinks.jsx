@@ -6,18 +6,18 @@ export default function NavLinks() {
       <li>
         <a
           href="/company/companies/"
-          className="font-semibold flex flex-col items-center group"
+          className="font-semibold flex  items-center group"
         >
           <FaBuilding className="text-gray-600 group-hover:text-brand text-sm transition-colors duration-300" />
-          <span className="mt-0.5 text-sm group-hover:text-brand transition-colors duration-300">
+          <span className="mt-0.5 text-base group-hover:text-brand transition-colors duration-300">
             Companies
           </span>
         </a>
       </li>
       <li>
-        <a href="#" className="font-semibold flex flex-col items-center group">
+        <a href="#" className="font-semibold flex  items-center group">
           <FaUserTie className="text-gray-600 group-hover:text-brand text-sm transition-colors duration-300" />
-          <span className="mt-0.5 text-sm group-hover:text-brand transition-colors duration-300">
+          <span className="mt-0.5 text-base group-hover:text-brand transition-colors duration-300">
             Hire Talent
           </span>
         </a>

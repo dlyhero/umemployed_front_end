@@ -2,6 +2,8 @@ import { Button } from "@/src/components/ui/button";
 import Image from "next/image";
 import { FaArrowRight } from "react-icons/fa";
 import FeaturedOpportunities from "./FeaturedOpportunities";
+import WhyChooseUs from "./WhyChooseUS";
+import Resources from "./Resources";
 
 export default function Home() {
   return (
@@ -10,7 +12,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-between items-center max-w-6xl mx-auto p-2 mt-10 md:mt-0">
           <div id="left-side" className="self-center ,md:mb-[5%] px-4">
           <div className="hero-text text-center md:text-start">
-          <h1 className="hero-title text-brand text-2xl md:text-3xl mb-2">Your Career Starts Here!
+          <h1 className="hero-title text-brand text-2xl md:text-3xl mb-2 font-bold">Your Career Starts Here!
             </h1>
             <h2 className="hero-subtitle text-gray-800 text-xl mb-2">Browse thousands of job listings and <br/> seize the opportunity to advance your career.</h2>
             <h3 className="text-gray-800 ">
@@ -32,6 +34,8 @@ export default function Home() {
         </div>
       </div>
       <FeaturedOpportunities />
+      <WhyChooseUs />
+      <Resources />
     </div>
   );
 }

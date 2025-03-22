@@ -75,19 +75,17 @@ function SearchBar() {
                 suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="border  rounded-lg overflow-hidden cursor-pointer transition-all"
+                    className="border  rounded-full p-2 overflow-hidden cursor-pointer transition-all"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     
                     <div className="p-1 flex items-center space-x-2">
-                      <span className="p-2 bg-blue-100 rounded-full">{suggestion.icon}</span>
-                      <span className="font-medium">{suggestion.text}</span>
+                      <span className="font-medium text-nowrap overflow-hidden text-ellipsis">{suggestion.text}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="col-span-2 text-center text-gray-500">
-                  <FaSearch className="inline text-gray-600" />
                   <span>No suggestions found</span>
                 </div>
               )}
