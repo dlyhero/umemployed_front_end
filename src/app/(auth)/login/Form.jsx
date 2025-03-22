@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@/components/ui/button'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { z } from "zod";
@@ -31,9 +31,13 @@ export default function Form() {
         setPasswordVisibility((prev) => !prev); 
     };
     
-    const onSubmit = data =>{
+    const onSubmit = data => {
         console.log(data);
     }
+
+    useEffect(() => {
+
+    }, []);
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className='w-full'>
