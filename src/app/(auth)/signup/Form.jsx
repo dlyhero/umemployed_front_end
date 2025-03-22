@@ -6,9 +6,20 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Zod schema for form validation
 const signUpSchema = z
   .object({
-    name: z.string().min(3, {message: 'Name must be at least 3 characters'}).max(254, {message: 'Name must be less than 255 characters'}),
+    name: z
+      .string()
+      .min(3, { message: "Name must be at least 3 characters" })
+      .max(254, { message: "Name must be less than 255 characters" }),
+    username: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters" })
+      .max(50, { message: "Username must be less than 50 characters" })
+      .regex(/^[a-zA-Z0-9_]+$/, {
+        message: "Username can only contain letters, numbers, and underscores",
+      }),
     email: z
       .string()
       .min(1, { message: "Must be at least one character" })
@@ -22,11 +33,13 @@ const signUpSchema = z
       })
       .regex(/[0-9]/, { message: "Password must contain at least one number" })
       .nonempty({ message: "Password is required" }),
-    confirmPassword: z.string().nonempty({ message: "Confirm Password is required" }),
+    confirmPassword: z
+      .string()
+      .nonempty({ message: "Confirm Password is required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"], 
+    path: ["confirmPassword"], // Attach error to confirmPassword field
   });
 
 export default function Form() {
@@ -41,23 +54,25 @@ export default function Form() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(signUpSchema) });
 
+  // Toggle password visibility
   const toggleVisibility = (field) => {
     setVisibility((prev) => ({
       ...prev,
-      [field]: !prev[field], 
+      [field]: !prev[field], // Toggle visibility for the specified field
     }));
   };
 
+  // Handle form submission
   const onSubmit = (data) => {
     console.log(data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-     {/* Name Field */}
-     <div className="name-wrap flex flex-col gap-1 my-4">
+      {/* Name Field */}
+      <div className="name-wrap flex flex-col gap-1 my-4">
         <label htmlFor="name" className="ml-1 text-gray-500 font-semibold">
-          Name
+          Full Name
         </label>
         <input
           {...register("name")}
@@ -65,14 +80,35 @@ export default function Form() {
           className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
           id="name"
           name="name"
-          placeholder="Enter your full names"
+          placeholder="Enter your full name"
         />
         {errors.name && (
           <p className="text-red-500 mt-1 ml-1 italic">{errors.name.message}</p>
         )}
       </div>
+
+      {/* Username Field */}
+      <div className="username-wrap flex flex-col gap-1 my-4">
+        <label htmlFor="username" className="ml-1 text-gray-500 font-semibold">
+          Username
+        </label>
+        <input
+          {...register("username")}
+          type="text"
+          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+          id="username"
+          name="username"
+          placeholder="Enter your username (nickname)"
+        />
+        {errors.username && (
+          <p className="text-red-500 mt-1 ml-1 italic">
+            {errors.username.message}
+          </p>
+        )}
+      </div>
+
       {/* Email Field */}
-      <div className="email-wrap flex flex-col gap-1">
+      <div className="email-wrap flex flex-col gap-1 my-4">
         <label htmlFor="email" className="ml-1 text-gray-500 font-semibold">
           Email
         </label>
@@ -148,20 +184,23 @@ export default function Form() {
         </Button>
       </div>
 
-      {/* Remember Me and Forgot Password */}
-      <div className="flex items-center space-x-1">
-        <div className="check-btn space-x-2">
-          <input type="checkbox" name="rememberMe" id="rememberMe" />
-          <span> I agree to the </span>
-        </div>
-        <a href="#" className="text-[#1e90ff]">
-         <span> Terms and conditions</span>
-        </a>
+      {/* Terms and Conditions */}
+      <div className="flex items-center space-x-1 my-4">
+        <input type="checkbox" name="terms" id="terms" />
+        <label htmlFor="terms" className="text-sm text-gray-700">
+          I agree to the{" "}
+          <a href="#" className="text-[#1e90ff] hover:underline">
+            Terms and Conditions
+          </a>
+        </label>
       </div>
 
       {/* Submit Button */}
       <div className="btn-wrap mt-4">
-        <Button variant={"brand"}  className={"font-semibold cursor-pointer"}>
+        <Button
+          variant={"brand"}
+          className={"w-full font-semibold cursor-pointer"}
+        >
           Sign Up
         </Button>
       </div>
