@@ -25,7 +25,7 @@ export default function Menu() {
 
       {isClient && (
         <div className="relative hidden md:block">
-          <button onClick={() => setIsDesktopMenuOpen(prev => !prev)} className="p-2 active:border-[#1e90ff] rounded-lg">
+          <button onClick={() => setIsDesktopMenuOpen(prev => !prev)} className="p-2 active:border-primary rounded-lg">
             <FaBars />
           </button>
 

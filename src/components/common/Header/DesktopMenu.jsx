@@ -36,26 +36,26 @@ export default function DesktopMenu({ isOpen, setIsDesktopMenuOpen }) {
                 >
                     {/* Menu Links */}
                     <div className="flex flex-col gap-4 mb-8">
-                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-[#1e90ff]">
+                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-primary">
                             <FaBuilding /> Resume
                         </Link>
-                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-[#1e90ff]">
+                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-primary">
                             <FaBriefcase /> Browse Jobs
                         </Link>
-                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-[#1e90ff]">
+                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-primary">
                             <FaPlusCircle /> Post a Job
                         </Link>
-                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-[#1e90ff]">
+                        <Link href="#" className="flex items-center gap-2 text-gray-600 font-semibold hover:text-primary">
                             <FaEnvelope /> Contact Us
                         </Link>
                     </div>
 
                     {/* Authentication Buttons */}
                     <div className="flex flex-col gap-4">
-                        <Link href="#" className="w-full border px-6 py-3 rounded-full text-[#1e90ff] text-center font-semibold flex items-center justify-center gap-2">
+                        <Link href="#" className="w-full border px-6 py-3 rounded-full text-primary text-center font-semibold flex items-center justify-center gap-2">
                             <FaUserPlus /> Create Account
                         </Link>
-                        <Link href="#" className="w-full bg-[#1e90ff] text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                        <Link href="#" className="w-full bg-primary text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
                             <FaSignInAlt /> Login
                         </Link>
                     </div>
