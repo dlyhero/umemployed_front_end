@@ -1,10 +1,8 @@
-import React from 'react'
-import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
-import Form from './Form'
 
-export const metadata = {
-  title: "Sign Up - UmEmployed",
-};
+"use client";  // Keep the "use client" only for the client-side component logic
+import React from 'react';
+import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
+import Form from './Form';
 
 function Login() {
   return (
@@ -47,4 +45,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Login;

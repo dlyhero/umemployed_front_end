@@ -41,14 +41,14 @@ export default function Form() {
         <form onSubmit={handleSubmit(onSubmit)} className='w-full'>
             <div className="email-wrap flex flex-col gap-1">
                 <label htmlFor="email" className='ml-1 text-gray-500 font-semibold'>Email</label>
-                <input {...register('email')} type="email" className='p-4 border border-gray-300 outline-none rounded-lg bg-white' id='email' name='email' placeholder='Enter your email' />
+                <input {...register('email')} type="email" className='p-2 border border-gray-300 outline-none rounded-lg bg-tansparent' id='email' name='email' placeholder='Enter your email' />
                 {errors.email && <p className='text-red-500 mt-1 ml-1 italic'>{errors.email.message}</p>}
             </div>
             <div className="password-wrap flex flex-col gap-1 my-4 relative">
                 <label htmlFor="password" className='ml-1 text-gray-500 font-semibold'>Password</label>
-                <input {...register('password')} type={`${!passwordVisibilty ? 'password' : 'text'}`} className='p-4 border border-gray-300 outline-none rounded-lg bg-white' id='password' name='password' placeholder='Enter your password' />
+                <input {...register('password')} type={`${!passwordVisibilty ? 'password' : 'text'}`} className='p-2 border border-gray-300 outline-none rounded-lg bg-tansparent' id='password' name='password' placeholder='Enter your password' />
                 {errors.password && <p className='text-red-500 mt-1 ml-1 italic'>{errors.password.message}</p>}
-                <Button variant={'ghost'} className='absolute top-10 right-3 text-gray-700 border-none' onClick={handleVisibility} >{passwordVisibilty ? <FaEyeSlash /> : <FaEye />}</Button>
+                <Button variant={'ghost'} className='absolute top-7 right-3 text-gray-700 border-none' onClick={handleVisibility} >{passwordVisibilty ? <FaEyeSlash /> : <FaEye />}</Button>
             </div>
             <div className="flex items-center justify-between">
                 <div className='check-btn space-x-2'>
@@ -58,7 +58,7 @@ export default function Form() {
                 <a href="#" className='text-[#1e90ff]'>Forgot your password?</a>
             </div>
             <div className="btn-wrap mt-4">
-                <Button variant={'brand'} size={'custom'} className={'font-semibold cursor-pointer'}>Log In</Button>
+                <Button variant={'brand'} className={'font-semibold cursor-pointer'}>Log In</Button>
             </div>
         </form>
     )
