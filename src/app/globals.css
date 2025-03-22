@@ -4,6 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme{
+  --color-primary: #1e90ff;
+  --color-darkHover: #2a004a;
+  --color-darkTheme: #11001F;
+
+}
+/* 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -125,4 +132,4 @@ body {
   body {
     @apply  text-foreground;
   }
-}
+} */
