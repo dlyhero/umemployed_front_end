@@ -7,7 +7,7 @@ function Login() {
     <div>
       <div className='container max-w-6xl mx-auto lg:flex border border-gray-300 rounded-lg'>
         <div id='left-section' className='hidden lg:block'>
-          <img src="/images/login.webp" alt="" />
+          <img src="/images/signin.svg" alt="" />
         </div>
         <div id='right-section' className='max-w-xl mx-auto lg:w-[60%] p-4 border lg:border-none border-gray-300 rounded-lg'>
           <div className='flex flex-col items-center w-full'>
