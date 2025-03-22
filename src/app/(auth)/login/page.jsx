@@ -2,9 +2,6 @@ import React from 'react'
 import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
 import Form from './Form'
 
-export const metadata = {
-  title: "Sign Up - UmEmployed",
-};
 
 function Login() {
   return (

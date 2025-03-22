@@ -2,9 +2,6 @@ import React from 'react'
 import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
 import Form from './Form'
 
-export const metadata = {
-  title: "Sign Up - UmEmployed",
-};
 
 function SignUp() {
   return (
@@ -16,13 +13,12 @@ function SignUp() {
               <div className="border-gray-300 p-2 gap-2">
                 <div className="heading">
                   <h1 className='text-gray-800 font-black text:2xl lg:text-3xl'>Create an Account</h1>
-                  <h2 className="text-gray-500">Sign up with one of the following options</h2>
                 </div>
               </div>
               <div id="alt-auth" className="w-full">
                 <div className="relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg">
                   <img src="/icons/google.png" alt="google-icon" className='h-6 w-6' />
-                  <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign in with google</span>
+                  <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign up with google</span>
                 </div>
               </div>
             </div>
