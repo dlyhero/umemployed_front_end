@@ -70,7 +70,7 @@ function SearchBar() {
             transition={{ duration: 0.2 }}
             className="absolute top-12 left-0 w-full bg-white border border-gray-200 rounded-lg z-50 p-4"
           >
-            <div className="grid grid-cols-2 gap-4S">
+            <div className="grid grid-cols-2 gap-4">
               {suggestions.length > 0 ? (
                 suggestions.map((suggestion, index) => (
                   <div
