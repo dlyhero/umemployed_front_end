@@ -58,7 +58,7 @@ export default function Form() {
                 <a href="#" className='text-brand'>Forgot your password?</a>
             </div>
             <div className="btn-wrap mt-4">
-                <Button variant={'brand'} className={'font-semibold cursor-pointer'}>Log In</Button>
+                <Button variant={'brand'}>Log In</Button>
             </div>
         </form>
     )

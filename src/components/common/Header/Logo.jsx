@@ -8,7 +8,7 @@ export default function Logo() {
   return (
     <div className="logo-wrap flex items-center mr-4">
       <Link href="/" className="text-2xl font-sans">
-        <span className="bg-primary p-1 text-white rounded-lg">uE</span>
+        <span className="bg-brand p-1 text-white rounded-lg">uE</span>
       </Link>
     </div>
   );

@@ -199,7 +199,6 @@ export default function Form() {
       <div className="btn-wrap mt-4">
         <Button
           variant={"brand"}
-          className={"w-full font-semibold cursor-pointer"}
         >
           Sign Up
         </Button>

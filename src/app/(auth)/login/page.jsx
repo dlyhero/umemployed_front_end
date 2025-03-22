@@ -29,7 +29,7 @@ function Login() {
                     <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign in with google</span>
                   </div>
                 </div>
-              </div>
+              </div>  
               <div className="flex items-center my-4 w-full">
                 <hr className="flex-grow border-gray-300" />
                 <span className="px-3 text-gray-500 text-sm">or</span>
