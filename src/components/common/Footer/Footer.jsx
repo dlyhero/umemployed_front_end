@@ -10,21 +10,21 @@ export default function Footer() {
                     href="/accounts/user/feature-not-implemented/"
                     className="text-black hover:text-gray-500"
                 >
-                    <FaTwitter size={20} />
+                    <FaTwitter size={18} />
                 </a>
                 <a
                     href="/accounts/user/feature-not-implemented/"
                     className="text-black hover:text-gray-500"
                 >
-                    <FaLinkedin size={20} />
+                    <FaLinkedin size={18} />
                 </a>
                 <a
                     href="/accounts/user/feature-not-implemented/"
                     className="text-black hover:text-gray-500"
                 >
-                    <FaFacebook size={20} />
+                    <FaFacebook size={18} />
                 </a>
-                <img src="/images/privacy.png" alt="Privacy" className="w-10 h-5" />
+                <img src="/images/privacy.png" alt="Privacy" className="w-8 h-4" />
             </div>
             <div className="text-sm flex space-x-4">
                 <a
