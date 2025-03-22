@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
 import Form from './Form';
+import Link from 'next/link';
 
 function Login() {
   return (
@@ -35,7 +36,7 @@ function Login() {
           <div className="bottom-section w-full">
            <Form />
            <div className='mt-2 text-center'>
-            <span className='text-gray-5000'>Don't have an account? </span><span className='text-[#1e90ff]'>Sign up</span>
+            <span className='text-gray-5000'>Don't have an account? </span><Link href="/signup" className='text-[#1e90ff]'>Sign up</Link>
            </div>
           </div>
         </div>
