@@ -63,7 +63,7 @@ export default function MobileMenu({ isOpen, onClose }) {
                         <Link href="/accounts/user/register-applicant/" className="w-full bg-transparent text-brand border px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
                             <FaUserPlus /> Create Account
                         </Link>
-                        <Link href="/api/users/login/" className="w-full bg-primary text-white px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
+                        <Link href="/api/users/login/" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
                             <FaSignInAlt /> Login
                         </Link>
                     </div>

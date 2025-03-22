@@ -55,7 +55,7 @@ export default function DesktopMenu({ isOpen, setIsDesktopMenuOpen }) {
                         <Link href="#" className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
                             <FaUserPlus /> Create Account
                         </Link>
-                        <Link href="#" className="w-full bg-primary text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                        <Link href="#" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
                             <FaSignInAlt /> Login
                         </Link>
                     </div>
