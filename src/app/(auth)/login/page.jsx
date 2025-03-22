@@ -18,7 +18,7 @@ function Login() {
             <div className="top-section w-full text-center">
               <div className="border-gray-300 p-4 gap-2">
                 <div className="heading">
-                  <h1 className='text-gray-800 font-black text-xl'>Welcome Back!</h1>
+                  <h1 className='text-gray-800 font-black text:2xl lg:text-3xl'>Welcome Back!</h1>
                   <h2 className="text-gray-500">Please log in to your account</h2>
                 </div>
               </div>

@@ -9,11 +9,6 @@ export default function Menu() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  const handlesClosingMenu = () => {
-    setIsMobileMenuOpen(false); 
-  };
-
-  // Set the client flag to true once the component is mounted on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -26,11 +21,8 @@ export default function Menu() {
       </button>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <MobileMenu isClosed={handlesClosingMenu} setIsClosed={handlesClosingMenu} />
-      )}
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
-      {/* Desktop Menu (only rendered on the client side) */}
       {isClient && (
         <div className="relative hidden md:block">
           <button onClick={() => setIsDesktopMenuOpen(prev => !prev)} className="p-2 active:border-[#1e90ff] rounded-lg">
