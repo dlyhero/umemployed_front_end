@@ -8,8 +8,8 @@ import Footer from '@/src/components/common/Footer/Footer';
 function SignUp() {
     return (
         <div>
-            <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 container max-w-6xl mx-auto '>
-                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6 md:bg-white rounded-lg'>
+            <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 container max-w-6xl mx-auto p-4 md:p-0'>
+                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6 md:bg-white rounded-lg border border-gray-300 md:border-none'>
                     <div className='flex flex-col items-center w-full'>
                         <div className="top-section w-full text-center">
                             <div className="border-gray-300 p-2 gap-2">
@@ -37,8 +37,10 @@ function SignUp() {
                         </div>
                     </div>
                 </div>
+                <footer>
+                <p className="text-sm text-nowrap text-gray-800 text-center mt-2">© 2024 UmEmployed. All rights reserved.</p>
+                 </footer>
             </div>
-            <Footer />
         </div >
     )
 }
