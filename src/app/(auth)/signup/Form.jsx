@@ -189,7 +189,7 @@ export default function Form() {
         <input type="checkbox" name="terms" id="terms" />
         <label htmlFor="terms" className="text-sm text-gray-700">
           I agree to the{" "}
-          <a href="#" className="text-[#1e90ff] hover:underline">
+          <a href="#" className="text-primary hover:underline">
             Terms and Conditions
           </a>
         </label>

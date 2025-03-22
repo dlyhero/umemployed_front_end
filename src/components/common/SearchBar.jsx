@@ -7,7 +7,7 @@ function SearchBar() {
                     <input className="flex-1  p-2 focus:outline-none overflow-hidden text-ellipsis" type="text" name="search_query" id="search" placeholder="Search jobs, companies, or keywords" />
                         <div className="border-l border-gray-300 mx-2 hidden lg:block"></div>
                         <div className="button-wrap">
-                            <button type="submit" className="text-white bg-[#1e90ff] font-semibold rounded-full py-2 px-4">
+                            <button type="submit" className="text-white bg-primary font-semibold rounded-full py-2 px-4">
                                 Search
                             </button>
                         </div>

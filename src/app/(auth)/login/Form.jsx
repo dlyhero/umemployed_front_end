@@ -55,7 +55,7 @@ export default function Form() {
                     <input type="checkbox" name="rememberMe" id="rememberMe" />
                     <span>Remember me</span>
                 </div>
-                <a href="#" className='text-[#1e90ff]'>Forgot your password?</a>
+                <a href="#" className='text-primary'>Forgot your password?</a>
             </div>
             <div className="btn-wrap mt-4">
                 <Button variant={'brand'} className={'font-semibold cursor-pointer'}>Log In</Button>

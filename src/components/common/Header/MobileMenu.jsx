@@ -60,10 +60,10 @@ export default function MobileMenu({ isOpen, onClose }) {
 
                     {/* Authentication Buttons */}
                     <div className="flex flex-col gap-4 absolute bottom-10 right-4 left-4">
-                        <Link href="/accounts/user/register-applicant/" className="w-full bg-transparent text-[#1e90ff] border px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
+                        <Link href="/accounts/user/register-applicant/" className="w-full bg-transparent text-primary border px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
                             <FaUserPlus /> Create Account
                         </Link>
-                        <Link href="/api/users/login/" className="w-full bg-[#1e90ff] text-white px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
+                        <Link href="/api/users/login/" className="w-full bg-primary text-white px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
                             <FaSignInAlt /> Login
                         </Link>
                     </div>
