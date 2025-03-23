@@ -30,11 +30,11 @@ const Resources = () => {
   ];
 
   return (
-    <section className="py-12 bg-gradient-to-r from-blue-50 to-purple-50">
-      <div className=" max-w-6xl mx-auto px-4 space-x-10">
-        <div className="">
-          <h2 className="text-2xl md:tex-3xl font-bold text-brand mb-6">Resources for Job Seekers</h2>
-          <p className="text-gray-600 mb-8">
+    <section className="py-12 px-8 bg-gray-100 text-gray-900 font-semibold">
+      <div className="max-w-6xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
+        <div className="w-full lg:w-1/2">
+          <h2 className="text-2xl md:text-3xl font-bold text-brand mb-6">Resources for Job Seekers</h2>
+          <p className="text-gray-700 mb-8">
             Navigate your job search with confidence. Explore tools, tips, and opportunities tailored for you.
           </p>
 
@@ -44,6 +44,8 @@ const Resources = () => {
                 <button
                   className="w-full flex justify-between items-center p-4 text-left text-brand font-semibold hover:bg-indigo-50"
                   onClick={() => toggleAccordion(index)}
+                  aria-expanded={openAccordion === index}
+                  aria-controls={`accordion-content-${index}`}
                 >
                   <span>{resource.title}</span>
                   <svg
@@ -62,10 +64,11 @@ const Resources = () => {
                   </svg>
                 </button>
                 <div
+                  id={`accordion-content-${index}`}
                   className={`overflow-hidden transition-all duration-300 ease-in-out ${openAccordion === index ? "max-h-40" : "max-h-0"
                     }`}
                 >
-                  <div className="p-4 pt-0 text-gray-600">
+                  <div className="p-4 pt-0 text-gray-700">
                     <p>{resource.content}</p>
                     <a href={resource.link} className="mt-2 inline-block text-brand hover:underline">
                       {resource.linkText}
@@ -75,6 +78,9 @@ const Resources = () => {
               </div>
             ))}
           </div>
+        </div>
+        <div className="w-full m flex items-center justify-center">
+          <img src="/images/learn.webp" alt="Learning" className="lg:ml-36 w-7xl h-auto lg:h-[500px] " />
         </div>
       </div>
     </section>
