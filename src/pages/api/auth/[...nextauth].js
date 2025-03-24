@@ -1,15 +1,57 @@
-import NextAuth from "next-auth"
-import GithubProvider from "next-auth/providers/github"
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import baseUrl from "./baseUrl";
 
 export const authOptions = {
-  // Configure one or more authentication providers
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
-    // ...add more providers here
-  ],
-}
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email", placeholder: "jsmith@example.com" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const { email, password } = credentials;
 
-export default NextAuth(authOptions)
+        try {
+          const response = await baseUrl.post("/users/login", { email, password });
+
+          const accessToken = response.data?.access;
+          const refreshToken = response.data?.refresh;
+
+          if (accessToken) {
+            return {
+              email,
+              accessToken,
+              refreshToken, // Store refresh token as well
+            };
+          } else {
+            return null;
+          }
+        } catch (error) {
+          console.error("Login failed:", error.response?.data || error.message);
+          return null;
+        }
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+      return session;
+    },
+  },
+};
+
+export default NextAuth(authOptions);

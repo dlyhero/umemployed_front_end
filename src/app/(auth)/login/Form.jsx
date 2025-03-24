@@ -20,7 +20,6 @@ const loginSchema = z.object({
         .nonempty({ message: "Password is required" }),
 });
 
-
 export default function Form() {
     const [passwordVisibilty, setPasswordVisibility] = useState(false);
     const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) })
