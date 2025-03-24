@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/src/components/ui/button";
 import Image from "next/image";
 import { FaArrowRight } from "react-icons/fa";
@@ -5,8 +6,12 @@ import FeaturedOpportunities from "./FeaturedOpportunities";
 import WhyChooseUs from "./WhyChooseUS";
 import Resources from "./Resources";
 import Companies from "./Companies";
+import { signIn, useSession } from "next-auth/react";
 
 export default function Home() {
+   const { data: session, status } = useSession();
+  
+    
   return (
     <div>
       <div id="Hero-section" className="flex justify-between items-center bg-white">
@@ -19,13 +24,13 @@ export default function Home() {
             
           </div>
           <div className="btnS my-4 flex flex-col md:w-[80%]">
-            <Button variant={'brand'} className={' mb-2 rounded-full'}>Sign In Now</Button>
+            {!session?.user && (<Button variant={'brand'} className={' mb-2 rounded-full'} onClick={() => signIn()}>Sign In Now</Button>)}
             <div className="text-center my-4 flex items-center gap-4">
               <hr className="flex-1 border-gray-300"/>
                <span>Or</span>
               <hr className="flex-1 border-gray-300" />
               </div>
-            <Button variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4'}>Log in</Button>
+           {!session?.user && (<Button variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4'}>Log in</Button>)}
           </div>
           </div>
           <div id="right-side">

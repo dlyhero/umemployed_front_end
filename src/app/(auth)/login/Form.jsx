@@ -1,64 +1,119 @@
 "use client"
-import { Button } from '@/src/components/ui/button'
-import React, { useEffect, useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
-import { z } from "zod";
-import { useForm } from 'react-hook-form'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/src/components/ui/button';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const loginSchema = z.object({
-    email: z
-    .string()
-    .min(1, { message: "must be at least one character" })
-    .max(254, { message: "Email must be less than 255 characters" })
-    .email("This is not a valid email"),
-    password: z
-        .string()
-        .min(8, { message: "Password must be at least 8 characters" })
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-        .regex(/[0-9]/, { message: "Password must contain at least one number" })
-        .nonempty({ message: "Password is required" }),
-});
+export default function LoginForm() {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-export default function Form() {
-    const [passwordVisibilty, setPasswordVisibility] = useState(false);
-    const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) })
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors } 
+  } = useForm();
 
-    const handleVisibility = (e) => {
-        setPasswordVisibility((prev) => !prev);
-    };
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError('');
 
-    const onSubmit = data => {
-        console.log(data);
+    try {
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      });
+
+      console.log("SignIn result:", result); // Debug
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      if (result?.ok) {
+        router.push(searchParams.get('callbackUrl') || '/');
+      }
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    useEffect(() => {
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
 
-    }, []);
+      <div className="email-wrap flex flex-col gap-1 mb-4">
+        <label htmlFor="email" className="ml-1 text-gray-500 font-semibold">
+          Email
+        </label>
+        <input
+          {...register("email", { required: "Email is required" })}
+          type="email"
+          className="p-2 border border-gray-300 rounded-lg"
+          id="email"
+          placeholder="Enter your email"
+        />
+        {errors.email && (
+          <p className="text-red-500 mt-1 ml-1 italic">{errors.email.message}</p>
+        )}
+      </div>
 
-    return (
-        <form onSubmit={handleSubmit(onSubmit)} className='w-full'>
-            <div className="email-wrap flex flex-col gap-1">
-                <label htmlFor="email" className='ml-1 text-gray-500 font-semibold'>Email</label>
-                <input {...register('email')} type="email" className='p-2 border border-gray-300 outline-none rounded-lg bg-tansparent' id='email' name='email' placeholder='Enter your email' />
-                {errors.email && <p className='text-red-500 mt-1 ml-1 italic'>{errors.email.message}</p>}
-            </div>
-            <div className="password-wrap flex flex-col gap-1 my-4 relative">
-                <label htmlFor="password" className='ml-1 text-gray-500 font-semibold'>Password</label>
-                <input {...register('password')} type={`${!passwordVisibilty ? 'password' : 'text'}`} className='p-2 border border-gray-300 outline-none rounded-lg bg-tansparent' id='password' name='password' placeholder='Enter your password' />
-                {errors.password && <p className='text-red-500 mt-1 ml-1 italic'>{errors.password.message}</p>}
-                <Button variant={'ghost'} className='absolute top-7 right-3 text-gray-700 border-none' onClick={handleVisibility} >{passwordVisibilty ? <FaEyeSlash /> : <FaEye />}</Button>
-            </div>
-            <div className="flex items-center justify-between">
-                <div className='check-btn space-x-2'>
-                    <input type="checkbox" name="rememberMe" id="rememberMe" />
-                    <span>Remember me</span>
-                </div>
-                <a href="#" className='text-brand'>Forgot your password?</a>
-            </div>
-            <div className="btn-wrap mt-4">
-                <Button variant={'brand'}>Log In</Button>
-            </div>
-        </form>
-    )
+      <div className="password-wrap flex flex-col gap-1 mb-4 relative">
+        <label htmlFor="password" className="ml-1 text-gray-500 font-semibold">
+          Password
+        </label>
+        <input
+          {...register("password", { required: "Password is required" })}
+          type={passwordVisible ? "text" : "password"}
+          className="p-2 border border-gray-300 rounded-lg"
+          id="password"
+          placeholder="Enter your password"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          className="absolute top-9 right-2"
+          onClick={() => setPasswordVisible(!passwordVisible)}
+        >
+          {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+        </Button>
+        {errors.password && (
+          <p className="text-red-500 mt-1 ml-1 italic">{errors.password.message}</p>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <input type="checkbox" id="rememberMe" />
+          <label htmlFor="rememberMe">Remember me</label>
+        </div>
+        <a href="#" className="text-brand hover:underline">
+          Forgot password?
+        </a>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full p-2 rounded-lg font-semibold  ${
+          loading ? "bg-brand/80" : "bg-brand hover:bg-brand/70"
+        } text-white`}
+      >
+        {loading ? "Logging in..." : "Log In"}
+      </button>
+    </form>
+  );
 }

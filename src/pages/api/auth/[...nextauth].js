@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import baseUrl from "./baseUrl";
+import { signIn, signOut } from "next-auth/react";
 
 export const authOptions = {
   providers: [
@@ -14,8 +15,12 @@ export const authOptions = {
         const { email, password } = credentials;
 
         try {
-          const response = await baseUrl.post("/users/login", { email, password });
-
+             
+          const response = await baseUrl({
+            url: "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
+            data: { email, password }
+          });
+          
           const accessToken = response.data?.access;
           const refreshToken = response.data?.refresh;
 
@@ -23,7 +28,7 @@ export const authOptions = {
             return {
               email,
               accessToken,
-              refreshToken, // Store refresh token as well
+              refreshToken, 
             };
           } else {
             return null;
@@ -38,20 +43,10 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      return session;
-    },
-  },
+  pages: {
+    signIn: "/login",
+    signOut: "/"
+  }
 };
 
 export default NextAuth(authOptions);

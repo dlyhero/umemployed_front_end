@@ -2,8 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaBuilding, FaBriefcase, FaPlusCircle, FaEnvelope, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 export default function DesktopMenu({ isOpen, setIsDesktopMenuOpen }) {
+    const {data: session, status} = useSession();
+
+    if (status === "loading") return null;
+
     const menuRef = useRef(null);
 
     // Close the menu when clicking outside
@@ -52,12 +57,14 @@ export default function DesktopMenu({ isOpen, setIsDesktopMenuOpen }) {
 
                     {/* Authentication Buttons */}
                     <div className="flex flex-col gap-4">
-                        <Link href="#" className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
+                        {!(session?.user) && (<button onClick={() => signOut()} className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
                             <FaUserPlus /> Create Account
-                        </Link>
-                        <Link href="#" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                        </button>)}
+                        {session?.user ? (<Link href="#" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                            <FaSignInAlt /> Logout
+                        </Link>) : (<button onClick={() => signIn()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
                             <FaSignInAlt /> Login
-                        </Link>
+                        </button>)}
                     </div>
                 </motion.div>
             )}

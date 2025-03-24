@@ -9,7 +9,7 @@ import Footer from '@/src/components/common/Footer/Footer';
 function Login() {
   return (
     <div className=''>
-      <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 container max-w-6xl mx-auto p-4 md:p-0'>
+      <div className=' lg:mt-[5%] container max-w-6xl mx-auto p-4 md:p-0'>
         <div className=' lg:flex items-center border border-gray-300 md:border-none rounded-lg'>
           <div id='left-section' className='hidden lg:block'>
             <img src="/images/login.webp" alt="" />
