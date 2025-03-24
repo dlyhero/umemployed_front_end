@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { signIn, signOut } from "next-auth/react";
+import axios from "axios";
 
 export const authOptions = {
   providers: [
@@ -11,30 +11,30 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const { email, password } = credentials;
-
         try {
-          const response = await fetch("https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+          const response = await axios.post(
+            "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
+            {
+              email: credentials.email,
+              password: credentials.password,
             },
-            body: JSON.stringify({ email, password }),
-          });
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data?.detail || "Login failed");
+          if (response.data?.access) {
+            return {
+              email: credentials.email,
+              accessToken: response.data.access,
+              refreshToken: response.data.refresh,
+            };
           }
-
-          return {
-            email,
-            accessToken: data.access,
-            refreshToken: data.refresh,
-          };
+          return null;
         } catch (error) {
-          console.error("Login failed:", error.message);
+          console.error("Login failed:", error.response?.data || error.message);
           return null;
         }
       },
@@ -42,24 +42,34 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  pages: {
+    signIn: "/login",
+    signOut: "/",
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
+      session.user.email = token.email;
       return session;
     },
-  },
-  pages: {
-    signIn: "/login",
-    signOut: "/",
+    async redirect({ url, baseUrl }) {
+      // Redirect to home after login, replacing history
+      if (url === baseUrl + "/login") {
+        return baseUrl;
+      }
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
   },
 };
 
