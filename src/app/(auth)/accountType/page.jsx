@@ -67,7 +67,7 @@ export default function ChooseAccountType() {
           onClick={handleJobSeekerClick}
           className="flex-1 p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-gray-200 rounded-lg cursor-pointer flex flex-col items-center"
         >
-          <div className="text-[#1e90ff] mb-4">
+          <div className="text-brand mb-4">
             <FaSearch className="text-2xl" />
           </div>
           <div className="text-center">
@@ -87,7 +87,7 @@ export default function ChooseAccountType() {
           onClick={handleEmployerClick}
           className="flex-1 p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-gray-200 rounded-lg cursor-pointer flex flex-col items-center"
         >
-          <div className="text-[#1e90ff] mb-4">
+          <div className="text-brand mb-4">
             <FaBriefcase className="text-2xl" />
           </div>
           <div className="text-center">
