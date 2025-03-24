@@ -2,11 +2,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
+import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/src/components/ui/button';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useSession } from 'next-auth/react';
 
 export default function LoginForm() {
+    const { data: session } = useSession();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,6 +21,13 @@ export default function LoginForm() {
     handleSubmit, 
     formState: { errors } 
   } = useForm();
+
+
+  useEffect(() => {
+    if (session) {
+      router.replace("/"); // Redirect to home if logged in
+    }
+  }, [session, router]);
 
   const onSubmit = async (data) => {
     setLoading(true);

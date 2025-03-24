@@ -57,12 +57,12 @@ export default function DesktopMenu({ isOpen, setIsDesktopMenuOpen }) {
 
                     {/* Authentication Buttons */}
                     <div className="flex flex-col gap-4">
-                        {!(session?.user) && (<button onClick={() => signOut()} className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
+                        {!(session?.user) && (<button className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
                             <FaUserPlus /> Create Account
                         </button>)}
-                        {session?.user ? (<Link href="#" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                        {session?.user ? (<button onClick={() => signOut()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
                             <FaSignInAlt /> Logout
-                        </Link>) : (<button onClick={() => signIn()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
+                        </button>) : (<button onClick={() => signIn()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
                             <FaSignInAlt /> Login
                         </button>)}
                     </div>

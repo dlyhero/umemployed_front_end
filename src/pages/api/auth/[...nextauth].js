@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import baseUrl from "./baseUrl";
 import { signIn, signOut } from "next-auth/react";
 
 export const authOptions = {
@@ -15,26 +14,27 @@ export const authOptions = {
         const { email, password } = credentials;
 
         try {
-             
-          const response = await baseUrl({
-            url: "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
-            data: { email, password }
+          const response = await fetch("https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
           });
-          
-          const accessToken = response.data?.access;
-          const refreshToken = response.data?.refresh;
 
-          if (accessToken) {
-            return {
-              email,
-              accessToken,
-              refreshToken, 
-            };
-          } else {
-            return null;
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data?.detail || "Login failed");
           }
+
+          return {
+            email,
+            accessToken: data.access,
+            refreshToken: data.refresh,
+          };
         } catch (error) {
-          console.error("Login failed:", error.response?.data || error.message);
+          console.error("Login failed:", error.message);
           return null;
         }
       },
@@ -43,10 +43,24 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+      return session;
+    },
+  },
   pages: {
     signIn: "/login",
-    signOut: "/"
-  }
+    signOut: "/",
+  },
 };
 
 export default NextAuth(authOptions);

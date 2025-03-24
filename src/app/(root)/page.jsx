@@ -7,6 +7,7 @@ import WhyChooseUs from "./WhyChooseUS";
 import Resources from "./Resources";
 import Companies from "./Companies";
 import { signIn, useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function Home() {
    const { data: session, status } = useSession();
@@ -24,13 +25,20 @@ export default function Home() {
             
           </div>
           <div className="btnS my-4 flex flex-col md:w-[80%]">
-            {!session?.user && (<Button variant={'brand'} className={' mb-2 rounded-full'} onClick={() => signIn()}>Sign In Now</Button>)}
-            <div className="text-center my-4 flex items-center gap-4">
-              <hr className="flex-1 border-gray-300"/>
-               <span>Or</span>
-              <hr className="flex-1 border-gray-300" />
-              </div>
-           {!session?.user && (<Button variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4'}>Log in</Button>)}
+            {!session?.user ? (
+              <>
+                <Button variant={'brand'} className={' mb-2 rounded-full'} onClick={() => signIn()}>Sign In Now</Button>
+                <div className="text-center my-4 flex items-center gap-4">
+                  <hr className="flex-1 border-gray-300"/>
+                  <span>Or</span>
+                  <hr className="flex-1 border-gray-300" />
+                </div>
+                <Button variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4'}>Log in</Button>
+              </>
+            ): <div className="flex flex-col w-full mt-10 gap-y-8">
+               <Link href="#" className={'bg-brand text-white font-semibold rounded-full p-2 text-center'}>Browse jobs</Link>
+               <Link href="#" className={'border border-brand text-brand font-semibold rounded-full p-2 text-center'}>let's get started</Link>
+              </div>}
           </div>
           </div>
           <div id="right-side">
