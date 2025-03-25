@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 

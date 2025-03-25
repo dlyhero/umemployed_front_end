@@ -1,11 +1,10 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
-import { FaArrowRight } from "react-icons/fa";
-import FeaturedOpportunities from "./FeaturedOpportunities";
-import WhyChooseUs from "./WhyChooseUS";
-import Resources from "./Resources";
-import Companies from "./Companies";
+import { Button } from "@/components/ui/button";
+import FeaturedOpportunities from "./MainContent/FeaturedOpportunities";
+import WhyChooseUs from "./MainContent/WhyChooseUS";
+import Resources from "./MainContent/Resources";
+import Companies from "./MainContent/Companies";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 
