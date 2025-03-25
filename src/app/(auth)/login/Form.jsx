@@ -76,7 +76,7 @@ export default function LoginForm() {
     
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full relative">
             {error && (
                 <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
                     {error}
