@@ -34,7 +34,7 @@ function SignUp() {
                         <div className="bottom-section w-full">
                             <Form />
                             <div className='mt-2 text-center'>
-                                <span className='text-gray-5000'>Already an account? </span><Link href="/login" className='text-brand'>Sign I</Link>
+                                <span className='text-gray-5000'>Already an account? </span><Link href="/login" className='text-brand'>Sign In</Link>
                             </div>
                         </div>
                     </div>
