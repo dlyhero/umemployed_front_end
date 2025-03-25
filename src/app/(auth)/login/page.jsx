@@ -41,6 +41,7 @@ function Login() {
                 <Form />
                 <div className='mt-2 text-center'>
                   <span className='text-gray-5000'>Don't have an account? </span><Link href="/signup" className='text-brand cursor-pointer '>Sign up</Link>
+<<<<<<< HEAD
                 </div>
               </div>
             </div>
@@ -110,9 +111,12 @@ export default function Form() {
                 <div className='check-btn space-x-2'>
                     <input type="checkbox" name="rememberMe" id="rememberMe" />
                     <span>Remember me</span>
+=======
+>>>>>>> 9f6c8ab (signup authentication)
                 </div>
-                <a href="#" className='text-[#1e90ff]'>Forgot your password?</a>
+              </div>
             </div>
+<<<<<<< HEAD
             <div className="btn-wrap mt-4">
                 <Button variant={'brand'}  className={'font-semibold cursor-pointer'}>Log In</Button>
             </div>
@@ -120,3 +124,14 @@ export default function Form() {
     )
 }
 >>>>>>> e0e0d51 (signin page setting up the size)
+=======
+          </div>
+        </div>
+      </div >
+      <Footer />
+    </div>
+  )
+}
+
+export default Login;
+>>>>>>> 9f6c8ab (signup authentication)
