@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
 
 export const authOptions = {
@@ -39,6 +40,17 @@ export const authOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    })
   ],
   session: {
     strategy: "jwt",
@@ -49,18 +61,44 @@ export const authOptions = {
     signOut: "/",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.email = user.email;
+    async jwt({ token, user, account }) {
+      // Initial sign in
+      if (account && user) {
+        // Handle Google provider
+        if (account.provider === "google") {
+          try {
+            // Send Google credentials to your backend
+            const response = await axios.post(
+              "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/google-auth/",
+              {
+                access_token: account.access_token,
+                id_token: account.id_token
+              }
+            );
+
+            if (response.data?.access) {
+              token.accessToken = response.data.access;
+              token.refreshToken = response.data.refresh;
+            }
+          } catch (error) {
+            console.error("Google auth failed:", error.response?.data || error.message);
+          }
+        }
+        
+        // Handle credentials provider
+        if (account.provider === "credentials") {
+          token.accessToken = user.accessToken;
+          token.refreshToken = user.refreshToken;
+        }
       }
+      
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.user.email = token.email;
+      session.error = token.error; // For error propagation
       return session;
     },
     async redirect({ url, baseUrl }) {
@@ -70,6 +108,13 @@ export const authOptions = {
       }
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
+    async signIn({ user, account, profile }) {
+      if (account.provider === "google") {
+        // Additional verification can be done here
+        return true;
+      }
+      return true;
+    }
   },
 };
 

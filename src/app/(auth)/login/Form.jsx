@@ -73,9 +73,7 @@ export default function LoginForm() {
         }
     };
 
-    if (status === "authenticated" || status === "loading") {
-        return null; // Or return a loading spinner
-    }
+    
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -160,7 +158,7 @@ export default function LoginForm() {
             <Button
                 type="submit"
                 disabled={loading}
-                className="w-full text-white bg-brand font-semibold hover:bg-brand/70"
+                className="w-full text-white bg-brand font-semibold hover:bg-brand/70 cursor-pointer "
             >
                 {loading ? (
                     <span className="flex items-center justify-cente ">
