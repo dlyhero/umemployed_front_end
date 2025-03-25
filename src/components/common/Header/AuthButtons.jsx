@@ -26,7 +26,7 @@ export default function AuthButtons() {
   }, [status, session, update]);
 
   return (
-    <div className="flex items-center gap-4 transition-all duration-300 ease-in-out min-w-[150px]">
+    <div className={`flex items-center gap-4 transition-all duration-300 ease-in-out ${ session ? 'min-w-[150px]' : 'w-fit'}`}>
       {/* Always render both states, just toggle visibility */}
       <div className={`flex items-center gap-4 ${status !== "authenticated" ? "hidden" : ""}`}>
         {/* Authenticated state */}
@@ -86,10 +86,10 @@ export default function AuthButtons() {
       {/* Loading state overlays */}
       {isLoading && (
         <>
-          <div className="absolute flex items-center gap-4">
+          {!session ? '' : <div className="absolute flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
             <div className="w-[100px] h-6 bg-gray-200 animate-pulse rounded-full" />
-          </div>
+          </div>}
         </>
       )}
     </div>

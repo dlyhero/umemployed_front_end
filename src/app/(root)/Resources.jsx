@@ -30,9 +30,9 @@ const Resources = () => {
   ];
 
   return (
-    <section className="py-12 px-8 bg-gray-100 text-gray-900 font-semibold">
+    <section className="py-12 lg:px-8 bg-gray-100 text-gray-900 font-semibold">
       <div className="max-w-6xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
-        <div className="w-full lg:w-1/2">
+        <div className="w-full lg:w-[51%]">
           <h2 className="text-2xl md:text-3xl font-bold text-brand mb-6">Resources for Job Seekers</h2>
           <p className="text-gray-700 mb-8">
             Navigate your job search with confidence. Explore tools, tips, and opportunities tailored for you.
@@ -42,7 +42,7 @@ const Resources = () => {
             {resources.map((resource, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <button
-                  className="w-full flex justify-between items-center p-4 text-left text-brand font-semibold hover:bg-indigo-50"
+                  className="w-full flex justify-between items-center p-4 text-left  font-semibold hover:bg-indigo-50"
                   onClick={() => toggleAccordion(index)}
                   aria-expanded={openAccordion === index}
                   aria-controls={`accordion-content-${index}`}
@@ -80,7 +80,7 @@ const Resources = () => {
           </div>
         </div>
         <div className="w-full m flex items-center justify-center">
-          <img src="/images/learn.webp" alt="Learning" className="lg:ml-36 w-7xl h-auto lg:h-[500px] " />
+          <img src="/images/ue1.jpg" alt="Learning" className="lg:ml-36 w-8xl bg-contain bg-center rounded-full" />
         </div>
       </div>
     </section>
