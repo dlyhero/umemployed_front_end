@@ -9,9 +9,9 @@ import { signIn } from 'next-auth/react';
 
 function SignUp() {
     return (
-        <div>
-            <div className='mt-4 container max-w-6xl mx-auto p-4 md:p-0'>
-                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6 md:bg-white rounded-lg border border-gray-300 md:border-none'>
+        <div className=''>
+            <div className='mt-4 container max-w-6xl mx-auto p-2 md:p-0'>
+                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6  bg-white rounded-lg border border-gray-300 md:border-none'>
                     <div className='flex flex-col items-center w-full'>
                         <div className="top-section w-full text-center">
                             <div className="border-gray-300 p-2 gap-2">
@@ -34,14 +34,12 @@ function SignUp() {
                         <div className="bottom-section w-full">
                             <Form />
                             <div className='mt-2 text-center'>
-                                <span className='text-gray-5000'>Already an account? </span><Link href="/login" className='text-brand'>Sign IN</Link>
+                                <span className='text-gray-5000'>Already an account? </span><Link href="/login" className='text-brand'>Sign In</Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <footer>
-                <p className="text-sm text-nowrap text-gray-800 text-center mt-1">© 2024 UmEmployed. All rights reserved.</p>
-                 </footer>
+                <Footer />
             </div>
         </div >
     )
