@@ -33,7 +33,7 @@ export default function Home() {
                   <span>Or</span>
                   <hr className="flex-1 border-gray-300" />
                 </div>
-                <Button onClick={() => signIn()} variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4'}>Log in</Button>
+                <Button onClick={() => signIn()} variant={'outline'} className={'border-brand text-brand hover:text-brand/70 rounded-full font-semibold my-4 cursor-pointer'}>Log in</Button>
               </>
             ): <div className="flex flex-col w-full mt-10 gap-y-8">
                <Link href="#" className={'bg-brand text-white font-semibold rounded-full p-2 text-center'}>Browse jobs</Link>
