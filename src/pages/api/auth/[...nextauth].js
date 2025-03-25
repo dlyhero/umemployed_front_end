@@ -43,21 +43,10 @@ export const authOptions = {
       },
     }),
 
-    // Google provider for OAuth login
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      },
-      httpOptions: {
-        timeout: 10000, // Set timeout to 10 seconds (10000ms)
-      },
-    })   
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),   
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
@@ -120,14 +109,20 @@ export const authOptions = {
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
 
+    
+
     // Sign-in verification
+
     async signIn({ user, account, profile }) {
+      console.log("User:", user);
+      console.log("Account:", account);
+      console.log("Profile:", profile);
       if (account.provider === "google") {
-        // Additional verification can be done here
         return true;
       }
       return true;
-    },
+    }
+ 
   },
 };
 
