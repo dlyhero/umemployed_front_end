@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
@@ -128,7 +127,7 @@ export default function LoginForm() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute top-9 right-2 h-8 w-8"
+                    className="absolute top-8 right-2 h-8 w-8"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                 >
                     {passwordVisible ? <FaEyeSlash className="h-4 w-4" /> : <FaEye className="h-4 w-4" />}
