@@ -1,45 +1,33 @@
 "use client";
 import { Button } from "@/src/components/ui/button";
-import React, { useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import axios from "axios";
+import { SuccessModal } from "@/src/components/common/modal/SuccessModal";
 
-// Zod schema for form validation
 const signUpSchema = z
   .object({
-    name: z
-      .string()
-      .min(3, { message: "Name must be at least 3 characters" })
-      .max(254, { message: "Name must be less than 255 characters" }),
+    firstname: z.string().min(3, "Name must be at least 3 characters").max(254),
+    lastname: z.string().min(3, "Name must be at least 3 characters").max(254),
     username: z
       .string()
-      .min(3, { message: "Username must be at least 3 characters" })
-      .max(50, { message: "Username must be less than 50 characters" })
-      .regex(/^[a-zA-Z0-9_]+$/, {
-        message: "Username can only contain letters, numbers, and underscores",
-      }),
-    email: z
-      .string()
-      .min(1, { message: "Must be at least one character" })
-      .max(254, { message: "Email must be less than 255 characters" })
-      .email("This is not a valid email"),
+      .min(3, "Username must be at least 3 characters")
+      .max(50, "Username must be less than 50 characters")
+      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+    email: z.string().email("This is not a valid email").max(254),
     password: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters" })
-      .regex(/[A-Z]/, {
-        message: "Password must contain at least one uppercase letter",
-      })
-      .regex(/[0-9]/, { message: "Password must contain at least one number" })
-      .nonempty({ message: "Password is required" }),
-    confirmPassword: z
-      .string()
-      .nonempty({ message: "Confirm Password is required" }),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"], // Attach error to confirmPassword field
+    path: ["confirmPassword"],
   });
 
 export default function Form() {
@@ -47,162 +35,181 @@ export default function Form() {
     password: false,
     confirmPassword: false,
   });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({ resolver: zodResolver(signUpSchema) });
 
-  // Toggle password visibility
   const toggleVisibility = (field) => {
     setVisibility((prev) => ({
       ...prev,
-      [field]: !prev[field], // Toggle visibility for the specified field
+      [field]: !prev[field],
     }));
   };
 
-  // Handle form submission
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    setError("");
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/signup/",
+        {
+          first_name: data.firstname,
+          last_name: data.lastname,
+          username: data.username,
+          email: data.email,
+          password: data.password,
+          confirm_password: data.confirmPassword,
+        }
+      );
+
+      if (response.status === 201) {
+        reset();
+        setShowSuccessModal(true);
+      }
+    } catch (error) {
+      const errorMessages = error.response?.data;
+      const errors = errorMessages
+        ? Object.values(errorMessages).flat().join(" ")
+        : "An error occurred";
+      setError(errors);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-      {/* Name Field */}
-      <div className="name-wrap flex flex-col gap-1 my-4">
-        <label htmlFor="name" className="ml-1 text-gray-500 font-semibold">
-          Full Name
-        </label>
-        <input
-          {...register("name")}
-          type="text"
-          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-          id="name"
-          name="name"
-          placeholder="Enter your full name"
-        />
-        {errors.name && (
-          <p className="text-red-500 mt-1 ml-1 italic">{errors.name.message}</p>
-        )}
-      </div>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
 
-      {/* Username Field */}
-      <div className="username-wrap flex flex-col gap-1 my-4">
-        <label htmlFor="username" className="ml-1 text-gray-500 font-semibold">
-          Username
-        </label>
-        <input
-          {...register("username")}
-          type="text"
-          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-          id="username"
-          name="username"
-          placeholder="Enter your username (nickname)"
-        />
-        {errors.username && (
-          <p className="text-red-500 mt-1 ml-1 italic">
-            {errors.username.message}
-          </p>
-        )}
-      </div>
+        {/* First Name */}
+        <div className="flex flex-col gap-1 my-4">
+          <label htmlFor="firstname" className="ml-1 text-gray-500 font-semibold">
+            First Name
+          </label>
+          <input
+            {...register("firstname")}
+            type="text"
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="firstname"
+            placeholder="Enter your first name"
+          />
+          {errors.firstname && <p className="text-red-500 mt-1 ml-1 italic">{errors.firstname.message}</p>}
+        </div>
 
-      {/* Email Field */}
-      <div className="email-wrap flex flex-col gap-1 my-4">
-        <label htmlFor="email" className="ml-1 text-gray-500 font-semibold">
-          Email
-        </label>
-        <input
-          {...register("email")}
-          type="email"
-          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-          id="email"
-          name="email"
-          placeholder="Enter your email"
-        />
-        {errors.email && (
-          <p className="text-red-500 mt-1 ml-1 italic">{errors.email.message}</p>
-        )}
-      </div>
+        {/* Last Name */}
+        <div className="flex flex-col gap-1 my-4">
+          <label htmlFor="lastname" className="ml-1 text-gray-500 font-semibold">
+            Last Name
+          </label>
+          <input
+            {...register("lastname")}
+            type="text"
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="lastname"
+            placeholder="Enter your last name"
+          />
+          {errors.lastname && <p className="text-red-500 mt-1 ml-1 italic">{errors.lastname.message}</p>}
+        </div>
 
-      {/* Password Field */}
-      <div className="password-wrap flex flex-col gap-1 my-4 relative">
-        <label htmlFor="password" className="ml-1 text-gray-500 font-semibold">
-          Password
-        </label>
-        <input
-          {...register("password")}
-          type={visibility.password ? "text" : "password"}
-          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-        />
-        {errors.password && (
-          <p className="text-red-500 mt-1 ml-1 italic">
-            {errors.password.message}
-          </p>
-        )}
-        <Button
-          variant={"ghost"}
-          className="absolute top-7 right-3 text-gray-700 border-none"
-          onClick={() => toggleVisibility("password")} // Toggle password visibility
-          type="button" // Prevent form submission
-        >
-          {visibility.password ? <FaEyeSlash /> : <FaEye />}
+        {/* Username */}
+        <div className="flex flex-col gap-1 my-4">
+          <label htmlFor="username" className="ml-1 text-gray-500 font-semibold">
+            Username
+          </label>
+          <input
+            {...register("username")}
+            type="text"
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="username"
+            placeholder="Enter your username"
+          />
+          {errors.username && <p className="text-red-500 mt-1 ml-1 italic">{errors.username.message}</p>}
+        </div>
+
+        {/* Email */}
+        <div className="flex flex-col gap-1 my-4">
+          <label htmlFor="email" className="ml-1 text-gray-500 font-semibold">
+            Email
+          </label>
+          <input
+            {...register("email")}
+            type="email"
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="email"
+            placeholder="Enter your email"
+          />
+          {errors.email && <p className="text-red-500 mt-1 ml-1 italic">{errors.email.message}</p>}
+        </div>
+
+        {/* Password */}
+        <div className="relative flex flex-col gap-1 my-4">
+          <label htmlFor="password" className="ml-1 text-gray-500 font-semibold">
+            Password
+          </label>
+          <input
+            {...register("password")}
+            type={visibility.password ? "text" : "password"}
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="password"
+            placeholder="Enter your password"
+          />
+          {errors.password && <p className="text-red-500 mt-1 ml-1 italic">{errors.password.message}</p>}
+          <Button
+            variant="ghost"
+            className="absolute top-7 right-3 text-gray-700"
+            onClick={() => toggleVisibility("password")}
+            type="button"
+            aria-label={visibility.password ? "Hide password" : "Show password"}
+          >
+            {visibility.password ? <FaEyeSlash /> : <FaEye />}
+          </Button>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative flex flex-col gap-1 my-4">
+          <label htmlFor="confirmPassword" className="ml-1 text-gray-500 font-semibold">
+            Confirm Password
+          </label>
+          <input
+            {...register("confirmPassword")}
+            type={visibility.confirmPassword ? "text" : "password"}
+            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
+            id="confirmPassword"
+            placeholder="Confirm your password"
+          />
+          {errors.confirmPassword && <p className="text-red-500 mt-1 ml-1 italic">{errors.confirmPassword.message}</p>}
+          <Button
+            variant="ghost"
+            className="absolute top-7 right-3 text-gray-700"
+            onClick={() => toggleVisibility("confirmPassword")}
+            type="button"
+            aria-label={visibility.confirmPassword ? "Hide password" : "Show password"}
+          >
+            {visibility.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </Button>
+        </div>
+
+        {/* Submit Button */}
+        <Button variant="brand" className="mt-4 w-full" disabled={isLoading}>
+          {isLoading ? "Creating account..." : "Sign Up"}
         </Button>
-      </div>
+      </form>
 
-      {/* Confirm Password Field */}
-      <div className="password-wrap flex flex-col gap-1 my-4 relative">
-        <label
-          htmlFor="confirmPassword"
-          className="ml-1 text-gray-500 font-semibold"
-        >
-          Confirm Password
-        </label>
-        <input
-          {...register("confirmPassword")}
-          type={visibility.confirmPassword ? "text" : "password"}
-          className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-          id="confirmPassword"
-          name="confirmPassword"
-          placeholder="Confirm your password"
-        />
-        {errors.confirmPassword && (
-          <p className="text-red-500 mt-1 ml-1 italic">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-        <Button
-          variant={"ghost"}
-          className="absolute top-7 right-3 text-gray-700 border-none"
-          onClick={() => toggleVisibility("confirmPassword")} // Toggle confirmPassword visibility
-          type="button" // Prevent form submission
-        >
-          {visibility.confirmPassword ? <FaEyeSlash /> : <FaEye />}
-        </Button>
-      </div>
-
-      {/* Terms and Conditions */}
-      <div className="flex items-center space-x-1 my-4">
-        <input type="checkbox" name="terms" id="terms" />
-        <label htmlFor="terms" className="text-sm text-gray-700">
-          I agree to the{" "}
-          <a href="#" className="text-brand hover:underline">
-            Terms and Conditions
-          </a>
-        </label>
-      </div>
-
-      {/* Submit Button */}
-      <div className="btn-wrap mt-4">
-        <Button
-          variant={"brand"}
-        >
-          Sign Up
-        </Button>
-      </div>
-    </form>
+      <SuccessModal
+        open={showSuccessModal}
+        onOpenChange={setShowSuccessModal}
+        title="Account Created Successfully!"
+        description="Your account has been successfully created. You will be redirected to the login page shortly."
+        redirectUrl="/login?signup=success"
+      />
+    </>
   );
 }

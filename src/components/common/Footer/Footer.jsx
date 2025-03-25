@@ -3,7 +3,7 @@ import { FaTwitter, FaLinkedin, FaFacebook } from "react-icons/fa";
 
 export default function Footer() {
     return (
-        <div className="flex flex-col sm:flex-row justify-center gap-2 items-center absolute bottom-2 left-1/2 -translate-x-1/2 text-gray-600">
+        <div className="flex flex-col sm:flex-row justify-center gap-2 items-center mt-4 text-gray-600">
             <p className="text-sm text-nowrap">© 2024 UmEmployed. All rights reserved.</p>
             <div className="flex space-x-2 items-center">
                 <a

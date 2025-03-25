@@ -5,11 +5,12 @@ import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
 import Form from './Form';
 import Link from 'next/link';
 import Footer from '@/src/components/common/Footer/Footer';
+import { signIn } from 'next-auth/react';
 
 function Login() {
   return (
     <div className=''>
-      <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 container max-w-6xl mx-auto p-4 md:p-0'>
+      <div className=' lg:mt-[5%] container max-w-6xl mx-auto p-4 md:p-0'>
         <div className=' lg:flex items-center border border-gray-300 md:border-none rounded-lg'>
           <div id='left-section' className='hidden lg:block'>
             <img src="/images/login.webp" alt="" />
@@ -24,10 +25,10 @@ function Login() {
                   </div>
                 </div>
                 <div id="alt-auth" className="w-full">
-                  <div className="relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg">
+                  <button onClick={() => signIn('google', { callbackUrl: '/' })} className="w-full cursor-pointer relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg">
                     <img src="/icons/google.png" alt="google-icon" className='h-6 w-6' />
                     <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign in with google</span>
-                  </div>
+                  </button>
                 </div>
               </div>  
               <div className="flex items-center my-4 w-full">
@@ -38,7 +39,7 @@ function Login() {
               <div className="bottom-section w-full">
                 <Form />
                 <div className='mt-2 text-center'>
-                  <span className='text-gray-5000'>Don't have an account? </span><Link href="/signup" className='text-brand'>Sign up</Link>
+                  <span className='text-gray-5000'>Don't have an account? </span><Link href="/signup" className='text-brand cursor-pointer '>Sign up</Link>
                 </div>
               </div>
             </div>
