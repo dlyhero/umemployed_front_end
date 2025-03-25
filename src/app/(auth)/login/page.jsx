@@ -1,4 +1,4 @@
-"use client";  // Keep the "use client" only for the client-side component logic
+"use client"; 
 import React from 'react';
 import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
 import Form from './Form';
