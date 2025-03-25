@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import Link from 'next/link';
-import { FaBuilding, FaBriefcase, FaPlusCircle, FaEnvelope, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
+import MenuAuthButtons from '../MenuAuthButtons'
+import MenuLinks from './MenuLinks';
 
 export default function MobileMenu({ isOpen, onClose }) {
     useEffect(() => {
@@ -43,30 +43,10 @@ export default function MobileMenu({ isOpen, onClose }) {
                         </button>
                     </div>
 
-                    <div className="flex flex-col gap-4 mb-8">
-                        <Link href="/resume/upload/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                            <FaBuilding /> Companies
-                        </Link>
-                        <Link href="/jobs/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                            <FaBriefcase /> Browse Jobs
-                        </Link>
-                        <Link href="/accounts/user/feature-not-implemented/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                            <FaPlusCircle /> Post a Job
-                        </Link>
-                        <Link href="/accounts/user/feature-not-implemented/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                            <FaEnvelope /> Contact Us
-                        </Link>
-                    </div>
-
+                    {/*Menu Links*/}
+                    <MenuLinks />
                     {/* Authentication Buttons */}
-                    <div className="flex flex-col gap-4 absolute bottom-10 right-4 left-4">
-                        <Link href="/accounts/user/register-applicant/" className="w-full bg-transparent text-brand border px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
-                            <FaUserPlus /> Create Account
-                        </Link>
-                        <Link href="/api/users/login/" className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex justify-center items-center gap-2">
-                            <FaSignInAlt /> Login
-                        </Link>
-                    </div>
+                    <MenuAuthButtons />
                 </motion.div>
             )}
         </AnimatePresence>
