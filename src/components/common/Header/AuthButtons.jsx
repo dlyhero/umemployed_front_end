@@ -36,20 +36,20 @@ export default function AuthButtons() {
   }
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-4 transition-all duration-300 ease-in-out">
       {status === "authenticated" && userEmail ? (
         <>
           <div className="flex gap-2 items-center">
             <img 
               src="https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg" 
               alt="Profile" 
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-10 h-10 rounded-full object-cover transition-transform duration-300 ease-in-out hover:scale-105"
               onError={(e) => {
                 e.currentTarget.src = "https://www.gravatar.com/avatar/?d=mp";
               }}
             />
             <span 
-              className="w-[90px] overflow-hidden whitespace-nowrap text-ellipsis hidden sm:block text-sm"
+              className="w-[90px] overflow-hidden whitespace-nowrap text-ellipsis hidden sm:block text-sm transition-opacity duration-300 ease-in-out"
               title={userEmail}
             >
               {userEmail}
@@ -57,7 +57,7 @@ export default function AuthButtons() {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors"
+            className="px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors duration-300 ease-in-out"
             disabled={isLoading}
           >
             Sign Out
@@ -66,7 +66,7 @@ export default function AuthButtons() {
       ) : (
         <button
           onClick={() => signIn(undefined, { callbackUrl: '/' })}
-          className="px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors"
+          className="px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors duration-300 ease-in-out"
           disabled={isLoading}
         >
           Sign In
