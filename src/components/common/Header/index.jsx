@@ -10,22 +10,20 @@ export default function Header() {
   const pathName = usePathname(); // Get the current pathname
 
   return (
-    <header className={`border-b border-gray-200 ${pathName === "/login" ? "#F3F2EF" : "bg-white"
-      }`}
+    <header className={`border-gray-200 bg-white`}
     >
       <div className="p-1.5 py-3 flex items-center justify-between container max-w-6xl w-full mx-auto">
         <div className="flex items-center">
           <Logo />
-          {/* Show NavLinks only if not on the login page */}
-          {pathName !== "/login" && <NavLinks />}
+           <NavLinks />
         </div>
 
         <div className="flex flex-1 max-w-xl">
           {/* Show SearchBar only on the home page */}
-          {pathName === "/" && <SearchBar />}
+          {pathName === "/"  && <SearchBar />}
         </div>
 
-        <div className={`flex gap-4 items-center ${pathName === '/login' ? 'hidden' : ''}`}>
+        <div className={`flex gap-4 items-center ${pathName === '/' ? '' : 'hidden'}`}>
           <AuthButtons />
           <Menu />
         </div>
