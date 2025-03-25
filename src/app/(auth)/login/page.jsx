@@ -9,7 +9,7 @@ import { signIn } from 'next-auth/react';
 function Login() {
   return (
     <div className='p-4'>
-      <div className=' lg:mt-[5%] container max-w-6xl mx-auto p-2 md:p-0 bg-white rounded-lg md:pr-4'>
+      <div className=' lg:mt-[5%] container max-w-6xl mx-auto p-2 md:pl-0 bg-white rounded-lg md:pr-6'>
         <div className=' lg:flex items-center border border-gray-300 md:border-none rounded-lg'>
           <div id='left-section' className='hidden lg:block'>
             <img src="/images/login.webp" alt="" />
