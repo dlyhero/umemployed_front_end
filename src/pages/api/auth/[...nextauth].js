@@ -45,15 +45,19 @@ export const authOptions = {
 
     // Google provider for OAuth login
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      authorization: "https://accounts.google.com/o/oauth2/auth",
-      token: "https://oauth2.googleapis.com/token",
-      userinfo: "https://www.googleapis.com/oauth2/v2/userinfo",
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      },
       httpOptions: {
         timeout: 10000, // Set timeout to 10 seconds (10000ms)
       },
-    }),    
+    })   
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
