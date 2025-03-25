@@ -27,7 +27,7 @@ export default function Home() {
           <div className="btnS my-4 flex flex-col md:w-[80%]">
             {!session?.user ? (
               <>
-                <Link  href="/signup" variant={'brand'} className={' mb-2 rounded-full'} >Sign Up Now</Link>
+                <Link  href="/signup"  className={' mb-2 rounded-full text-white text-center bg-brand font-semibold p-2'} >Sign Up Now</Link>
                 <div className="text-center my-4 flex items-center gap-4">
                   <hr className="flex-1 border-gray-300"/>
                   <span>Or</span>
