@@ -43,18 +43,12 @@ export const authOptions = {
       },
     }),
 
-    // Google provider for OAuth login
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      authorization: "https://accounts.google.com/o/oauth2/auth",
-      token: "https://oauth2.googleapis.com/token",
-      userinfo: "https://www.googleapis.com/oauth2/v2/userinfo",
-      httpOptions: {
-        timeout: 10000, // Set timeout to 10 seconds (10000ms)
-      },
-    }),    
+    }),   
   ],
+  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
@@ -116,14 +110,20 @@ export const authOptions = {
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
 
+    
+
     // Sign-in verification
+
     async signIn({ user, account, profile }) {
+      console.log("User:", user);
+      console.log("Account:", account);
+      console.log("Profile:", profile);
       if (account.provider === "google") {
-        // Additional verification can be done here
         return true;
       }
       return true;
-    },
+    }
+ 
   },
 };
 

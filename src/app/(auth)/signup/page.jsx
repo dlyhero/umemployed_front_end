@@ -20,7 +20,7 @@ function SignUp() {
                                 </div>
                             </div>
                             <div id="alt-auth" className="w-full">
-                                <button onClick={() => signIn('google')} className="relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg w-full cursor-pointer">
+                                <button onClick={() => signIn('google',{ callbackUrl: '/' })} className="relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg w-full cursor-pointer">
                                     <img src="/icons/google.png" alt="google-icon" className='h-6 w-6' />
                                     <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign up with google</span>
                                 </button>
@@ -34,7 +34,7 @@ function SignUp() {
                         <div className="bottom-section w-full">
                             <Form />
                             <div className='mt-2 text-center'>
-                                <span className='text-gray-5000'>Don't have an account? </span><Link href="/login" className='text-brand'>Sign up</Link>
+                                <span className='text-gray-5000'>Already an account? </span><Link href="/login" className='text-brand'>Sign IN</Link>
                             </div>
                         </div>
                     </div>
