@@ -9,9 +9,9 @@ import { signIn } from 'next-auth/react';
 
 function SignUp() {
     return (
-        <div className='p-3'>
-            <div className='mt-4 container max-w-6xl mx-auto p-2 md:p-0  bg-white'>
-                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6 rounded-lg border border-gray-300 md:border-none'>
+        <div className=''>
+            <div className='mt-4 container max-w-6xl mx-auto p-2 md:p-0'>
+                <div id='right-section' className='max-w-lg mx-auto lg:w-[60%] p-6  bg-white rounded-lg border border-gray-300 md:border-none'>
                     <div className='flex flex-col items-center w-full'>
                         <div className="top-section w-full text-center">
                             <div className="border-gray-300 p-2 gap-2">
