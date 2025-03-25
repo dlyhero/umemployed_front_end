@@ -24,7 +24,6 @@ export default function AccountTypeLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[15px]`}
       >
-        <Header />
         {children}
         <Footer />
       </body>
