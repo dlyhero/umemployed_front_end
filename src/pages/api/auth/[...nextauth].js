@@ -18,29 +18,39 @@ export const authOptions = {
             "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
             {
               email: credentials.email,
-              password: credentials.password,
+              password: credentials.password
             },
             {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              timeout: 10000, // Set timeout for the request (10 seconds)
+              headers: { "Content-Type": "application/json" },
+              validateStatus: (status) => status === 403 || status < 400 // Allow 403 through
             }
           );
-
-          if (response.data?.access) {
+      
+          // Handle unverified email (403)
+          if (response.status === 403) {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
+      
+          // Successful login
+          if (response.status === 200) {
             return {
               email: credentials.email,
               accessToken: response.data.access,
-              refreshToken: response.data.refresh,
+              refreshToken: response.data.refresh
             };
           }
-          return null;
+      
+          // All other cases (including 400/401)
+          throw new Error("INVALID_CREDENTIALS");
+      
         } catch (error) {
-          console.error("Login failed:", error.response?.data || error.message);
-          return null;
+          // Preserve 403 error
+          if (error.response?.status === 403) {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
+          throw error;
         }
-      },
+      }
     }),
 
     GoogleProvider({
@@ -60,7 +70,7 @@ export const authOptions = {
   },
   callbacks: {
     // Handling JWT and token persistence
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, error }) {
       // On initial sign in
       if (account && user) {
         // Handle Google provider
@@ -72,24 +82,39 @@ export const authOptions = {
                 access_token: account.access_token,
                 id_token: account.id_token,
               },
-              { timeout: 10000 } // Set timeout for the request (10 seconds)
+              { timeout: 10000 }
             );
-
+    
             if (response.data?.access) {
               token.accessToken = response.data.access;
               token.refreshToken = response.data.refresh;
+              token.email = user.email;
             }
           } catch (error) {
             console.error("Google auth failed:", error.response?.data || error.message);
+            // Propagate Google auth errors
+            token.error = "GOOGLE_AUTH_FAILED";
           }
         }
-
+    
         // Handle credentials provider
         if (account.provider === "credentials") {
           token.accessToken = user.accessToken;
           token.refreshToken = user.refreshToken;
+          token.email = user.email;
+          
+          // If there was an error during credentials auth (like unverified email)
+          if (error) {
+            token.error = error; // This will contain "EMAIL_NOT_VERIFIED" or "INVALID_CREDENTIALS"
+          }
         }
       }
+      
+      // If there was an error but not during initial sign in
+      if (error) {
+        token.error = error;
+      }
+    
       return token;
     },
 
