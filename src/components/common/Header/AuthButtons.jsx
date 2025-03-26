@@ -1,7 +1,9 @@
 "use client";
-
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { User, LogOut, LogIn } from "lucide-react";
+import Image from "next/image";
 
 export default function AuthButtons() {
   const { data: session, status, update } = useSession();
@@ -26,71 +28,56 @@ export default function AuthButtons() {
   }, [status, session, update]);
 
   return (
-    <div className={`flex items-center gap-4 transition-all duration-300 ease-in-out ${ session ? 'min-w-[150px]' : 'w-fit'}`}>
-      {/* Always render both states, just toggle visibility */}
-      <div className={`flex items-center gap-4 ${status !== "authenticated" ? "hidden" : ""}`}>
-        {/* Authenticated state */}
-        <div className="flex gap-2 items-center">
-          <div className="relative w-10 h-10">
-            <img 
-              src="https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg" 
-              alt="Profile" 
-              className="absolute w-full h-full rounded-full object-cover transition-transform duration-300 ease-in-out hover:scale-105"
-              onError={(e) => {
-                e.currentTarget.src = "https://www.gravatar.com/avatar/?d=mp";
-              }}
-            />
-            {isLoading && (
-              <div className="absolute w-full h-full rounded-full bg-gray-200 animate-pulse" />
-            )}
+    <div className={`flex items-center gap-4 ${session ? 'min-w-[180px]' : 'w-fit'}`}>
+      {status === "authenticated" ? (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200">
+              <Image
+                src={session.user?.image || "/default-avatar.png"}
+                alt="Profile"
+                width={40}
+                height={40}
+                className="object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "/default-avatar.png";
+                }}
+              />
+              {isLoading && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+              )}
+            </div>
+            <span 
+              className="hidden sm:block text-sm font-medium text-gray-700 truncate max-w-[120px]"
+              title={userEmail}
+            >
+              {isLoading ? (
+                <div className="w-24 h-4 bg-gray-200 animate-pulse rounded" />
+              ) : (
+                userEmail.split('@')[0] // Show only the name part of email
+              )}
+            </span>
           </div>
-          <span 
-            className="w-[90px] overflow-hidden whitespace-nowrap text-ellipsis hidden sm:block text-sm transition-opacity duration-300 ease-in-out"
-            title={userEmail}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="border-brand text-brand hover:bg-brand/10"
           >
-            {isLoading ? (
-              <div className="w-full h-4 bg-gray-200 animate-pulse rounded-full" />
-            ) : (
-              userEmail
-            )}
-          </span>
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
-        <button
-          onClick={() => signOut({ callbackUrl: '/' })}
-          className={`px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors duration-300 ease-in-out ${
-            isLoading ? "invisible" : ""
-          }`}
-          disabled={isLoading}
-        >
-          Sign Out
-        </button>
-      </div>
-
-      {/* Unauthenticated state */}
-      <div className={`${status === "authenticated" ? "hidden" : ""}`}>
-        <button
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => signIn(undefined, { callbackUrl: '/' })}
-          className={`px-4 lg:px-5 py-2 lg:py-3 text-brand font-semibold border border-brand rounded-full hover:bg-brand/10 transition-colors duration-300 ease-in-out ${
-            isLoading ? "invisible" : ""
-          }`}
-          disabled={isLoading}
+          className="border-brand text-brand hover:bg-brand/10"
         >
-          {isLoading ? (
-            <div className="w-[60px] h-4 bg-gray-200 animate-pulse rounded-full" />
-          ) : (
-            "Sign In"
-          )}
-        </button>
-      </div>
-
-      {/* Loading state overlays */}
-      {isLoading && (
-        <>
-          {!session ? '' : <div className="absolute flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-            <div className="w-[100px] h-6 bg-gray-200 animate-pulse rounded-full" />
-          </div>}
-        </>
+          <LogIn className="w-4 h-4 mr-2" />
+          Sign In
+        </Button>
       )}
     </div>
   );
