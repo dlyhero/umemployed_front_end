@@ -28,7 +28,7 @@ const HeroSection = ({ session, status }) => {
   };
 
   return (
-    <section id="Hero-section" className="relative py-16 md:py-24 overflow-hidden">
+    <section id="Hero-section" className="relative py-16 md:py-24 overflow-hidden bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Content - Text and CTA */}
