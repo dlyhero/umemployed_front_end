@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu as MenuIcon } from "lucide-react"; // Renamed import
 import { MobileMenu } from "./MobileMenu";
 import { DesktopMenu } from "./DesktopMenu";
@@ -7,6 +7,11 @@ import { DesktopMenu } from "./DesktopMenu";
 export function Menu() {
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="flex items-center gap-4">
@@ -19,15 +24,15 @@ export function Menu() {
 
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
-      <div className="hidden md:block relative">
+      {isClient && (<div className="hidden md:block relative">
         <button 
           onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
           className="p-2 rounded-lg hover:bg-gray-100"
         >
           <MenuIcon className="w-5 h-5" /> {/* Using renamed import */}
         </button>
-        <DesktopMenu isOpen={isDesktopMenuOpen} setIsOpen={setIsDesktopMenuOpen} />
-      </div>
+        {isDesktopMenuOpen && <DesktopMenu isOpen={isDesktopMenuOpen} setIsOpen={setIsDesktopMenuOpen} />}
+      </div>)}
     </div>
   );
 }

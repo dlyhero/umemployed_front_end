@@ -28,7 +28,7 @@ export default function AuthButtons() {
   }, [status, session, update]);
 
   return (
-    <div className={`flex items-center gap-4 ${session ? 'min-w-[180px]' : 'w-fit'}`}>
+    <div className={`flex items-center gap-4 ${session ? 'min-w-[150px]' : 'w-fit'}`}>
       {status === "authenticated" ? (
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
@@ -39,9 +39,7 @@ export default function AuthButtons() {
                 width={40}
                 height={40}
                 className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "/default-avatar.png";
-                }}
+               
               />
               {isLoading && (
                 <div className="absolute inset-0 bg-gray-200 animate-pulse" />

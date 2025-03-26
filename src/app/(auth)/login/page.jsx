@@ -1,50 +1,72 @@
-"use client"; 
-import React from 'react';
-import { FaApple, FaGoogle, FaHome } from "react-icons/fa";
-import Form from './Form';
-import Link from 'next/link';
+"use client";
+import { Button } from "@/components/ui/button";
+import { Apple, Github, Google, Home, Mail } from "lucide-react";
+import { signIn, useSession } from 'next-auth/react';
+import LoginForm from './Form';
 import Footer from '@/src/components/common/Footer/Footer';
-import { signIn } from 'next-auth/react';
+import Link from "next/link";
+import { UilGoogle, UilGithub } from '@iconscout/react-unicons';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 function Login() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
+
+  if (status === 'authenticated' || status === 'loading') {
+    return null; // or a loading spinner
+  }
+
   return (
-    <div className='p-4'>
-      <div className=' lg:mt-[5%] container max-w-lg shadow-lg mx-auto p-6  bg-white rounded-lg'>
-        <div className=' lg:flex items-center border border-gray-300 md:border-none rounded-lg'>
-          <div id='right-section' className='w-full'>
-            <div className='flex flex-col items-center w-full'>
-              <div className="top-section w-full text-center">
-                <div className="border-gray-300 p-4 gap-2">
-                  <div className="heading">
-                    <h1 className='text-gray-800 font-black text-3xl'>Welcome Back!</h1>
-                    <h2 className="text-gray-500">Please log in to your account</h2>
-                  </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p className="text-gray-600">Log in to your account to continue</p>
+            </div>
+
+            <div className="space-y-4">
+              <Button 
+                variant="outline" 
+                className="w-full border-gray-300 hover:bg-gray-50"
+                onClick={() => signIn('google', { callbackUrl: '/' })}
+              >
+                <UilGoogle className="h-4 w-4 mr-2" />
+                Continue with Google
+              </Button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
                 </div>
-                <div id="alt-auth" className="w-full">
-                  <button onClick={() => signIn('google', { callbackUrl: '/' })} className="w-full cursor-pointer relative wrapper shadow border border-gray-300 p-2 h-fit rounded-lg">
-                    <img src="/icons/google.png" alt="google-icon" className='h-6 w-6' />
-                    <span className='absolute left-1/2 top-1/2 transform -translate-1/2 -translate-y-1/2 text-gray-700 font-semibold'>Sign in with google</span>
-                  </button>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">or continue with</span>
                 </div>
-              </div>  
-              <div className="flex items-center my-4 w-full">
-                <hr className="flex-grow border-gray-300" />
-                <span className="px-3 text-gray-500 text-sm">or</span>
-                <hr className="flex-grow border-gray-300" />
               </div>
-              <div className="bottom-section w-full">
-                <Form />
-                <div className='mt-2 text-center'>
-                  <span className='text-gray-5000'>Don't have an account? </span><Link href="/signup" className='text-brand cursor-pointer '>Sign up</Link>
-                </div>
+
+              <LoginForm />
+
+              <div className="text-center text-sm text-gray-600 mt-4">
+                Don't have an account?{' '}
+                <Link href="/signup" className="font-medium text-brand hover:underline">
+                  Sign up
+                </Link>
               </div>
             </div>
           </div>
         </div>
-      </div >
+      </div>
       <Footer />
     </div>
-  )
+  );
 }
 
 export default Login;

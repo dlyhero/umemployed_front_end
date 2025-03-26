@@ -84,99 +84,106 @@ const FeaturedOpportunities = () => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
+    arrows: false,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 2,
+          arrows: false,
         },
       },
       {
         breakpoint: 640,
         settings: {
           slidesToShow: 1,
+          arrows: false,
         },
       },
     ],
   };
 
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-        className="mb-12"
-      >
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Featured Opportunities</h2>
-        <p className="text-lg text-gray-600">
-          Find the best jobs tailored to your skills and preferences
-        </p>
-      </motion.div>
+    <section className="w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-16 bg-slate-200">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Featured Opportunities</h2>
+          <p className="text-lg text-gray-600">
+            Find the best jobs tailored to your skills and preferences
+          </p>
+        </motion.div>
 
-      <Slider {...settings}>
-        {jobs.map((job) => (
-          <div key={job.id} className="px-3 focus:outline-none h-full">
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full flex flex-col"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={job.company.logo} 
-                    alt={job.company.name}
-                    className="w-12 h-12 rounded-lg object-contain border border-gray-200 p-1"
-                  />
-                  <span className="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-brand">
-                    {job.job_location_type}
-                  </span>
-                </div>
-                <button className="text-gray-400 hover:text-brand">
-                  <Bookmark className={`w-5 h-5 ${job.is_saved ? "fill-brand text-brand" : ""}`} />
-                </button>
-              </div>
-
-              <div className="flex-grow space-y-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 min-h-[56px]">
-                    {job.title}
-                  </h3>
-                  <p className="text-gray-600 mt-1">{job.company.name}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mr-1 text-brand" />
-                    {job.location}
+        <div className="relative">
+          <Slider {...settings}>
+            {jobs.map((job) => (
+              <div key={job.id} className="px-2 focus:outline-none">
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full flex flex-col"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={job.company.logo} 
+                        alt={job.company.name}
+                        className="w-12 h-12 rounded-lg object-contain border border-gray-200 p-1"
+                      />
+                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-brand">
+                        {job.job_location_type}
+                      </span>
+                    </div>
+                    <button className="text-gray-400 hover:text-brand">
+                      <Bookmark className={`w-5 h-5 ${job.is_saved ? "fill-brand text-brand" : ""}`} />
+                    </button>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <DollarSign className="w-4 h-4 mr-1 text-brand" />
-                    ${job.salary_range}
-                  </div>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="w-4 h-4 mr-1 text-brand" />
-                    {job.created_at}
-                  </div>
-              </div>
 
-              <div className="pt-6 mt-auto">
-                {job.is_applied ? (
-                  <Button variant="outline" className="w-full border-brand text-brand" disabled>
-                    Applied
-                  </Button>
-                ) : (
-                  <Button className="w-full bg-brand hover:bg-brand/90 text-white">
-                    Apply Now
-                  </Button>
-                )}
+                  <div className="flex-grow space-y-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 min-h-[56px]">
+                        {job.title}
+                      </h3>
+                      <p className="text-gray-600 mt-1">{job.company.name}</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1 text-brand" />
+                        {job.location}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <DollarSign className="w-4 h-4 mr-1 text-brand" />
+                        ${job.salary_range}
+                      </div>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="w-4 h-4 mr-1 text-brand" />
+                      {job.created_at}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 mt-auto">
+                    {job.is_applied ? (
+                      <Button variant="outline" className="w-full border-brand text-brand" disabled>
+                        Applied
+                      </Button>
+                    ) : (
+                      <Button className="w-full bg-brand hover:bg-brand/90 text-white">
+                        Apply Now
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
-        ))}
-      </Slider>
+            ))}
+          </Slider>
+        </div>
+      </div>
     </section>
   );
 };
