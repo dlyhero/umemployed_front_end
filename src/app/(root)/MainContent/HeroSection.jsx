@@ -28,7 +28,7 @@ const HeroSection = ({ session, status }) => {
   };
 
   return (
-    <section id="Hero-section" className="relative py-16 md:py-24 overflow-hidden bg-white/60">
+    <section id="Hero-section" className="relative py-16 md:py-24 overflow-hidden bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Content - Text and CTA */}
@@ -131,7 +131,7 @@ const HeroSection = ({ session, status }) => {
             transition={{ duration: 0.8 }}
             className="relative lg:ml-12"
           >
-            <div className="relative rounded-xl overflow-hidden  border border-gray-100">
+            <div className="relative rounded-xl shadow-lg overflow-hidden  border border-gray-100">
               {/* Your original image with parallax effect */}
               <motion.img 
                 src="/images/ue3.avif" 
