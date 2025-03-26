@@ -36,7 +36,7 @@ export default function VerificationSuccess() {
 
         <Button
           onClick={() => router.push('/login')}
-          className="w-full bg-brand hover:bg-brand/90"
+          className="w-full bg-brand hover:bg-brand/90 text-white"
         >
           Proceed to Login
         </Button>

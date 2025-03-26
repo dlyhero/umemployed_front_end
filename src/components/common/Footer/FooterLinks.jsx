@@ -22,7 +22,7 @@ export default function FooterLinks() {
         <a
           key={index}
           href={link.href}
-          className="text-sm font-semibold text-gray-700 hover:text-blue-600"
+          className="text-sm font-semibold text-gray-700 hover:text-brand"
         >
           {link.text}
         </a>

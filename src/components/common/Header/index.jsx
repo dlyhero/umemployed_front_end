@@ -35,10 +35,10 @@ export function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+       {pathname == '/signup' || pathname !== '/login' && ( <div className="flex items-center gap-4">
           <AuthButtons className="hidden md:flex" />
           <Menu />
-        </div>
+        </div>)}
       </div>
     </header>
   );

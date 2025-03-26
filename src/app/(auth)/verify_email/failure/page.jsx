@@ -54,7 +54,7 @@ export default function VerificationFailure() {
           </Button>
           <Button
             onClick={() => router.push('/')}
-            className="w-full bg-brand hover:bg-brand/90"
+            className="w-full bg-brand hover:bg-brand/90 text-white"
           >
             Return Home
           </Button>
