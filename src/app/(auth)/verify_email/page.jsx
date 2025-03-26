@@ -5,6 +5,7 @@ import { Mail, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSearchParams } from 'next/navigation';
 import sendEmailVerification from "@/src/app/api/auth/verify_email";
+import Footer from "@/src/components/common/Footer/Footer";
 
 export default function EmailConfirmation() {
   const [loading, setLoading] = useState(false);
@@ -79,7 +80,7 @@ export default function EmailConfirmation() {
         <Button
           onClick={handleResend}
           disabled={loading || resent}
-          className="w-full bg-brand hover:bg-brand/90"
+          className="w-full bg-brand hover:bg-brand/90 text-white"
         >
           {loading ? (
             <>

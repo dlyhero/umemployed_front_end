@@ -1,13 +1,13 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
 import FeaturedOpportunities from "./MainContent/FeaturedOpportunities";
 import WhyChooseUs from "./MainContent/WhyChooseUS";
 import Resources from "./MainContent/Resources";
-import Companies from "./MainContent/Companies";
+import Companies from "./MainContent/CompaniesCard";
 import { signIn, useSession } from "next-auth/react";
-import Link from "next/link";
 import HeroSection from "./MainContent/HeroSection";
+import CompaniesResources from "./MainContent/CompaniesResources";
+import Destination from "./MainContent/Destination";
+import CTA from "./MainContent/CTA";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -19,6 +19,9 @@ export default function Home() {
       <WhyChooseUs />
       <Resources />
       <Companies />
+      <CompaniesResources />
+      <Destination />
+      <CTA />
     </div>
   );
 }
