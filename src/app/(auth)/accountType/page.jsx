@@ -1,4 +1,3 @@
-// src/app/(auth)/accountType/page.jsx (Updated to Hide Loader Before Delay)
 "use client";
 
 import { useState, useEffect } from "react";
@@ -45,7 +44,6 @@ export default function ChooseAccountType() {
     }
 
     try {
-      // Create an AbortController to handle timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
 
@@ -65,8 +63,6 @@ export default function ChooseAccountType() {
       );
 
       clearTimeout(timeoutId);
-
-      // Hide the loader as soon as the API request completes
       setLoading(false);
 
       if (!response.ok) {
@@ -87,17 +83,17 @@ export default function ChooseAccountType() {
       await response.json();
       setSuccess("Account type selected successfully!");
 
-      // Wait 2 seconds before redirecting (loader is already hidden)
+      // Wait 2 seconds before redirecting
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Redirect based on account type
       if (accountType === "job_seeker") {
         router.push("/upload");
       } else if (accountType === "recruiter") {
-        router.push("/create_company");
+        router.push("/recruiter/company/create"); // Updated redirect URL
       }
     } catch (err) {
-      setLoading(false); // Hide the loader on error
+      setLoading(false);
       if (err.name === "AbortError") {
         setError("Request timed out. Please check your internet connection and try again.");
       } else if (err.message.includes("Failed to fetch")) {
@@ -147,7 +143,6 @@ export default function ChooseAccountType() {
     },
   };
 
-  // Show a loading state while checking authentication
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
@@ -158,7 +153,6 @@ export default function ChooseAccountType() {
 
   return (
     <main className="container flex flex-col items-center justify-center min-h-[calc(100vh-120px)] max-w-4xl mx-auto p-3 rounded-lg">
-      {/* Loader Overlay */}
       {loading && <Loader />}
 
       <motion.h2
@@ -181,7 +175,6 @@ export default function ChooseAccountType() {
         </p>
       </motion.div>
 
-      {/* Success Message */}
       {success && (
         <motion.div
           className="p-4 border shadow-lg bg-green-50 rounded-lg mb-5 text-center border-l-4 border-l-green-400 shadow-sm"
@@ -193,7 +186,6 @@ export default function ChooseAccountType() {
         </motion.div>
       )}
 
-      {/* Error Message */}
       {error && (
         <motion.div
           className="p-4 border shadow-lg bg-red-50 rounded-lg mb-5 text-center border-l-4 border-l-red-400 shadow-sm"
