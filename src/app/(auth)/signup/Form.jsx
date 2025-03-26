@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { SuccessModal } from "@/src/components/common/modal/SuccessModal";
+import { useRouter } from "next/navigation";
 
 const signUpSchema = z
   .object({
@@ -31,6 +32,7 @@ const signUpSchema = z
   });
 
 export default function Form() {
+  const router = useRouter();
   const [visibility, setVisibility] = useState({
     password: false,
     confirmPassword: false,
@@ -38,6 +40,7 @@ export default function Form() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState(""); // Store email for redirect
 
   const {
     register,
@@ -70,15 +73,37 @@ export default function Form() {
       );
 
       if (response.status === 201) {
+        setRegisteredEmail(data.email); // Store the email for redirect
         reset();
         setShowSuccessModal(true);
+        
       }
     } catch (error) {
-      const errorMessages = error.response?.data;
-      const errors = errorMessages
-        ? Object.values(errorMessages).flat().join(" ")
-        : "An error occurred";
-      setError(errors);
+      let errorMessage = "An error occurred during registration";
+      
+      if (error.response) {
+        // Handle different types of backend errors
+        if (error.response.data) {
+          // If backend returns error messages in response data
+          if (typeof error.response.data === 'object') {
+            // Join all error messages if multiple fields have errors
+            errorMessage = Object.entries(error.response.data)
+              .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(' ') : value}`)
+              .join('\n');
+          } else {
+            errorMessage = error.response.data;
+          }
+        } else if (error.response.status === 400) {
+          errorMessage = "Validation error - please check your inputs";
+        } else if (error.response.status === 409) {
+          errorMessage = "User with this email or username already exists";
+        }
+      } else if (error.request) {
+        errorMessage = "No response from server - please try again later";
+      }
+      
+      setError(errorMessage);
+      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -87,10 +112,16 @@ export default function Form() {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-        {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg whitespace-pre-line">
+            {error}
+          </div>
+        )}
 
-        {/* First Name */}
-        <div className="flex flex-col gap-1 my-4">
+        {/* Rest of your form fields remain the same */}
+        {/* ... */}
+          {/* First Name */}
+          <div className="flex flex-col gap-1 my-4">
           <label htmlFor="firstname" className="ml-1 text-gray-500 font-semibold">
             First Name
           </label>
@@ -197,7 +228,7 @@ export default function Form() {
           </Button>
         </div>
 
-        {/* Submit Button */}
+
         <Button variant="brand" className="mt-4 w-full" disabled={isLoading}>
           {isLoading ? "Creating account..." : "Sign Up"}
         </Button>
@@ -207,8 +238,11 @@ export default function Form() {
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         title="Account Created Successfully!"
-        description="Your account has been successfully created. You will be redirected to the login page shortly."
-        redirectUrl="/login?signup=success"
+        description="Please check your email to verify your account before logging in."
+        redirectUrl={`/verify_email?email=${encodeURIComponent(registeredEmail)}`}
+        onRedirect={() => {
+          router.push(`/verify_email?email=${encodeURIComponent(registeredEmail)}`);
+        }}
       />
     </>
   );

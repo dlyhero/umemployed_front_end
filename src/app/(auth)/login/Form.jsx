@@ -35,44 +35,40 @@ export default function LoginForm() {
     const onSubmit = async (data) => {
         setLoading(true);
         setError('');
-
+      
         try {
-            const result = await signIn("credentials", {
-                email: data.email,
-                password: data.password,
-                redirect: false,
-                callbackUrl: callbackUrl
-            });
+          const result = await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false
+          });
 
-            if (result?.error) {
-                let errorMessage = "Login failed";
-                
-                // Handle specific error cases
-                if (result.error.includes("401")) {
-                    errorMessage = "Invalid email or password";
-                } else if (result.error.includes("Network Error")) {
-                    errorMessage = "Network error - please try again later";
-                } else if (result.error.includes("CredentialsSignin")) {
-                    errorMessage = "Invalid credentials";
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            if (result?.ok && !result?.error) {
-                // Clear the login page from history stack
-                window.history.replaceState(null, '', callbackUrl);
-                router.replace(callbackUrl);
-            }
+          console.log('result', result)
+      
+          // Handle unverified email
+          if (result?.error === "EMAIL_NOT_VERIFIED") {
+            return router.push(`/verify_email?email=${encodeURIComponent(data.email)}`);
+          }
+      
+          // Handle other errors
+          if (result?.error) {
+            throw new Error(
+              result.error === "INVALID_CREDENTIALS" 
+                ? "Invalid email or password" 
+                : "Login failed"
+            );
+          }
+      
+          // Successful login
+          window.history.replaceState(null, '', callbackUrl);
+          router.replace(callbackUrl);
+      
         } catch (err) {
-            setError(err.message || "Login failed. Please try again.");
-            console.error("Login error:", err);
+          setError(err.message);
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
-
-    
+      };
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="w-full relative">
