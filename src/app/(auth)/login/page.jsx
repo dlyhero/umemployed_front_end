@@ -9,17 +9,14 @@ import { signIn } from 'next-auth/react';
 function Login() {
   return (
     <div className='p-4'>
-      <div className=' lg:mt-[5%] container max-w-6xl mx-auto p-2 md:pl-0 bg-white rounded-lg md:pr-6'>
+      <div className=' lg:mt-[5%] container max-w-lg shadow-lg mx-auto p-6  bg-white rounded-lg'>
         <div className=' lg:flex items-center border border-gray-300 md:border-none rounded-lg'>
-          <div id='left-section' className='hidden lg:block'>
-            <img src="/images/login.webp" alt="" />
-          </div>
-          <div id='right-section' className='max-w-xl mx-auto lg:w-[60%] p-4  rounded-lg'>
+          <div id='right-section' className='w-full'>
             <div className='flex flex-col items-center w-full'>
               <div className="top-section w-full text-center">
                 <div className="border-gray-300 p-4 gap-2">
                   <div className="heading">
-                    <h1 className='text-gray-800 font-black text-3xl lg:text-4xl'>Welcome Back!</h1>
+                    <h1 className='text-gray-800 font-black text-3xl'>Welcome Back!</h1>
                     <h2 className="text-gray-500">Please log in to your account</h2>
                   </div>
                 </div>

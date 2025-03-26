@@ -8,7 +8,7 @@ export default function VerificationSuccess() {
   const router = useRouter();
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 mt-[10%]">
+    <div className="max-w-md w-full mx-auto bg-white dark:bg-gray-900 p-8 rounded-xl shawdow-lg border border-gray-200 dark:border-gray-800 mt-[10%]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
