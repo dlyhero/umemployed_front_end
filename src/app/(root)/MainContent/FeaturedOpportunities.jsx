@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
@@ -17,7 +17,7 @@ const companyLogos = [
 ];
 
 const FeaturedOpportunities = () => {
-  const jobs = [
+  const [jobs, setJobs] = useState([
     {
       id: 1,
       title: "Software Engineer",
@@ -74,7 +74,13 @@ const FeaturedOpportunities = () => {
       is_saved: true,
       is_applied: false,
     },
-  ];
+  ]);
+
+  const toggleSave = (jobId) => {
+    setJobs(jobs.map(job => 
+      job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
+    ));
+  };
 
   const settings = {
     dots: true,
@@ -138,8 +144,15 @@ const FeaturedOpportunities = () => {
                         {job.job_location_type}
                       </span>
                     </div>
-                    <button className="text-gray-400 hover:text-brand">
-                      <Bookmark className={`w-5 h-5 ${job.is_saved ? "fill-brand text-brand" : ""}`} />
+                    <button 
+                      onClick={() => toggleSave(job.id)}
+                      className={`p-1 rounded-full hover:bg-gray-100 ${
+                        job.is_saved ? "text-brand" : "text-gray-400"
+                      }`}
+                    >
+                      <Bookmark 
+                        className={`w-5 h-5 ${job.is_saved ? "fill-brand" : ""}`} 
+                      />
                     </button>
                   </div>
 
