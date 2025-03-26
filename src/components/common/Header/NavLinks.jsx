@@ -1,27 +1,22 @@
-import { FaBuilding, FaUserTie } from "react-icons/fa";
+import Link from "next/link";
+import { Building2, Briefcase } from "lucide-react";
 
-export default function NavLinks() {
+// 7. NavLinks.js
+export function NavLinks() {
   return (
-    <ul className="hidden md:flex items-center gap-8">
-      <li>
-        <a
-          href="/companies"
-          className=" flex  items-center group"
-        >
-          <FaBuilding className="text-gray-600 group-hover:text-brand text-base transition-colors duration-300" />
-          <span className="mt-0.5 text-base group-hover:text-brand transition-colors duration-300">
-            Companies
-          </span>
-        </a>
-      </li>
-      <li>
-        <a href="/jobs" className=" flex  items-center group">
-          <FaUserTie className="text-gray-600 group-hover:text-brand text-base transition-colors duration-300" />
-          <span className="mt-0.5 text-base group-hover:text-brand transition-colors duration-300">
-            Hire Talent
-          </span>
-        </a>
-      </li>
-    </ul>
+    <div className="hidden md:flex items-center gap-6">
+      <Link href="/companies" className="flex items-center gap-2 group">
+        <Building2 className="w-4 h-4 text-gray-600 group-hover:text-brand transition-colors" />
+        <span className="text-sm font-medium group-hover:text-brand transition-colors">
+          Companies
+        </span>
+      </Link>
+      <Link href="/jobs" className="flex items-center gap-2 group">
+        <Briefcase className="w-4 h-4 text-gray-600 group-hover:text-brand transition-colors" />
+        <span className="text-sm font-medium group-hover:text-brand transition-colors">
+          Browse Jobs
+        </span>
+      </Link>
+    </div>
   );
 }

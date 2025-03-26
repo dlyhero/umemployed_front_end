@@ -1,8 +1,11 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+import React from "react";
+import { Bookmark, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const Resources = () => {
-  const [openAccordion, setOpenAccordion] = useState(null);
+  const [openAccordion, setOpenAccordion] = React.useState(null);
 
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -11,77 +14,90 @@ const Resources = () => {
   const resources = [
     {
       title: "Job Search Tips",
-      content: "Learn how to optimize your resume, ace interviews, and network effectively.",
+      icon: <Bookmark className="w-5 h-5" />,
+      content: "Learn how to optimize your resume and ace interviews.",
       link: "#",
-      linkText: "Explore Tips",
     },
     {
       title: "Free Online Courses",
-      content: "Upskill with free courses in tech, business, and more to boost your employability.",
+      icon: <MapPin className="w-5 h-5" />,
+      content: "Upskill with free courses to boost your employability.",
       link: "#",
-      linkText: "Browse Courses",
     },
     {
       title: "Job Boards",
-      content: "Discover job openings tailored to your skills and experience.",
+      icon: <Clock className="w-5 h-5" />,
+      content: "Discover job openings tailored to your skills.",
       link: "#",
-      linkText: "Find Jobs",
     },
   ];
 
   return (
-    <section className="py-12 lg:px-8 bg-gray-100 text-gray-900 font-semibold">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
-        <div className="w-full lg:w-[51%]">
-          <h2 className="text-2xl md:text-3xl font-bold text-brand mb-6">Resources for Job Seekers</h2>
-          <p className="text-gray-700 mb-8">
-            Navigate your job search with confidence. Explore tools, tips, and opportunities tailored for you.
-          </p>
+    <section className="py-16 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="flex flex-col lg:flex-row gap-12"
+        >
+          <div className="w-full lg:w-1/2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Resources</h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Tools and opportunities tailored for you.
+            </p>
 
-          <div className="space-y-4">
-            {resources.map((resource, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <button
-                  className="w-full flex justify-between items-center p-4 text-left  font-semibold hover:bg-indigo-50"
-                  onClick={() => toggleAccordion(index)}
-                  aria-expanded={openAccordion === index}
-                  aria-controls={`accordion-content-${index}`}
+            <div className="space-y-4">
+              {resources.map((resource, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                 >
-                  <span>{resource.title}</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transform transition-transform duration-300 ${openAccordion === index ? "rotate-180" : ""}`}
+                  <button
+                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50"
+                    onClick={() => toggleAccordion(index)}
                   >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-                <div
-                  id={`accordion-content-${index}`}
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${openAccordion === index ? "max-h-40" : "max-h-0"
-                    }`}
-                >
-                  <div className="p-4 pt-0 text-gray-700">
-                    <p>{resource.content}</p>
-                    <a href={resource.link} className="mt-2 inline-block text-brand hover:underline">
-                      {resource.linkText}
-                    </a>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-brand/10 p-2 rounded-lg text-brand">
+                        {resource.icon}
+                      </div>
+                      <h3 className="text-lg font-semibold">{resource.title}</h3>
+                    </div>
+                    <ArrowRight className={`w-5 h-5 transition-transform ${openAccordion === index ? 'rotate-90' : ''}`} />
+                  </button>
+                  <div className={`transition-all ${openAccordion === index ? 'max-h-40' : 'max-h-0'}`}>
+                    <div className="px-6 pb-6 pt-2 text-gray-600">
+                      <p className="mb-4">{resource.content}</p>
+                      <Button variant="link" className="text-brand p-0 h-auto">
+                        Learn more <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="w-full m flex items-center justify-center">
-          <img src="/images/ue1.jpg" alt="Learning" className="lg:ml-36 w-8xl bg-contain bg-center rounded-full" />
-        </div>
+
+          <div className="w-full lg:w-1/2 flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <img 
+                src="/images/ue1.jpg" 
+                alt="Resources" 
+                className="rounded-xl shadow-sm border border-gray-200 w-full max-w-lg" 
+              />
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

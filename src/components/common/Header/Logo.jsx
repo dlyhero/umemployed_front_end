@@ -1,15 +1,10 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-export default function Logo() {
-  const pathName = usePathname(); // Get the current pathname
-
+export function Logo() {
   return (
-    <div className="logo-wrap flex items-center mr-4">
-      <Link href="/" className="text-2xl font-sans">
-        <span className="bg-brand p-1 text-white rounded-lg">uE</span>
-      </Link>
-    </div>
+    <Link href="/" className="flex items-center mr-6">
+      <span className="bg-brand px-2 py-1 text-white text-xl font-bold rounded-lg">uE</span>
+    </Link>
   );
 }
