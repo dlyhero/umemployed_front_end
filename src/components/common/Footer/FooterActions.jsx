@@ -21,7 +21,7 @@ export default function FooterActions() {
         <div>
           <a
             href="/accounts/user/contact/"
-            className="text-sm font-semibold text-gray-700 hover:text-blue-600"
+            className="text-sm font-semibold text-gray-700 hover:text-brand"
           >
             Need Help?
           </a>
@@ -53,7 +53,7 @@ export default function FooterActions() {
         <div>
           <a
             href="/settings"
-            className="text-sm font-semibold text-gray-700 hover:text-blue-600"
+            className="text-sm font-semibold text-gray-700 hover:text-brand"
           >
             Account Settings
           </a>

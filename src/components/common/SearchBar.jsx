@@ -1,27 +1,62 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { FaSearch, FaBriefcase } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useClickOutside } from "@/src/hooks/useClickOutside";
+import { 
+  Search,
+  Briefcase,
+  Building,
+  MapPin,
+  User,
+  Clock,
+  DollarSign
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-// Mock data with job images
-const mockSuggestions = [
-  { text: "Software Engineer", icon: <FaBriefcase />},
-  { text: "Product Manager", icon: <FaBriefcase />},
-  { text: "Data Scientist", icon: <FaBriefcase />},
-  { text: "UX Designer", icon: <FaBriefcase /> },
-  { text: "Frontend Developer", icon: <FaBriefcase />},
-  { text: "Backend Developer", icon: <FaBriefcase />},
-  { text: "Full Stack Developer", icon: <FaBriefcase />},
-  { text: "DevOps Engineer", icon: <FaBriefcase />},
-  { text: "Mobile App Developer", icon: <FaBriefcase />},
-  { text: "Cloud Architect", icon: <FaBriefcase />},
-];
+const mockData = {
+  jobs: [
+    { 
+      text: "Software Engineer", 
+      company: "Tech Corp Inc.", 
+      location: "San Francisco, CA",
+      type: "Full-time",
+      salary: "$120,000 - $150,000"
+    },
+    { 
+      text: "Product Manager", 
+      company: "Product Labs", 
+      location: "Remote",
+      type: "Contract",
+      salary: "$90 - $120/hr"
+    }
+  ],
+  companies: [
+    { 
+      text: "Tech Corp Inc.", 
+      info: "Information Technology • 10,001+ employees",
+      followers: "1,234,567 followers"
+    },
+    { 
+      text: "Design Hub", 
+      info: "Design Services • 501-1,000 employees",
+      followers: "56,789 followers"
+    }
+  ],
+  locations: [
+    { 
+      text: "San Francisco, California", 
+      info: "1,234,567+ members"
+    },
+    { 
+      text: "Remote", 
+      info: "5,678,901+ members"
+    }
+  ]
+};
 
 function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState(mockSuggestions);
   const dropdownRef = useRef(null);
 
   useClickOutside(dropdownRef, () => setIsOpen(false));
@@ -29,64 +64,87 @@ function SearchBar() {
   const handleInputChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-
-    const filteredSuggestions = mockSuggestions.filter((suggestion) =>
-      suggestion.text.toLowerCase().includes(query.toLowerCase())
-    );
-    setSuggestions(filteredSuggestions);
-
     setIsOpen(query.length > 0);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion.text);
-    setIsOpen(false);
+  const filteredData = {
+    jobs: mockData.jobs.filter(item => 
+      item.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.company.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    companies: mockData.companies.filter(item => 
+      item.text.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    locations: mockData.locations.filter(item => 
+      item.text.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   };
 
   return (
-    <div className="search-wrapper w-full max-w-sm hidden lg:flex mx-auto bg-white py-1 border rounded-full  relative">
-      <form method="get" action="/jobs/" className="flex flex-1 mx-4">
+    <div className="relative w-full max-w-md hidden md:block">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
-          className="flex-1 pl-1 pr-5 py-2 focus:outline-none overflow-hidden text-ellipsis"
           type="text"
-          name="search_query"
-          id="search"
-          placeholder="Search jobs, companies, or keywords"
+          placeholder="Search for jobs, companies, or locations"
+          className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-brand"
           value={searchQuery}
           onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => searchQuery.length > 0 && setIsOpen(true)}
         />
-      </form>
-      <FaSearch className="absolute right-4 top-4 text-gray-800" />
+      </div>
 
-      {/* Dropdown Modal */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             ref={dropdownRef}
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-12 left-0 w-full bg-white border border-gray-200 rounded-lg z-50 p-4"
+            className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-lg border border-gray-200 z-50"
           >
-            <div className="grid grid-cols-2 gap-4">
-              {suggestions.length > 0 ? (
-                suggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="border  rounded-full p-2 overflow-hidden cursor-pointer transition-all"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    
-                    <div className="p-1 flex items-center space-x-2">
-                      <span className="font-medium text-nowrap overflow-hidden text-ellipsis">{suggestion.text}</span>
-                    </div>
+            <div className="p-4 space-y-4">
+              {filteredData.jobs.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm font-medium text-gray-500">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    <span>Jobs</span>
                   </div>
-                ))
-              ) : (
-                <div className="col-span-2 text-center text-gray-500">
-                  <span>No suggestions found</span>
+                  {filteredData.jobs.map((job, index) => (
+                    <div key={`job-${index}`} className="p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                      <div className="font-medium">{job.text}</div>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <Building className="h-3 w-3 mr-1" />
+                        {job.company}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {job.location}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {filteredData.companies.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm font-medium text-gray-500">
+                    <Building className="h-4 w-4 mr-2" />
+                    <span>Companies</span>
+                  </div>
+                  {filteredData.companies.map((company, index) => (
+                    <div key={`company-${index}`} className="p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                      <div className="font-medium">{company.text}</div>
+                      <div className="text-sm text-gray-600 mt-1">{company.info}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {Object.values(filteredData).every(arr => arr.length === 0) && (
+                <div className="text-center py-4 text-gray-500">
+                  No results found for "{searchQuery}"
                 </div>
               )}
             </div>

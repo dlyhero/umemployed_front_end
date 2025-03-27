@@ -1,28 +1,26 @@
-"use client"
-import React from 'react'
-import Link from 'next/link'
-import { FaBuilding, FaBriefcase, FaPlusCircle, FaEnvelope } from 'react-icons/fa';
+"use client";
+import Link from "next/link";
+import { Building2, Briefcase, PlusCircle, Mail } from "lucide-react";
 
-
-function MenuLinks() {
+export function MenuLinks() {
     return (
-
-        <div className="flex flex-col gap-4 mb-8">
-            <Link href="/resume/upload/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                <FaBuilding /> Companies
-            </Link>
-            <Link href="/jobs/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                <FaBriefcase /> Browse Jobs
-            </Link>
-            <Link href="/accounts/user/feature-not-implemented/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                <FaPlusCircle /> Post a Job
-            </Link>
-            <Link href="/accounts/user/feature-not-implemented/" className="menu-item flex items-center gap-2 font-semibold text-gray-600 p-2 border-b">
-                <FaEnvelope /> Contact Us
-            </Link>
-        </div>
-
-    )
-}
-
-export default MenuLinks
+      <div className="flex flex-col gap-2 mb-6">
+        <Link href="/companies" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+          <Building2 className="w-5 h-5 text-gray-600" />
+          <span className="font-medium">Companies</span>
+        </Link>
+        <Link href="/jobs" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+          <Briefcase className="w-5 h-5 text-gray-600" />
+          <span className="font-medium">Browse Jobs</span>
+        </Link>
+        <Link href="/post-job" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+          <PlusCircle className="w-5 h-5 text-gray-600" />
+          <span className="font-medium">Post a Job</span>
+        </Link>
+        <Link href="/contact" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+          <Mail className="w-5 h-5 text-gray-600" />
+          <span className="font-medium">Contact Us</span>
+        </Link>
+      </div>
+    );
+  }

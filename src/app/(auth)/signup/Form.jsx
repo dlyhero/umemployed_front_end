@@ -2,36 +2,32 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Mail, User, Lock, ChevronRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
-import { SuccessModal } from "@/src/components/common/modal/SuccessModal";
 import { useRouter } from "next/navigation";
+import { SuccessModal } from "@/src/components/common/modal/SuccessModal";
 
-const signUpSchema = z
-  .object({
-    firstname: z.string().min(3, "Name must be at least 3 characters").max(254),
-    lastname: z.string().min(3, "Name must be at least 3 characters").max(254),
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .max(50, "Username must be less than 50 characters")
-      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
-    email: z.string().email("This is not a valid email").max(254),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const signUpSchema = z.object({
+  firstname: z.string().min(3, "Name must be at least 3 characters").max(254),
+  lastname: z.string().min(3, "Name must be at least 3 characters").max(254),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(50, "Username must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  email: z.string().email("This is not a valid email").max(254),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
-export default function Form() {
+export function SignUpForm() {
   const router = useRouter();
   const [visibility, setVisibility] = useState({
     password: false,
@@ -40,7 +36,7 @@ export default function Form() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState(""); // Store email for redirect
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const {
     register,
@@ -73,26 +69,18 @@ export default function Form() {
       );
 
       if (response.status === 201) {
-        setRegisteredEmail(data.email); // Store the email for redirect
+        setRegisteredEmail(data.email);
         reset();
         setShowSuccessModal(true);
-        
       }
     } catch (error) {
       let errorMessage = "An error occurred during registration";
       
       if (error.response) {
-        // Handle different types of backend errors
         if (error.response.data) {
-          // If backend returns error messages in response data
-          if (typeof error.response.data === 'object') {
-            // Join all error messages if multiple fields have errors
-            errorMessage = Object.entries(error.response.data)
-              .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(' ') : value}`)
-              .join('\n');
-          } else {
-            errorMessage = error.response.data;
-          }
+          errorMessage = Object.entries(error.response.data)
+            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(' ') : value}`)
+            .join('\n');
         } else if (error.response.status === 400) {
           errorMessage = "Validation error - please check your inputs";
         } else if (error.response.status === 409) {
@@ -103,7 +91,6 @@ export default function Form() {
       }
       
       setError(errorMessage);
-      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -111,126 +98,167 @@ export default function Form() {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg whitespace-pre-line">
+          <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* Rest of your form fields remain the same */}
-        {/* ... */}
-          {/* First Name */}
-          <div className="flex flex-col gap-1 my-4">
-          <label htmlFor="firstname" className="ml-1 text-gray-500 font-semibold">
-            First Name
-          </label>
-          <input
-            {...register("firstname")}
-            type="text"
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="firstname"
-            placeholder="Enter your first name"
-          />
-          {errors.firstname && <p className="text-red-500 mt-1 ml-1 italic">{errors.firstname.message}</p>}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="firstname" className="text-sm font-medium text-gray-700">
+              First Name
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                {...register("firstname")}
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+                id="firstname"
+                placeholder="John"
+              />
+            </div>
+            {errors.firstname && (
+              <p className="text-sm text-red-600">{errors.firstname.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="lastname" className="text-sm font-medium text-gray-700">
+              Last Name
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                {...register("lastname")}
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+                id="lastname"
+                placeholder="Doe"
+              />
+            </div>
+            {errors.lastname && (
+              <p className="text-sm text-red-600">{errors.lastname.message}</p>
+            )}
+          </div>
         </div>
 
-        {/* Last Name */}
-        <div className="flex flex-col gap-1 my-4">
-          <label htmlFor="lastname" className="ml-1 text-gray-500 font-semibold">
-            Last Name
-          </label>
-          <input
-            {...register("lastname")}
-            type="text"
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="lastname"
-            placeholder="Enter your last name"
-          />
-          {errors.lastname && <p className="text-red-500 mt-1 ml-1 italic">{errors.lastname.message}</p>}
-        </div>
-
-        {/* Username */}
-        <div className="flex flex-col gap-1 my-4">
-          <label htmlFor="username" className="ml-1 text-gray-500 font-semibold">
+        <div className="space-y-2">
+          <label htmlFor="username" className="text-sm font-medium text-gray-700">
             Username
           </label>
-          <input
-            {...register("username")}
-            type="text"
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="username"
-            placeholder="Enter your username"
-          />
-          {errors.username && <p className="text-red-500 mt-1 ml-1 italic">{errors.username.message}</p>}
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              {...register("username")}
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+              id="username"
+              placeholder="johndoe"
+            />
+          </div>
+          {errors.username && (
+            <p className="text-sm text-red-600">{errors.username.message}</p>
+          )}
         </div>
 
-        {/* Email */}
-        <div className="flex flex-col gap-1 my-4">
-          <label htmlFor="email" className="ml-1 text-gray-500 font-semibold">
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium text-gray-700">
             Email
           </label>
-          <input
-            {...register("email")}
-            type="email"
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="email"
-            placeholder="Enter your email"
-          />
-          {errors.email && <p className="text-red-500 mt-1 ml-1 italic">{errors.email.message}</p>}
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              {...register("email")}
+              type="email"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+              id="email"
+              placeholder="you@example.com"
+            />
+          </div>
+          {errors.email && (
+            <p className="text-sm text-red-600">{errors.email.message}</p>
+          )}
         </div>
 
-        {/* Password */}
-        <div className="relative flex flex-col gap-1 my-4">
-          <label htmlFor="password" className="ml-1 text-gray-500 font-semibold">
+        <div className="space-y-2">
+          <label htmlFor="password" className="text-sm font-medium text-gray-700">
             Password
           </label>
-          <input
-            {...register("password")}
-            type={visibility.password ? "text" : "password"}
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="password"
-            placeholder="Enter your password"
-          />
-          {errors.password && <p className="text-red-500 mt-1 ml-1 italic">{errors.password.message}</p>}
-          <Button
-            variant="ghost"
-            className="absolute top-7 right-3 text-gray-700"
-            onClick={() => toggleVisibility("password")}
-            type="button"
-            aria-label={visibility.password ? "Hide password" : "Show password"}
-          >
-            {visibility.password ? <FaEyeSlash /> : <FaEye />}
-          </Button>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              {...register("password")}
+              type={visibility.password ? "text" : "password"}
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+              id="password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => toggleVisibility("password")}
+            >
+              {visibility.password ? 
+                <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                <Eye className="h-5 w-5 text-gray-400" />
+              }
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-sm text-red-600">{errors.password.message}</p>
+          )}
         </div>
 
-        {/* Confirm Password */}
-        <div className="relative flex flex-col gap-1 my-4">
-          <label htmlFor="confirmPassword" className="ml-1 text-gray-500 font-semibold">
+        <div className="space-y-2">
+          <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
             Confirm Password
           </label>
-          <input
-            {...register("confirmPassword")}
-            type={visibility.confirmPassword ? "text" : "password"}
-            className="p-2 border border-gray-300 outline-none rounded-lg bg-transparent"
-            id="confirmPassword"
-            placeholder="Confirm your password"
-          />
-          {errors.confirmPassword && <p className="text-red-500 mt-1 ml-1 italic">{errors.confirmPassword.message}</p>}
-          <Button
-            variant="ghost"
-            className="absolute top-7 right-3 text-gray-700"
-            onClick={() => toggleVisibility("confirmPassword")}
-            type="button"
-            aria-label={visibility.confirmPassword ? "Hide password" : "Show password"}
-          >
-            {visibility.confirmPassword ? <FaEyeSlash /> : <FaEye />}
-          </Button>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              {...register("confirmPassword")}
+              type={visibility.confirmPassword ? "text" : "password"}
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+              id="confirmPassword"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => toggleVisibility("confirmPassword")}
+            >
+              {visibility.confirmPassword ? 
+                <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                <Eye className="h-5 w-5 text-gray-400" />
+              }
+            </button>
+          </div>
+          {errors.confirmPassword && (
+            <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+          )}
         </div>
 
-
-        <Button variant="brand" className="mt-4 w-full" disabled={isLoading}>
-          {isLoading ? "Creating account..." : "Sign Up"}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-brand hover:bg-brand/90 text-white"
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating account...
+            </span>
+          ) : (
+            <>
+              Sign Up <ChevronRight className="ml-2 h-4 w-4" />
+            </>
+          )}
         </Button>
       </form>
 
@@ -240,9 +268,6 @@ export default function Form() {
         title="Account Created Successfully!"
         description="Please check your email to verify your account before logging in."
         redirectUrl={`/verify_email?email=${encodeURIComponent(registeredEmail)}`}
-        onRedirect={() => {
-          router.push(`/verify_email?email=${encodeURIComponent(registeredEmail)}`);
-        }}
       />
     </>
   );
