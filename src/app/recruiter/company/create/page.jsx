@@ -9,7 +9,11 @@ const CompanyCreationPage = () => {
   return (
     <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl">
       <div className="mb-6">
-        <img src="/icons/company.jpg" alt="Company" className="w-24 h-24 mx-auto mb-4" />
+        <img
+          src="/images/company.jpg"
+          alt="Company"
+          className="w-full h-48 object-cover rounded-t-lg mb-4"
+        />
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-800">Before we get started...</h2>
           <p className="text-gray-600 mt-1">We need to know a little about your company.</p>
@@ -24,7 +28,12 @@ const CompanyCreationPage = () => {
         <hr className="border-gray-200" />
         <PageOverview />
         <hr className="border-gray-200" />
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-4">
+          <Button
+            className="bg-[#ef4444] text-white rounded-full hover:bg-[#dc2626] transition-colors"
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             className="bg-[#1e90ff] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#1a78d6] transition-colors"
