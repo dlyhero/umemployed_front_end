@@ -6,9 +6,11 @@ import { Building, Upload } from 'lucide-react';
 
 const PageIdentityForm = () => {
   return (
-    <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Page Identity</h2>
-      <div className="space-y-4">
+    <section className="bg-white sm:bg-transparent p-4 sm:p-0 rounded-lg sm:rounded-none shadow-md sm:shadow-none border border-gray-200 sm:border-0">
+      <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-[#1e90ff] pb-2">
+        Page Identity
+      </h2>
+      <div className="space-y-4 mt-4">
         <div className="space-y-2">
           <Label htmlFor="companyName" className="text-gray-700 font-medium">
             Company Name
@@ -19,7 +21,7 @@ const PageIdentityForm = () => {
               id="companyName"
               type="text"
               placeholder="Enter company name"
-              className="w-full pl-10"
+              className="w-full pl-10 text-sm sm:text-base"
             />
           </div>
         </div>
@@ -27,18 +29,20 @@ const PageIdentityForm = () => {
           <Label htmlFor="companyLogo" className="text-gray-700 font-medium">
             Company Logo
           </Label>
-          <div className="flex items-center">
+          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Input id="companyLogo" type="file" className="hidden" />
             <Button
               asChild
-              className="bg-[#1e90ff] text-white hover:bg-[#1a78d6] rounded-full"
+              variant="brand"
+              size="sm"
+              className="rounded-full w-full sm:w-auto"
             >
-              <label htmlFor="companyLogo" className="cursor-pointer flex items-center">
+              <label htmlFor="companyLogo" className="cursor-pointer flex items-center justify-center">
                 <Upload className="h-4 w-4 mr-2" />
                 Choose File
               </label>
             </Button>
-            <span className="ml-3 text-gray-600 text-sm">No file chosen</span>
+            <span className="text-gray-600 text-sm">No file chosen</span>
           </div>
         </div>
       </div>

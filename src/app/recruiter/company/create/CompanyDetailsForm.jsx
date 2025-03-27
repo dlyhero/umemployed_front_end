@@ -10,15 +10,17 @@ import {
 
 const CompanyDetailsForm = () => {
   return (
-    <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Company Details</h2>
-      <div className="space-y-4">
+    <section className="bg-white sm:bg-transparent p-4 sm:p-0 rounded-lg sm:rounded-none shadow-md sm:shadow-none border border-gray-200 sm:border-0">
+      <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-[#1e90ff] pb-2">
+        Company Details
+      </h2>
+      <div className="space-y-4 mt-4">
         <div className="space-y-2">
           <Label htmlFor="industry" className="text-gray-700 font-medium">
             Category
           </Label>
           <Select>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select Industry" />
             </SelectTrigger>
             <SelectContent>
@@ -34,7 +36,7 @@ const CompanyDetailsForm = () => {
             Specialty
           </Label>
           <Select>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select Specialty" />
             </SelectTrigger>
             <SelectContent>
@@ -50,7 +52,7 @@ const CompanyDetailsForm = () => {
             Company Size
           </Label>
           <Select>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select Company Size" />
             </SelectTrigger>
             <SelectContent>
