@@ -1,23 +1,32 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Bookmark, MapPin, Briefcase, Clock, DollarSign } from "lucide-react";
+
+// Using shadcn/ui example images
+const companyLogos = [
+  "/examples/company1.png",
+  "/examples/company2.png",
+  "/examples/company3.png",
+  "/examples/company4.png",
+  "/examples/company5.png"
+];
 
 const FeaturedOpportunities = () => {
-  // Hard-coded job data
-  const jobs = [
+  const [jobs, setJobs] = useState([
     {
       id: 1,
       title: "Software Engineer",
       company: {
         name: "Tech Corp",
-        logo: "https://via.placeholder.com/40", // Placeholder image
+        logo: companyLogos[0],
       },
       job_location_type: "Remote",
-      location: {
-        name: "New York",
-      },
+      location: "New York",
       salary_range: "80,000 - 100,000",
       created_at: "2 days ago",
       is_saved: false,
@@ -28,12 +37,10 @@ const FeaturedOpportunities = () => {
       title: "Product Manager",
       company: {
         name: "Innovate Inc",
-        logo: "https://via.placeholder.com/40", // Placeholder image
+        logo: companyLogos[1],
       },
       job_location_type: "On-site",
-      location: {
-        name: "San Francisco",
-      },
+      location: "San Francisco",
       salary_range: "90,000 - 120,000",
       created_at: "1 week ago",
       is_saved: true,
@@ -44,12 +51,10 @@ const FeaturedOpportunities = () => {
       title: "Data Scientist",
       company: {
         name: "DataWorks",
-        logo: "https://via.placeholder.com/40", // Placeholder image
+        logo: companyLogos[2],
       },
       job_location_type: "Hybrid",
-      location: {
-        name: "Chicago",
-      },
+      location: "Chicago",
       salary_range: "85,000 - 110,000",
       created_at: "3 days ago",
       is_saved: false,
@@ -60,133 +65,137 @@ const FeaturedOpportunities = () => {
       title: "UX Designer",
       company: {
         name: "DesignCo",
-        logo: "https://via.placeholder.com/40", // Placeholder image
+        logo: companyLogos[3],
       },
       job_location_type: "Remote",
-      location: {
-        name: "Austin",
-      },
+      location: "Austin",
       salary_range: "75,000 - 95,000",
       created_at: "5 days ago",
       is_saved: true,
       is_applied: false,
     },
-  ];
+  ]);
 
-  // Slick carousel settings
+  const toggleSave = (jobId) => {
+    setJobs(jobs.map(job => 
+      job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
+    ));
+  };
+
   const settings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: 3,
     slidesToScroll: 1,
-    autoplay: true, // Enable auto-play
+    autoplay: true,
     autoplaySpeed: 3000,
+    arrows: false,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
           slidesToShow: 2,
-          slidesToScroll: 1,
+          arrows: false,
         },
       },
       {
-        breakpoint: 480,
+        breakpoint: 640,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1,
+          arrows: false,
         },
       },
     ],
   };
 
   return (
-    <section className="container max-w-6xl px-4 lg:px-6 mx-auto py-12 overflow-hidden">
-      {/* Section Header */}
-      <div className="mb-8">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-800">
-          Featured Opportunities
-        </h2>
-        <p className="text-gray-600 text-lg">
-          Find the best jobs tailored to your skills and preferences.
-        </p>
-      </div>
+    <section className="w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-16 bg-slate-100">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Featured Opportunities</h2>
+          <p className="text-lg text-gray-600">
+            Find the best jobs tailored to your skills and preferences
+          </p>
+        </motion.div>
 
-      {/* Job Cards Carousel */}
-      <div>
-        <Slider {...settings}>
-          {jobs.map((job) => (
-            <div key={job.id} className="px-2 ">
-              <div className="bg-white border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <img
-                    className="w-12 h-12 rounded-full mr-4"
-                    src={job.company.logo}
-                    alt="Company Logo"
-                  />
-                  <div>
-                    <span className="text-md text-gray-500 capitalize">
-                      {job.job_location_type}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800 truncate">
-                    {job.title}
-                  </h3>
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="text-gray-600">{job.company.name}</span>
-                    <span className="text-gray-500" style={{ fontSize: "16px" }}>
-                      {job.created_at}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-brand font-semibold text-sm p-1 bg-[rgba(30,144,250,0.1)] w-fit rounded mb-4 flex items-center">
-                  <i className="fas fa-map-marker-alt mr-2"></i> {job.location.name}
-                </p>
-
-                <p className="text-gray-800 mb-4 flex items-center">
-                  ${job.salary_range} / year
-                </p>
-
-                {/* Bookmark Icon */}
-                <div className="flex items-center justify-between">
-                  {job.is_saved ? (
-                    <a className="bookmark-job flex-1" data-job-id={job.id}>
-                      <i className="fas fa-bookmark text-brand text-xl order-start"></i>
-                    </a>
-                  ) : (
-                    <a className="bookmark-job flex-1" data-job-id={job.id}>
-                      <i className="far fa-bookmark text-gray-500 text-xl hover:text-brand"></i>
-                    </a>
-                  )}
-
-                  {/* Apply Now Button or Already Applied */}
-                  {job.is_applied ? (
-                    <span className="text-green-500 py-2 px-2 ">(Already Applied)</span>
-                  ) : (
-                    <div className="w-[70%]">
-                      <a href={`/job/${job.id}`}>
-                        <button className="bg-brand text-white font-bold py-2 px-2 rounded-full hover:bg-blue-400 w-full">
-                          Apply Now
-                        </button>
-                      </a>
+        <div className="relative">
+          <Slider {...settings}>
+            {jobs.map((job) => (
+              <div key={job.id} className="px-2 focus:outline-none">
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full flex flex-col"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={job.company.logo} 
+                        alt={job.company.name}
+                        className="w-12 h-12 rounded-lg object-contain border border-gray-200 p-1"
+                      />
+                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-brand">
+                        {job.job_location_type}
+                      </span>
                     </div>
-                  )}
-                </div>
+                    <button 
+                      onClick={() => toggleSave(job.id)}
+                      className={`p-1 rounded-full hover:bg-gray-100 ${
+                        job.is_saved ? "text-brand" : "text-gray-400"
+                      }`}
+                    >
+                      <Bookmark 
+                        className={`w-5 h-5 ${job.is_saved ? "fill-brand" : ""}`} 
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex-grow space-y-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 min-h-[56px]">
+                        {job.title}
+                      </h3>
+                      <p className="text-gray-600 mt-1">{job.company.name}</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1 text-brand" />
+                        {job.location}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <DollarSign className="w-4 h-4 mr-1 text-brand" />
+                        ${job.salary_range}
+                      </div>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="w-4 h-4 mr-1 text-brand" />
+                      {job.created_at}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 mt-auto">
+                    {job.is_applied ? (
+                      <Button variant="outline" className="w-full border-brand text-brand" disabled>
+                        Applied
+                      </Button>
+                    ) : (
+                      <Button className="w-full bg-brand hover:bg-brand/90 text-white">
+                        Apply Now
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          ))}
-        </Slider>
+            ))}
+          </Slider>
+        </div>
       </div>
     </section>
   );

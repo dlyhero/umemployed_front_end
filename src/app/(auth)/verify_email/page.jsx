@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FaEnvelope, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { Mail, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSearchParams } from 'next/navigation';
 import sendEmailVerification from "@/src/app/api/auth/verify_email";
+import Footer from "@/src/components/common/Footer/Footer";
 
 export default function EmailConfirmation() {
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export default function EmailConfirmation() {
     setResent(false);
     
     try {
-      await sendEmailVerification(email); // Pass the email directly
+      await sendEmailVerification(email);
       setResent(true);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to resend email");
@@ -34,39 +35,42 @@ export default function EmailConfirmation() {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 mt-[10%]">
+    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200 mt-[10%]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
         className="flex flex-col items-center text-center space-y-6"
       >
         <div className="relative w-20 h-20 flex items-center justify-center">
           {resent ? (
             <>
-              <FaCheckCircle className="text-green-500 text-3xl absolute z-10" />
+              <CheckCircle className="text-green-500 w-12 h-12 absolute z-10" />
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute inset-0 bg-green-100 dark:bg-green-900/20 rounded-full"
+                transition={{ delay: 0.2 }}
+                className="absolute inset-0 bg-green-100 rounded-full"
               />
             </>
           ) : (
             <>
-              <FaEnvelope className="text-brand text-3xl absolute z-10" />
+              <Mail className="text-brand w-12 h-12 absolute z-10" />
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute inset-0 bg-blue-100 dark:bg-blue-900/20 rounded-full"
+                transition={{ delay: 0.2 }}
+                className="absolute inset-0 bg-blue-100 rounded-full"
               />
             </>
           )}
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900">
             {resent ? "Email Resent!" : "Check Your Email"}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-600">
             {resent
               ? "We've resent the confirmation link to your inbox"
               : `We've sent a confirmation link to ${email}`}
@@ -75,13 +79,12 @@ export default function EmailConfirmation() {
 
         <Button
           onClick={handleResend}
-          disabled={loading}
-          variant={resent ? "outline" : "default"}
-          className="w-full gap-2 bg-brand text-white rounded-full font-semibold hover:bg-brand/70 hover:text-white"
+          disabled={loading || resent}
+          className="w-full bg-brand hover:bg-brand/90 text-white"
         >
           {loading ? (
             <>
-              <FaSpinner className="animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
             </>
           ) : (
@@ -93,13 +96,13 @@ export default function EmailConfirmation() {
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-red-500 dark:text-red-400 text-sm"
+            className="text-red-500 text-sm"
           >
             {error}
           </motion.p>
         )}
 
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500">
           Can't find it? Check your spam folder.
         </p>
       </motion.div>

@@ -1,23 +1,43 @@
-import React from 'react'
+"use client";
 import { signIn, signOut, useSession } from 'next-auth/react';
-import {FaUserPlus, FaSignInAlt } from 'react-icons/fa';
+import { Mail, UserPlus, LogIn, LogOut } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
+export default function AuthButtons() {
+  const { data: session, status } = useSession();
 
+  if (status === "loading") return null;
 
-export default function index() {
-      const {data: session, status} = useSession();
-    
-        if (status === "loading") return null;
-    return (
-        <div className="flex flex-col gap-4">
-            {!(session?.user) && (<button className="w-full border px-6 py-3 rounded-full text-brand text-center font-semibold flex items-center justify-center gap-2">
-                <FaUserPlus /> Create Account
-            </button>)}
-            {session?.user ? (<button onClick={() => signOut()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
-                <FaSignInAlt /> Logout
-            </button>) : (<button onClick={() => signIn()} className="w-full bg-brand text-white px-6 py-3 rounded-full text-center font-semibold flex items-center justify-center gap-2">
-                <FaSignInAlt /> Login
-            </button>)}
-        </div>
-    )
+  return (
+    <div className="flex flex-col gap-4">
+      {!(session?.user) && (
+        <Button 
+          variant="outline" 
+          className="w-full gap-2"
+          onClick={() => signIn()}
+        >
+          <UserPlus className="h-4 w-4" /> 
+          Create Account
+        </Button>
+      )}
+      
+      {session?.user ? (
+        <Button 
+          className="w-full gap-2 text-white bg-brand"
+          onClick={() => signOut()}
+        >
+          <LogOut className="h-4 w-4 " />
+          Logout
+        </Button>
+      ) : (
+        <Button 
+          className="w-full gap-2 bg-brand text-white"
+          onClick={() => signIn()}
+        >
+          <LogIn className="h-4 w-4" />
+          Login
+        </Button>
+      )}
+    </div>
+  );
 }
