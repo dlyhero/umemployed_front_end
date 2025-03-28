@@ -1,8 +1,9 @@
-// src/app/(auth)/accountType/layout.jsx
 import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
-import Header from "@/src/components/common/Header/index";
-import Footer from '@/src/components/common/Footer/Footer';
+import "@/src/app/globals.css";
+import AuthProvider from "@/src/components/AuthProvider";
+import {Header} from "@/src/components/common/Header";
+import Footer from "@/src/components/common/Footer";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,17 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Account Type",
+  title: "home",
 };
 
-export default function AccountTypeLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[15px]`}
-      >
-        {children}
-        <Footer />
+      >  
+        <AuthProvider>
+          <Header />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
