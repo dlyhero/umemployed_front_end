@@ -20,7 +20,7 @@ const CompanyCreationPage = () => {
     location: '',
     founded: '',
     website_url: '',
-    country: '', // Will store country code (e.g., "KY")
+    country: '',
     contact_email: '',
     contact_phone: '',
     description: '',
@@ -32,6 +32,7 @@ const CompanyCreationPage = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const router = useRouter();
 
   if (status === 'loading') {
@@ -59,12 +60,16 @@ const CompanyCreationPage = () => {
     }
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     const data = new FormData();
     for (const key in formData) {
       if (formData[key]) data.append(key, formData[key]);
     }
-    if (logoFile) data.append('logo', logoFile);
+    if (logoFile) {
+      data.append('logo', logoFile); // Ensure this matches the backend field name
+      console.log('Logo File:', logoFile.name, logoFile.size, logoFile.type);
+    }
 
     const token = session?.user?.accessToken || session?.accessToken;
     console.log('Token:', token);
@@ -87,11 +92,19 @@ const CompanyCreationPage = () => {
           },
         }
       );
-      console.log('Company created:', response.data);
+      console.log('Company created:', response.data); // Check if logo is in the response
+      setSuccessMessage('Company created successfully!');
       router.push('/recruiter/dashboard');
     } catch (err) {
       console.error('Error:', err.response?.data || err.message);
-      setError(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Failed to create company.');
+      if (
+        err.response?.status === 500 &&
+        err.response?.data?.includes('duplicate key value violates unique constraint')
+      ) {
+        setError('A user can only create one company.');
+      } else {
+        setError(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Failed to create company.');
+      }
     } finally {
       setLoading(false);
     }
@@ -145,6 +158,7 @@ const CompanyCreationPage = () => {
             </Button>
           </div>
           {error && <p className="text-red-600 text-center">{error}</p>}
+          {successMessage && <p className="text-green-600 text-center">{successMessage}</p>}
         </form>
       )}
     </main>
