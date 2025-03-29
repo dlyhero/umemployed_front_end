@@ -1,4 +1,6 @@
 "use client";
+
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -6,8 +8,17 @@ import { motion } from "framer-motion";
 
 export default function VerificationFailure() {
   const router = useRouter();
+
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <VerificationFailureContent router={router} />
+    </Suspense>
+  );
+}
+
+function VerificationFailureContent({ router }) {
   const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const email = searchParams.get("email");
 
   const handleResend = () => {
     if (!email) return;
@@ -16,7 +27,7 @@ export default function VerificationFailure() {
 
   return (
     <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200 mt-[10%]">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -33,11 +44,9 @@ export default function VerificationFailure() {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Verification Failed
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">Verification Failed</h2>
           <p className="text-gray-600">
-            {email 
+            {email
               ? `The verification link for ${email} is invalid or has expired.`
               : "The verification link is invalid or has expired."}
           </p>
@@ -53,7 +62,7 @@ export default function VerificationFailure() {
             {email ? "Resend Verification Email" : "No Email Provided"}
           </Button>
           <Button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="w-full bg-brand hover:bg-brand/90 text-white"
           >
             Return Home
