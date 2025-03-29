@@ -5,11 +5,12 @@ import Footer from '@/src/components/common/Footer/Footer';
 
 
 
+
 export const metadata = {
-  title: "Account Type",
+  title: "home",
 };
 
-export default function AccountTypeLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
@@ -17,6 +18,7 @@ export default function AccountTypeLayout({ children }) {
       >
         {children}
         <Footer />
+
       </body>
     </html>
   );
