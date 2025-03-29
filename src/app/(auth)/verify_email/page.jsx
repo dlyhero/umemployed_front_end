@@ -1,18 +1,18 @@
 "use client";
-import { useState } from "react";
+
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Mail, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from "next/navigation";
 import sendEmailVerification from "@/src/app/api/auth/verify_email";
-import Footer from "@/src/components/common/Footer/Footer";
 
-export default function EmailConfirmation() {
+function EmailConfirmationContent() {
   const [loading, setLoading] = useState(false);
   const [resent, setResent] = useState(false);
   const [error, setError] = useState("");
   const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const email = searchParams.get("email");
 
   const handleResend = async () => {
     if (!email) {
@@ -23,7 +23,7 @@ export default function EmailConfirmation() {
     setLoading(true);
     setError("");
     setResent(false);
-    
+
     try {
       await sendEmailVerification(email);
       setResent(true);
@@ -35,8 +35,8 @@ export default function EmailConfirmation() {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200 mt-[10%]">
-      <motion.div 
+    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl border border-gray-200 mt-[10%]">
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -73,7 +73,9 @@ export default function EmailConfirmation() {
           <p className="text-gray-600">
             {resent
               ? "We've resent the confirmation link to your inbox"
-              : `We've sent a confirmation link to ${email}`}
+              : email
+              ? `We've sent a confirmation link to ${email}`
+              : "Please enter your email again."}
           </p>
         </div>
 
@@ -93,7 +95,7 @@ export default function EmailConfirmation() {
         </Button>
 
         {error && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-red-500 text-sm"
@@ -107,5 +109,13 @@ export default function EmailConfirmation() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function EmailConfirmation() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EmailConfirmationContent />
+    </Suspense>
   );
 }
