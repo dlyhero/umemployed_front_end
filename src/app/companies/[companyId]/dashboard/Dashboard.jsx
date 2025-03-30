@@ -8,40 +8,27 @@ import AnalyticsOverview from './AnalyticsOverview';
 import RecentJobListings from './RecentJobListings';
 
 const Dashboard = ({ companyId, companyData }) => {
-  // Mock tips since API might not provide them
   const mockTips = [
-    { title: 'Tip 1', content: 'Optimize your job postings.' },
+    { title: 'Tip 1', content: 'Optimize your job postings. lkbsdlkfblbslkbksdbkjv jksd vkjbskjdbvkjsabdkjvkjbvkjbk' },
     { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-    { title: 'Tip 2', content: 'Respond to candidates quickly.' },
-
+    { title: 'Tip 3', content: 'Use clear job descriptions.' },
+    { title: 'Tip 4', content: 'Provide feedback to candidates.' },
+    { title: 'Tip 5', content: 'Engage with top talent early.' },
   ];
 
-  // Mock job listings from job_openings string
   const mockJobs = companyData.job_openings
     ? companyData.job_openings.split(',').map((title, index) => ({
         id: index + 1,
         title: title.trim(),
         location: companyData.location || 'Unknown',
-        applications: Math.floor(Math.random() * 10), // Mock data
+        applications: Math.floor(Math.random() * 10),
       }))
     : [];
 
   return (
-    <div className="flex flex-col lg:flex-row container mx-auto py-6 space-y-6 lg:space-x-4">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       <Sidebar companyId={companyId} />
-      <main className="flex-1 space-y-6">
+      <main className="flex-1 space-y-6 p-6">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

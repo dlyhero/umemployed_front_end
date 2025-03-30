@@ -10,6 +10,7 @@ import SocialLinksAndVideo from './SocialLinksAndVideo';
 import Loader from "@/src/components/common/Loader/Loader";
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const CompanyCreationPage = () => {
   const { data: session, status } = useSession();
@@ -31,8 +32,6 @@ const CompanyCreationPage = () => {
   });
   const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
   const router = useRouter();
 
   if (status === 'loading') {
@@ -55,19 +54,17 @@ const CompanyCreationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.country) {
-      setError('Country is required.');
+      toast.error('Country is required.');
       return;
     }
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null);
 
     const data = new FormData();
     for (const key in formData) {
       if (formData[key]) data.append(key, formData[key]);
     }
     if (logoFile) {
-      data.append('logo', logoFile); // Ensure this matches the backend field name
+      data.append('logo', logoFile);
       console.log('Logo File:', logoFile.name, logoFile.size, logoFile.type);
     }
 
@@ -76,7 +73,7 @@ const CompanyCreationPage = () => {
     console.log('Form Data:', Object.fromEntries(data));
 
     if (!token) {
-      setError('No authentication token found. Please sign in again.');
+      toast.error('No authentication token found. Please sign in again.');
       setLoading(false);
       return;
     }
@@ -92,8 +89,8 @@ const CompanyCreationPage = () => {
           },
         }
       );
-      console.log('Company created:', response.data); // Check if logo is in the response
-      setSuccessMessage('Company created successfully!');
+      console.log('Company created:', response.data);
+      toast.success('Company created successfully!');
       router.push('/recruiter/dashboard');
     } catch (err) {
       console.error('Error:', err.response?.data || err.message);
@@ -101,9 +98,9 @@ const CompanyCreationPage = () => {
         err.response?.status === 500 &&
         err.response?.data?.includes('duplicate key value violates unique constraint')
       ) {
-        setError('A user can only create one company.');
+        toast.error('A user can only create one company.');
       } else {
-        setError(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Failed to create company.');
+        toast.error(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Failed to create company.');
       }
     } finally {
       setLoading(false);
@@ -157,8 +154,6 @@ const CompanyCreationPage = () => {
               {loading ? 'Creating...' : 'Create'}
             </Button>
           </div>
-          {error && <p className="text-red-600 text-center">{error}</p>}
-          {successMessage && <p className="text-green-600 text-center">{successMessage}</p>}
         </form>
       )}
     </main>
