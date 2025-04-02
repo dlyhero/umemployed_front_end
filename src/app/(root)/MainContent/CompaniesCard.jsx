@@ -71,10 +71,6 @@ const Companies = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ 
-                y: -8,
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-              }}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden max-w-lg"
             >
               <a href={company.link} className="block h-full">
@@ -129,7 +125,7 @@ const Companies = () => {
           viewport={{ once: true }}
           className="mt-16"
         >
-          <Button className="bg-brand hover:bg-brand/90 px-8 py-4 text-lg text-white">
+          <Button className="bg-brand hover:bg-brand/90 px-8 py-4 text-base md:text-lg text-white">
             <Users className="w-5 h-5 mr-2" />
             Explore All Companies
           </Button>
