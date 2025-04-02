@@ -91,9 +91,9 @@ const Resources = () => {
               viewport={{ once: true }}
             >
               <img 
-                src="/images/ue.avif" 
+                src="/images/resources.webp" 
                 alt="Resources" 
-                className="rounded-xl w-full max-w-lg" 
+                className="w-full max-w-lg" 
               />
             </motion.div>
           </div>
