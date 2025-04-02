@@ -7,7 +7,7 @@ import Footer from "@/src/components/common/Footer/Footer";
 import z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import sendPasswordResetLink from "@/src/app/api/auth/forgotPassword";
 
 const schema = z.object({
@@ -21,6 +21,12 @@ const ForgotPassword = () => {
   const [responseMessage, setResponseMessage] = useState(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(()=>{
+    let timer;
+    if(responseMessage) timer = setTimeout(() => {setResponseMessage(null)}, 4000)
+      return () => clearTimeout(timer)
+  }, [responseMessage])
 
   const onSubmit = async (data) => {
     setIsLoading(true);

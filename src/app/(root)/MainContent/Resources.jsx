@@ -59,7 +59,7 @@ const Resources = () => {
                   className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                 >
                   <button
-                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50"
+                    className="w-full flex justify-between items-center p-4 text-left hover:bg-gray-50"
                     onClick={() => toggleAccordion(index)}
                   >
                     <div className="flex items-center gap-4">
@@ -91,9 +91,9 @@ const Resources = () => {
               viewport={{ once: true }}
             >
               <img 
-                src="/images/ue1.jpg" 
+                src="/images/ue.avif" 
                 alt="Resources" 
-                className="rounded-xl shadow-sm border border-gray-200 w-full max-w-lg" 
+                className="rounded-xl w-full max-w-lg" 
               />
             </motion.div>
           </div>

@@ -9,9 +9,9 @@ const WhyChooseUs = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-end">
             <img
-              src="/images/jobseek.jpg"
+              src="/images/why.avif"
               alt="Job seeker illustration"
-              className="w-full max-w-md lg:max-w-lg rounded-xl shadow-sm border border-gray-200"
+              className="w-full max-w-md lg:max-w-lg rounded-xl"
             />
           </div>
 
@@ -22,10 +22,10 @@ const WhyChooseUs = () => {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                 Why Choose Us?
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-gray-600 mb-6">
                 We provide the best tools and resources to help you find your dream job.
               </p>
             </motion.div>
