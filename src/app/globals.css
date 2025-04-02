@@ -12,6 +12,19 @@
 
 }
 
+/* Add this to your global CSS file if the issue persists */
+.slick-list {
+  margin: 0 -8px;
+}
+
+.slick-slide > div {
+  padding: 0 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

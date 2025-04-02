@@ -32,10 +32,10 @@ const CTA = () => {
             className="w-full lg:w-1/2 space-y-8"
           >
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
                 Take control of your career path
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-lg md:text-xl text-gray-600">
                 Join thousands who've found their perfect match through our platform
               </p>
             </div>
@@ -43,7 +43,7 @@ const CTA = () => {
             <div className="space-y-6 max-w-md">
               {/* Hire Talent Button */}
               <motion.div whileHover={{ scale: 1.02 }}>
-                <Button className="w-full justify-between px-8 py-6 text-lg gap-4 bg-brand text-white hover:bg-brand/70">
+                <Button className="w-full justify-between px-8 py-6 text-lg gap-4 bg-brand text-white text-sm md:text-base hover:bg-brand/70">
                   <Briefcase className="w-6 h-6" />
                   <span className="flex-grow text-center">Hire Top Talent</span>
                   <ArrowRight className="w-5 h-5" />
@@ -57,7 +57,7 @@ const CTA = () => {
                   className="w-full justify-between px-8 py-6 text-lg gap-4 border-gray-300 hover:bg-gray-50"
                 >
                   <UserRound className="w-6 h-6" />
-                  <span className="flex-grow text-center">Get Hired</span>
+                  <span className="flex-grow text-center text-sm md:text-base">Get Hired</span>
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </motion.div>

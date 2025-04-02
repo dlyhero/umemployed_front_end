@@ -34,7 +34,7 @@ const Destination = () => {
     <section className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className=" mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Global Hiring Destinations</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Global Hiring Destinations</h2>
           <p className="text-lg text-gray-600 max-w-3xl">
             Tap into specialized talent pools from world-class business hubs
           </p>

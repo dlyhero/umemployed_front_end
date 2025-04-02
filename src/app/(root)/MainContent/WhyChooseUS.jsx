@@ -22,7 +22,7 @@ const WhyChooseUs = () => {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
                 Why Choose Us?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
@@ -42,7 +42,7 @@ const WhyChooseUs = () => {
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  <h3 className="text-base md:text-xl font-semibold text-gray-800 mb-2">
                     Tailored Job Matches
                   </h3>
                   <p className="text-gray-600">
@@ -62,7 +62,7 @@ const WhyChooseUs = () => {
                   <User className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  <h3 className="text-base md:text-xl font-semibold text-gray-800 mb-2">
                     Expert Career Guidance
                   </h3>
                   <p className="text-gray-600">
@@ -82,7 +82,7 @@ const WhyChooseUs = () => {
                   <Rocket className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  <h3 className="text-base md:text-xl font-semibold text-gray-800 mb-2">
                     Seamless Application
                   </h3>
                   <p className="text-gray-600">

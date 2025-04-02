@@ -57,7 +57,7 @@ const Companies = () => {
           viewport={{ once: true }}
           className="mb-10"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Top Hiring Companies</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Top Hiring Companies</h2>
           <p className="text-lg text-gray-600 max-w-2xl">
             Discover exciting opportunities with industry leaders
           </p>
@@ -75,7 +75,7 @@ const Companies = () => {
                 y: -8,
                 boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
               }}
-              className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden max-w-lg"
             >
               <a href={company.link} className="block h-full">
                 <div className="p-6 h-full flex flex-col">
@@ -93,7 +93,7 @@ const Companies = () => {
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{company.name}</h3>
+                  <h3 className="text-base md:text-xl font-bold text-gray-900 mb-1">{company.name}</h3>
                   <div className="flex items-center text-gray-600 mb-3">
                     <Building2 className="w-4 h-4 mr-1" />
                     <span className="text-sm">{company.industry}</span>
