@@ -11,171 +11,159 @@ const companyLogos = [
   "/examples/company2.png",
   "/examples/company3.png",
   "/examples/company4.png",
-  "/examples/company5.png"
+  "/examples/company5.png",
 ];
 
-// Mock job data matching your structure
+// Mock job data
 const mockJobs = [
   {
     id: 1,
     title: "Software Engineer",
-    company: {
-      name: "Tech Corp",
-      logo: companyLogos[0],
-    },
+    company: { name: "Tech Corp", logo: companyLogos[0] },
     job_location_type: "Remote",
     location: "New York",
-    salary_range: "80,000 - 100,000",
-    created_at: "2 days ago",
+    salary_range: "80k - 100k",
+    created_at: "2d ago",
     is_saved: false,
     is_applied: false,
   },
   {
     id: 2,
     title: "Product Manager",
-    company: {
-      name: "Innovate Inc",
-      logo: companyLogos[1],
-    },
+    company: { name: "Innovate Inc", logo: companyLogos[1] },
     job_location_type: "On-site",
     location: "San Francisco",
-    salary_range: "90,000 - 120,000",
-    created_at: "1 week ago",
+    salary_range: "90k - 120k",
+    created_at: "1w ago",
     is_saved: true,
     is_applied: true,
   },
   {
     id: 3,
     title: "Data Scientist",
-    company: {
-      name: "DataWorks",
-      logo: companyLogos[2],
-    },
+    company: { name: "DataWorks", logo: companyLogos[2] },
     job_location_type: "Hybrid",
     location: "Chicago",
-    salary_range: "85,000 - 110,000",
-    created_at: "3 days ago",
+    salary_range: "85k - 110k",
+    created_at: "3d ago",
     is_saved: false,
     is_applied: false,
   },
   {
     id: 4,
     title: "UX Designer",
-    company: {
-      name: "DesignCo",
-      logo: companyLogos[3],
-    },
+    company: { name: "DesignCo", logo: companyLogos[3] },
     job_location_type: "Remote",
     location: "Austin",
-    salary_range: "75,000 - 95,000",
-    created_at: "5 days ago",
+    salary_range: "75k - 95k",
+    created_at: "5d ago",
     is_saved: true,
     is_applied: false,
   },
   {
     id: 5,
     title: "DevOps Engineer",
-    company: {
-      name: "CloudSystems",
-      logo: companyLogos[4],
-    },
+    company: { name: "CloudSystems", logo: companyLogos[4] },
     job_location_type: "Hybrid",
     location: "Seattle",
-    salary_range: "95,000 - 125,000",
-    created_at: "4 days ago",
+    salary_range: "95k - 125k",
+    created_at: "4d ago",
     is_saved: false,
     is_applied: false,
-  }
+  },
 ];
 
 const RecentJobListings = () => {
   const [jobs, setJobs] = useState(mockJobs);
 
   const toggleSave = (jobId) => {
-    setJobs(jobs.map(job => 
+    setJobs(jobs.map((job) =>
       job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
     ));
   };
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-16 bg-slate-100">
-      <div className="max-w-6xl mx-auto">
+    <section className="w-full px-4 py-8 bg-gray-50">
+      <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           viewport={{ once: true }}
-          className="mb-12"
+          className="mb-6"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Featured Opportunities</h2>
-          <p className="text-lg text-gray-600">
-            Find the best jobs tailored to your skills and preferences
-          </p>
+          <h2 className="text-xl font-semibold text-gray-800">Featured Jobs</h2>
+          <p className="text-sm text-gray-500">Explore top opportunities for you</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {jobs.map((job) => (
             <motion.div
               key={job.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full flex flex-col"
+              transition={{ duration: 0.4 }}
+              className="bg-white border border-gray-100 rounded-lg p-4 shadow-sm flex flex-col"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={job.company.logo} 
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={job.company.logo}
                     alt={job.company.name}
-                    className="w-12 h-12 rounded-lg object-contain border border-gray-200 p-1"
+                    className="w-8 h-8 rounded-md object-contain border border-gray-100 p-0.5"
                   />
-                  <span className="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-brand">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
                     {job.job_location_type}
                   </span>
                 </div>
-                <button 
+                <button
                   onClick={() => toggleSave(job.id)}
                   className={`p-1 rounded-full hover:bg-gray-100 ${
-                    job.is_saved ? "text-brand" : "text-gray-400"
+                    job.is_saved ? "text-blue-600" : "text-gray-400"
                   }`}
                 >
-                  <Bookmark 
-                    className={`w-5 h-5 ${job.is_saved ? "fill-brand" : ""}`} 
+                  <Bookmark
+                    className={`w-4 h-4 ${job.is_saved ? "fill-blue-600" : ""}`}
                   />
                 </button>
               </div>
 
-              <div className="flex-grow space-y-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 min-h-[56px]">
-                    {job.title}
-                  </h3>
-                  <p className="text-gray-600 mt-1">{job.company.name}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mr-1 text-brand" />
+              <div className="flex-grow space-y-2">
+                <h3 className="text-lg font-medium text-gray-900 line-clamp-1">
+                  {job.title}
+                </h3>
+                <p className="text-sm text-gray-600">{job.company.name}</p>
+                <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                  <span className="flex items-center">
+                    <MapPin className="w-3 h-3 mr-1 text-blue-500" />
                     {job.location}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <DollarSign className="w-4 h-4 mr-1 text-brand" />
+                  </span>
+                  <span className="flex items-center">
+                    <DollarSign className="w-3 h-3 mr-1 text-blue-500" />
                     ${job.salary_range}
-                  </div>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="w-4 h-4 mr-1 text-brand" />
-                  {job.created_at}
+                  </span>
+                  <span className="flex items-center">
+                    <Clock className="w-3 h-3 mr-1 text-blue-500" />
+                    {job.created_at}
+                  </span>
                 </div>
               </div>
 
-              <div className="pt-6 mt-auto">
+              <div className="mt-3">
                 {job.is_applied ? (
-                  <Button variant="outline" className="w-full border-brand text-brand" disabled>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-blue-500 text-blue-500 text-xs"
+                    disabled
+                  >
                     Applied
                   </Button>
                 ) : (
-                  <Button className="w-full bg-brand hover:bg-brand/90 text-white">
+                  <Button
+                    size="sm"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                  >
                     Apply Now
                   </Button>
                 )}
