@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ const FeaturedOpportunities = () => {
   ]);
 
   const toggleSave = (jobId) => {
-    setJobs(jobs.map(job => 
+    setJobs(jobs.map(job =>
       job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
     ));
   };
@@ -129,14 +129,13 @@ const FeaturedOpportunities = () => {
           <Slider {...settings}>
             {jobs.map((job) => (
               <div key={job.id} className="px-2 focus:outline-none">
-                <motion.div 
-                  whileHover={{ y: -5 }}
+                <motion.div
                   className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full flex flex-col"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-4">
-                      <img 
-                        src={job.company.logo} 
+                      <img
+                        src={job.company.logo}
                         alt={job.company.name}
                         className="w-12 h-12 rounded-lg object-contain border border-gray-200 p-1"
                       />
@@ -144,14 +143,14 @@ const FeaturedOpportunities = () => {
                         {job.job_location_type}
                       </span>
                     </div>
-                    <button 
+                    <button
                       onClick={() => toggleSave(job.id)}
                       className={`p-1 rounded-full hover:bg-gray-100 ${
                         job.is_saved ? "text-brand" : "text-gray-400"
                       }`}
                     >
-                      <Bookmark 
-                        className={`w-5 h-5 ${job.is_saved ? "fill-brand" : ""}`} 
+                      <Bookmark
+                        className={`w-5 h-5 ${job.is_saved ? "fill-brand" : ""}`}
                       />
                     </button>
                   </div>

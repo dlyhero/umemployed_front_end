@@ -4,11 +4,54 @@ import { Button } from "@/components/ui/button";
 import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/src/components/common/Footer/Footer";
+import z from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import sendPasswordResetLink from "@/src/app/api/auth/forgotPassword";
+
+const schema = z.object({
+  email: z.string().email('Enter a valid email')
+});
 
 const ForgotPassword = () => {
+  const { handleSubmit, register, reset, formState: { errors } } = useForm({
+    resolver: zodResolver(schema)
+  });
+  const [responseMessage, setResponseMessage] = useState(null);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(()=>{
+    let timer;
+    if(responseMessage) timer = setTimeout(() => {setResponseMessage(null)}, 4000)
+      return () => clearTimeout(timer)
+  }, [responseMessage])
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    setResponseMessage(null);
+    setIsError(false);
+    
+    try {
+      await sendPasswordResetLink(data.email);
+      setResponseMessage('Password reset link sent successfully! Check your email.');
+      reset({ email: '' }); // Clear the email field
+    } catch (error) {
+      setIsError(true);
+      setResponseMessage(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to send reset link. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 gap-5">
-       <motion.div
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 gap-5">
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -27,11 +70,22 @@ const ForgotPassword = () => {
             </div>
           </div>
 
+          {responseMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mb-6 p-4 rounded-lg ${isError ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}
+            >
+              {responseMessage}
+            </motion.div>
+          )}
+
           <motion.form
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="space-y-6"
+            onSubmit={handleSubmit(onSubmit)}
           >
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -42,8 +96,8 @@ const ForgotPassword = () => {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  {...register("email")}
                   id="email"
-                  name="email"
                   type="email"
                   autoComplete="email"
                   required
@@ -51,14 +105,16 @@ const ForgotPassword = () => {
                   placeholder="your@email.com"
                 />
               </div>
+              {errors.email && <p className="my-2 text-red-400">{errors.email.message}</p>}
             </div>
 
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Button type="submit" className="w-full bg-brand text-white hover:bg-brad/70">
-                Send Reset Link
+            <motion.div>
+              <Button 
+                type="submit" 
+                className="w-full bg-brand text-white hover:bg-brand/70"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send Reset Link'}
               </Button>
             </motion.div>
           </motion.form>
@@ -87,12 +143,9 @@ const ForgotPassword = () => {
             Contact support
           </Link>
         </motion.div>
-
       </motion.div>
-       <Footer />
-
+      <Footer />
     </div>
-
   );
 };
 
