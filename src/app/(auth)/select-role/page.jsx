@@ -3,130 +3,57 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { FaSearch, FaBriefcase } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Loader from "@/src/components/common/Loader/Loader";
+import { ACCOUNT_TYPES, selectAccountType } from "@/src/app/api/auth/select-role";
 
-export default function ChooseAccountType() {
+export default function SelectRolePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // Redirect to login if not authenticated
+  // Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/accountType");
+      router.push("/login?callbackUrl=/select-role");
     }
   }, [status, router]);
 
-  // Function to handle API call with timeout
-  const handleAccountTypeSelection = async (accountType) => {
-    if (status !== "authenticated") {
-      setError("You are not authenticated. Please log in.");
-      router.push("/login?callbackUrl=/accountType");
-      return;
-    }
+  const handleAccountTypeSelect = async (accountType) => {
+    if (status !== "authenticated" || loading) return;
 
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    // Get the token from the session
-    const token = session?.user?.accessToken || session?.accessToken;
-
-    if (!token) {
-      setError("Authentication token not found. Please log in again.");
-      setLoading(false);
-      router.push("/login?callbackUrl=/accountType");
-      return;
-    }
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+      const token = session?.accessToken || session?.user?.accessToken;
+      if (!token) throw new Error("Authentication required");
 
-      const response = await fetch(
-        "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/choose-account-type/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            account_type: accountType,
-          }),
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
-      setLoading(false);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 400) {
-          throw new Error(
-            errorData.message ||
-              errorData.account_type?.[0] ||
-              "Invalid request. Please check your input and try again."
-          );
-        }
-        if (response.status === 401) {
-          throw new Error("Unauthorized: Invalid or expired token. Please log in again.");
-        }
-        throw new Error("Failed to select account type. Please try again.");
-      }
-
-      await response.json();
+      await selectAccountType(accountType, token);
+      
       setSuccess("Account type selected successfully!");
+      
+      // Find the selected account type config
+      const accountConfig = Object.values(ACCOUNT_TYPES).find(
+        type => type.value === accountType
+      );
+      
+      // Redirect after success message is shown
+      setTimeout(() => {
+        router.push(accountConfig.redirectPath);
+      }, 1500);
 
-      // Wait 2 seconds before redirecting
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Redirect based on account type
-      if (accountType === "job_seeker") {
-        router.push("/upload");
-      } else if (accountType === "recruiter") {
-        router.push("/recruiter/company/create"); // Updated redirect URL
-      }
     } catch (err) {
-      setLoading(false);
-      if (err.name === "AbortError") {
-        setError("Request timed out. Please check your internet connection and try again.");
-      } else if (err.message.includes("Failed to fetch")) {
-        setError("Unable to reach the server. Please check your internet connection or try again later.");
-      } else {
-        setError(err.message);
-        if (err.message.includes("Unauthorized")) {
-          router.push("/login?callbackUrl=/accountType");
-        }
+      setError(err.message);
+      if (err.message.includes("expired") || err.message.includes("required")) {
+        router.push("/login?callbackUrl=/select-role");
       }
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleJobSeekerClick = () => {
-    if (!loading) {
-      handleAccountTypeSelection("job_seeker");
-    }
-  };
-
-  const handleEmployerClick = () => {
-    if (!loading) {
-      handleAccountTypeSelection("recruiter");
-    }
-  };
-
-  const headingVariants = {
-    hidden: { opacity: 0, y: -50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  };
-
-  const fadeInVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.8, delay: 0.2 } },
   };
 
   const cardVariants = {
@@ -134,114 +61,93 @@ export default function ChooseAccountType() {
     visible: (i) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, delay: i * 0.2, ease: "easeOut" },
+      transition: { duration: 0.3, delay: i * 0.1 }
     }),
     hover: {
-      y: -10,
-      boxShadow: "4px 4px 0 #1e90ff",
-      transition: { duration: 0.3 },
+      y: -4,
+      transition: { duration: 0.2 }
     },
+    tap: {
+      scale: 0.98
+    }
   };
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
-        <Loader />
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <Loader className="h-8 w-8" />
       </div>
     );
   }
 
   return (
-    <main className="container flex flex-col items-center justify-center min-h-[calc(100vh-120px)] max-w-4xl mx-auto p-3 rounded-lg">
-      {loading && <Loader />}
-
-      <motion.h2
-        className="text-3xl font-bold text-center mb-6 text-gray-900"
-        variants={headingVariants}
-        initial="hidden"
-        animate="visible"
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <motion.div 
+        className="w-full max-w-2xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
       >
-        Choose Your Account Type
-      </motion.h2>
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Choose Your Account Type
+          </h1>
+          <p className="text-gray-600">
+            Select the option that best describes your goals
+          </p>
+        </header>
 
-      <motion.div
-        className="text-center mb-6 max-w-md"
-        variants={fadeInVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <p className="text-base text-gray-600">
-          Select the account type that best fits your goals.
-        </p>
+        {error && (
+          <motion.div
+            className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-100"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {success && (
+          <motion.div
+            className="mb-6 p-4 bg-green-50 text-green-600 rounded-lg border border-green-100"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {success}
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.values(ACCOUNT_TYPES).map((type, index) => {
+            const Icon = type.icon;
+            return (
+              <motion.button
+                key={type.value}
+                variants={cardVariants}
+                custom={index}
+                initial="hidden"
+                animate="visible"
+                whileTap={!loading ? "tap" : {}}
+                onClick={() => handleAccountTypeSelect(type.value)}
+                disabled={loading}
+                className={`p-6 bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all ${
+                  loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
+                }`}
+              >
+                <div className="mb-4 p-3 bg-blue-50 rounded-full">
+                  <Icon className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  {type.label}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {type.description}
+                </p>
+              </motion.button>
+            );
+          })}
+        </div>
       </motion.div>
-
-      {success && (
-        <motion.div
-          className="p-4 border shadow-lg bg-green-50 rounded-lg mb-5 text-center border-l-4 border-l-green-400 shadow-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <p className="text-green-600">{success}</p>
-        </motion.div>
-      )}
-
-      {error && (
-        <motion.div
-          className="p-4 border shadow-lg bg-red-50 rounded-lg mb-5 text-center border-l-4 border-l-red-400 shadow-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <p className="text-red-600">{error}</p>
-        </motion.div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-6 w-full max-w-2xl">
-        <motion.div
-          custom={0}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={!loading ? "hover" : ""}
-          onClick={handleJobSeekerClick}
-          className={`flex-1 p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-gray-200 rounded-lg cursor-pointer flex flex-col items-center ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <div className="text-brand mb-4">
-            <FaSearch className="text-2xl" />
-          </div>
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Job Seeker</h2>
-            <p className="text-sm text-gray-600">
-              Find and apply to your dream job.
-            </p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          custom={1}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={!loading ? "hover" : ""}
-          onClick={handleEmployerClick}
-          className={`flex-1 p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-gray-200 rounded-lg cursor-pointer flex flex-col items-center ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <div className="text-brand mb-4">
-            <FaBriefcase className="text-2xl" />
-          </div>
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Employer</h2>
-            <p className="text-sm text-gray-600">
-              Hire the best talent for your team.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    </main>
+    </div>
   );
 }
