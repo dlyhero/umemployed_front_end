@@ -9,7 +9,7 @@ export default withAuth(
     // Define route categories
     const loggedOutOnlyRoutes = ['/', '/login', '/signup', '/verify_email', '/forgotPassword']; // Added '/signup'
     const selectRoleRoute = '/select-role';
-    const publicApiRoutes = ['/api/auth', '/auth/error'];
+    const publicApiRoutes = ['/api/auth', '/error'];
 
     // 1. First check for select-role route
     if (pathname.startsWith(selectRoleRoute)) {
