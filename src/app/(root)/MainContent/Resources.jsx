@@ -43,7 +43,7 @@ const Resources = () => {
           className="flex flex-col lg:flex-row gap-12"
         >
           <div className="w-full lg:w-1/2">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Resources</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">Resources</h2>
             <p className="text-lg text-gray-600 mb-8">
               Tools and opportunities tailored for you.
             </p>
@@ -59,14 +59,14 @@ const Resources = () => {
                   className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                 >
                   <button
-                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50"
+                    className="w-full flex justify-between items-center p-4 text-left hover:bg-gray-50"
                     onClick={() => toggleAccordion(index)}
                   >
                     <div className="flex items-center gap-4">
                       <div className="bg-brand/10 p-2 rounded-lg text-brand">
                         {resource.icon}
                       </div>
-                      <h3 className="text-lg font-semibold">{resource.title}</h3>
+                      <h3 className="text-base md:text-lg font-semibold">{resource.title}</h3>
                     </div>
                     <ArrowRight className={`w-5 h-5 transition-transform ${openAccordion === index ? 'rotate-90' : ''}`} />
                   </button>
@@ -91,9 +91,9 @@ const Resources = () => {
               viewport={{ once: true }}
             >
               <img 
-                src="/images/ue1.jpg" 
+                src="/images/resources.webp" 
                 alt="Resources" 
-                className="rounded-xl shadow-sm border border-gray-200 w-full max-w-lg" 
+                className="w-full max-w-lg" 
               />
             </motion.div>
           </div>

@@ -38,7 +38,7 @@ const CompaniesSection = () => {
     <section className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">For Companies</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">For Companies</h2>
           <p className="text-lg text-gray-600 max-w-2xl">
             Streamline your hiring process with our powerful tools designed for employers
           </p>
@@ -55,7 +55,7 @@ const CompaniesSection = () => {
                   {feature.icon}
                 </div>
                 
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <h3 className="text-base md:text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600 mb-6 flex-grow">{feature.description}</p>
                 
                 <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">

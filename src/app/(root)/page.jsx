@@ -13,7 +13,7 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   return (
-    <div>
+    <div className="overflow-hidden">
        <HeroSection session={session} status={status}/>
       <FeaturedOpportunities />
       <WhyChooseUs />
