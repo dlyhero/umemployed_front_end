@@ -7,13 +7,11 @@ export default withAuth(
     const { token } = req;
 
     // Define route categories
-    const loggedOutOnlyRoutes = ['/', '/login', '/verify_email', '/forgotPassword'];
+    const loggedOutOnlyRoutes = ['/', '/login', '/signup', '/verify_email', '/forgotPassword']; // Added '/signup'
     const selectRoleRoute = '/select-role';
-    const publicApiRoutes = ['/api/auth', '/auth/error'];
-    const applicantRoutes = ['/applicant'];
-    const recruiterRoutes = ['/recruiter'];
+    const publicApiRoutes = ['/api/auth', '/error'];
 
-    // 1. Handle select-role route (special case)
+    // 1. First check for select-role route
     if (pathname.startsWith(selectRoleRoute)) {
       if (!token) return NextResponse.redirect(new URL('/login', req.url));
       if (token.role && token.role !== 'none') {
@@ -23,53 +21,46 @@ export default withAuth(
             : new URL('/recruiter/dashboard', req.url)
         );
       }
-      return NextResponse.next(); // Allow access only for role 'none'
+      return NextResponse.next(); // Only allow if role is 'none'
     }
 
-    // 2. Block logged-in users from logged-out only routes
-    if (loggedOutOnlyRoutes.some(route => pathname.startsWith(route))) {
-      if (token) {
-        return NextResponse.redirect(
-          token.role === 'none'
-            ? new URL(selectRoleRoute, req.url)
-            : token.role === 'applicant'
-              ? new URL('/applicant/dashboard', req.url)
-              : new URL('/recruiter/dashboard', req.url)
-        );
-      }
-      return NextResponse.next(); // Allow access for logged-out users
-    }
-
-    // 3. Allow public API routes
+    // 2. Handle public API routes
     if (publicApiRoutes.some(route => pathname.startsWith(route))) {
       return NextResponse.next();
     }
 
-    // 4. Handle protected routes
-
-    // Block unauthenticated access
+    // 3. Check authentication status
     if (!token) {
+      // Unauthenticated users can only access loggedOutOnlyRoutes
+      if (loggedOutOnlyRoutes.some(route => pathname.startsWith(route))) {
+        return NextResponse.next();
+      }
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
-    // STRICT ENFORCEMENT: Users with role 'none' can ONLY access /select-role
+    // 4. At this point, user is authenticated - enforce role restrictions
     if (token.role === 'none') {
+      // Users with 'none' role can ONLY access select-role
       return NextResponse.redirect(new URL(selectRoleRoute, req.url));
     }
 
-    // Enforce role-specific routes
-    const isApplicant = token.role === 'applicant';
-    const isRecruiter = token.role === 'recruiter';
-
-    if (isApplicant && !pathname.startsWith('/applicant')) {
+    // 5. Handle role-specific routes for authenticated users with roles
+    if (token.role === 'applicant') {
+      if (pathname.startsWith('/applicant')) {
+        return NextResponse.next();
+      }
       return NextResponse.redirect(new URL('/applicant/dashboard', req.url));
     }
 
-    if (isRecruiter && !pathname.startsWith('/recruiter')) {
+    if (token.role === 'recruiter') {
+      if (pathname.startsWith('/recruiter')) {
+        return NextResponse.next();
+      }
       return NextResponse.redirect(new URL('/recruiter/dashboard', req.url));
     }
 
-    return NextResponse.next();
+    // Fallback - should never reach here
+    return NextResponse.redirect(new URL('/login', req.url));
   },
   {
     callbacks: {
@@ -77,7 +68,7 @@ export default withAuth(
     },
     pages: {
       signIn: "/login",
-      error: "/auth/error",
+      error: "/error",
     },
   }
 );
