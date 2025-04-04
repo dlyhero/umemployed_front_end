@@ -7,7 +7,7 @@ import AuthProvider from "@/src/components/AuthProvider";
 
 
 export const metadata = {
-  title: "Account Type",
+  title: "Upload Resume",
 };
 
 export default function AccountTypeLayout({ children }) {
