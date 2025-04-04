@@ -12,8 +12,8 @@ export const metadata = {
 
 export default function AccountTypeLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+    <>
+      <div
         className={` antialiased text-[15px]`}
       >
         {children}
@@ -25,7 +25,7 @@ export default function AccountTypeLayout({ children }) {
         }}
       />
         <Footer />
-      </body>
-    </html>
+      </div>
+    </>
   );
 }

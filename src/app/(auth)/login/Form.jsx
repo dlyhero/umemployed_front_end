@@ -10,59 +10,67 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function LoginForm() {
-    const { data: session, status } = useSession();
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { data: session, status } = useSession();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get('callbackUrl') || '/';
 
-    const { 
-        register, 
-        handleSubmit, 
-        formState: { errors } 
-    } = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm();
 
     useEffect(() => {
         if (status === "authenticated") {
-            window.history.replaceState(null, '', callbackUrl);
-            router.replace(callbackUrl);
+            // Add a small delay to ensure session is fully loaded
+            const timer = setTimeout(() => {
+                const role = session?.user?.role;
+                console.log("Current role:", role);
+                
+                if (role === 'applicant') {
+                    router.replace('/applicant/dashboard');
+                } else if (role === 'recruiter') {
+                    router.replace('/recruiter/dashboard');
+                } else {
+                    // Default case - including 'none' and undefined
+                    router.replace('/select-role');
+                }
+            }, 100); // 100ms delay
+
+            return () => clearTimeout(timer);
         }
-    }, [status, router, callbackUrl]);
+    }, [status, session, router]);
 
     const onSubmit = async (data) => {
         setLoading(true);
         setError('');
       
         try {
-          const result = await signIn("credentials", {
-            email: data.email,
-            password: data.password,
-            redirect: false
-          });
+            const result = await signIn("credentials", {
+                email: data.email,
+                password: data.password,
+                redirect: false
+            });
 
-          if (result?.error === "EMAIL_NOT_VERIFIED") {
-            return router.push(`/verify_email?email=${encodeURIComponent(data.email)}`);
-          }
-      
-          if (result?.error) {
-            throw new Error(
-              result.error === "INVALID_CREDENTIALS" 
-                ? "Invalid email or password" 
-                : "Login failed"
-            );
-          }
-      
-          window.history.replaceState(null, '', callbackUrl);
-          router.replace(callbackUrl);
-      
+            if (result?.error === "EMAIL_NOT_VERIFIED") {
+                return router.push(`/verify_email?email=${encodeURIComponent(data.email)}`);
+            }
+        
+            if (result?.error) {
+                throw new Error(
+                    result.error === "INVALID_CREDENTIALS" 
+                        ? "Invalid email or password" 
+                        : "Login failed"
+                );
+            }
+
+            // The useEffect will handle the redirect after session updates
+            
         } catch (err) {
-          setError(err.message);
+            setError(err.message);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
+    };
+
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

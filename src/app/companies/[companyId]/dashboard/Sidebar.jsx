@@ -1,29 +1,10 @@
-"use client";
-
-import { useState, useEffect } from "react";
+// Sidebar.jsx
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Home, Users, Briefcase, FileText, BarChart, Settings, Menu, X } from 'lucide-react';
+import { Home, Users, Briefcase, FileText, BarChart, Settings, Zap } from 'lucide-react';
 
 const Sidebar = ({ companyId }) => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // Always start closed on both mobile and desktop
-      setIsOpen(false);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: `/recruiter/company/${companyId}/dashboard` },
@@ -34,117 +15,53 @@ const Sidebar = ({ companyId }) => {
     { icon: Settings, label: 'Settings', path: `/recruiter/company/${companyId}/settings` },
   ];
 
-  const sidebarVariants = {
-    expanded: { 
-      width: isMobile ? "250px" : "16rem",
-      x: 0 
-    },
-    collapsed: { 
-      width: isMobile ? "0" : "4rem",
-      x: isMobile ? "-250px" : 0 
-    },
-  };
-
-  const handleMouseEnter = () => !isMobile && !isOpen && setHovered(true);
-  const handleMouseLeave = () => !isMobile && setHovered(false);
-
   return (
-    <>
-      {/* Mobile Menu Button - Only shown on mobile when sidebar is closed */}
-      {isMobile && !isOpen && (
-        <motion.button
-          className="md:hidden fixed top-20 left-1 z-30 p-2 rounded-full bg-brand-500 text-black hover:bg-brand-600"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsOpen(true)}
-        >
-          <Menu size={20} />
-        </motion.button>
-      )}
-
-      <motion.aside
-        className={`fixed md:sticky h-[calc(100vh-72px-20px)] bg-white border-r border-gray-200 z-20 top-[72px] transition-all ${
-          isMobile && isOpen ? 'shadow-xl' : ''
-        }`}
-        initial="collapsed"
-        animate={isOpen || (!isMobile && hovered) ? "expanded" : "collapsed"}
-        variants={sidebarVariants}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Close Button - Inside sidebar and shown when open */}
-          {(isOpen || (!isMobile && hovered)) && (
-            <div className="p-4 flex justify-end">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-full hover:bg-gray-100 text-brand-500"
-              >
-                <X size={20} />
-              </motion.button>
-            </div>
-          )}
-
-          {/* Desktop Menu Button - Only shown when collapsed on desktop */}
-          {!isMobile && !isOpen && !hovered && (
-            <div className="p-4 flex justify-end">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsOpen(true)}
-                className="p-2 rounded-full hover:bg-gray-100 text-brand-500"
-              >
-                <Menu size={20} />
-              </motion.button>
-            </div>
-          )}
-
-          <nav className="flex-1 px-2 py-4 overflow-y-auto">
-            <ul className="space-y-2">
-              {menuItems.map((item, index) => {
-                const isActive = pathname === item.path;
-                return (
-                  <motion.li
-                    key={item.label}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+    <aside className="w-48 bg-white border-r border-gray-200 h-[calc(100vh-72px)] rounded-lg flex flex-col">
+      <nav className="flex-1 px-2 py-4">
+        <ul className="space-y-2">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <li key={item.label}>
+                <Link href={item.path} passHref>
+                  <div
+                    className={`group flex items-center px-4 py-3 rounded-md cursor-pointer transition-colors duration-200 ${
+                      isActive
+                        ? "bg-brand-50 text-brand-600 text-1"
+                        : "text-gray-600 hover:bg-blue-50/10 hover:text-blue-500"
+                    }`}
                   >
-                    <Link href={item.path} passHref>
-                      <motion.div
-                        className={`flex items-center px-4 py-3 rounded-md cursor-pointer ${
-                          isActive ? "bg-brand-50 text-brand-600" : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <item.icon size={20} className={isActive ? "text-brand-500" : ""} />
-                        <AnimatePresence>
-                          {(isOpen || (!isMobile && hovered)) && (
-                            <motion.span
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -10 }}
-                              transition={{ duration: 0.2 }}
-                              className="ml-4 font-medium whitespace-nowrap"
-                            >
-                              {item.label}
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    </Link>
-                  </motion.li>
-                );
-              })}
-            </ul>
-          </nav>
+                    <item.icon
+                      size={20}
+                      className={`${
+                        isActive ? "text-brand-500" : "text-gray-600 group-hover:text-brand-500"
+                      } transition-colors duration-200`}
+                    />
+                    <span
+                      className={`ml-4 font-medium whitespace-nowrap ${
+                        isActive ? "text-brand-600" : "text-gray-600 group-hover:text-brand-500"
+                      } transition-colors duration-200`}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+      {/* Nice Element at the Bottom */}
+      <div className="p-4 border-t border-gray-200">
+        <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-md">
+          <Zap size={20} className="text-blue-500" />
+          <div>
+            <p className="text-sm font-semibold text-gray-800">Upgrade to Pro</p>
+            <p className="text-xs text-gray-600">Unlock advanced features!</p>
+          </div>
         </div>
-      </motion.aside>
-    </>
+      </div>
+    </aside>
   );
 };
 
