@@ -46,7 +46,12 @@ export const authOptions = {
     }),   
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    // Session expires after 30 minutes of inactivity
+    maxAge: 30 * 60, // 30 minutes in seconds
+    updateAge: 0, // The session is updated (and maxAge reset) on every activity
+  },
   pages: {
     signIn: "/login",
     error: "/auth/error",
@@ -54,7 +59,7 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.role = user.role || 'none';
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
       }
@@ -66,8 +71,13 @@ export const authOptions = {
       session.refreshToken = token.refreshToken;
       return session;
     },
-    // Remove the redirect callback completely
-    // We'll handle redirects manually in the client
+    async redirect({ url, baseUrl }) {
+      // Redirect to select-role after login if no role is assigned
+      if (url === baseUrl) {
+        return `${baseUrl}/select-role`;
+      }
+      return url;
+    }
   },
 };
 

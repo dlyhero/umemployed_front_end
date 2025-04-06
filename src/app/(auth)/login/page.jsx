@@ -1,27 +1,18 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Apple, Github, Google, Home, Mail } from "lucide-react";
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import LoginForm from './Form';
 import Footer from '@/src/components/common/Footer/Footer';
 import Link from "next/link";
-import { UilGoogle, UilGithub } from '@iconscout/react-unicons';
+import { UilGoogle } from '@iconscout/react-unicons';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Spinner from "@/src/components/common/Spinner";
+import { signIn } from 'next-auth/react';
 
 function Login() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/');
-    }
-  }, [status, router]);
-
-  if (status === 'authenticated' || status === 'loading') {
-    return null; // or a loading spinner
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -37,7 +28,7 @@ function Login() {
               <Button 
                 variant="outline" 
                 className="w-full border-gray-300 hover:bg-gray-50"
-                onClick={() => signIn('google', { callbackUrl: '/' })}
+                onClick={() => signIn('google', { callbackUrl: '/select-role' })}
               >
                 <UilGoogle className="h-4 w-4 mr-2" />
                 Continue with Google
