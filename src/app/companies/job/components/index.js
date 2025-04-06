@@ -1,7 +1,8 @@
-export { default as ProgressStepper } from './ProgressStepper';
-export { default as Step1BasicInfo } from './Step1BasicInfo';
-export { default as Step2Requirements } from './Step2Requirements';
-export { default as Step3Description } from './Step3Description';
-export { default as Step4Skills } from './Step4Skills';
-export { default as FormNavigation } from './FormNavigation';
-export { default as FormContainer } from './FormContainer';
+// /job/components/index.js
+export { ProgressStepper } from './ProgressStepper';
+export { Step1BasicInfo } from './Step1BasicInfo';
+export { Step2Requirements } from './Step2Requirements';
+export { Step3Description } from './Step3Description';
+export { Step4Skills } from './Step4Skills';
+export { FormNavigation } from './FormNavigation';
+export { FormContainer } from './FormContainer';

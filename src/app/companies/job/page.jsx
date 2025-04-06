@@ -1,11 +1,58 @@
+// /job/page.jsx
 'use client';
-import { FormContainer } from './components/FormContainer';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useJobForm } from '@/src/hooks/useJobForm';
+import { FormContainer } from './components';
+import Loader from '@/src/components/common/Loader/Loader';
+import axios from 'axios';
 
 export default function JobPostingPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { step, form, nextStep, prevStep, stepIsValid } = useJobForm(); // Ensure stepIsValid is destructured
+
+  if (status === 'loading') {
+    return <Loader />;
+  }
+  if (status === 'unauthenticated') {
+    router.push('/api/auth/signin');
+    return null;
+  }
+
+  const onSubmit = async (data) => {
+    const token = session?.user?.accessToken || session?.accessToken;
+    if (!token) {
+      alert('No authentication token found. Please sign in again.');
+      return;
+    }
+
+    try {
+      await axios.post(
+        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/create-job/',
+        data,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+      alert('Job posted successfully!');
+      router.push('/recruiter/dashboard');
+    } catch (error) {
+      console.error('Error posting job:', error);
+      alert('Failed to post job. Please try again.');
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-brand mb-8"> Job Posting</h1>
-      <FormContainer />
-    </div>
+    <FormContainer
+      step={step}
+      form={form}
+      nextStep={nextStep}
+      prevStep={prevStep}
+      onSubmit={onSubmit}
+      stepIsValid={stepIsValid} // Pass stepIsValid as a prop
+    />
   );
 }

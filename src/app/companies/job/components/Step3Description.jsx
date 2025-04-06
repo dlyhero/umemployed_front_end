@@ -1,38 +1,73 @@
 // /job/components/Step3Description.jsx
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+'use client';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 export const Step3Description = ({ form }) => {
   return (
-    <div className="space-y-4 bg-white p-6 rounded-lg shadow">
+    <div className="space-y-4">
+      {/* Description */}
       <FormField
         control={form.control}
-        name="description.jobDescription"
+        name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Job Description</FormLabel>
+            <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Describe the job role and requirements..."
-                className="min-h-[150px]"
+                placeholder="Provide an overview of the job role..."
+                className="min-h-[100px]"
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  form.trigger('description'); // Trigger validation on change
+                }}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+
+      {/* Responsibilities */}
       <FormField
         control={form.control}
-        name="description.responsibilities"
+        name="responsibilities"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Key Responsibilities</FormLabel>
+            <FormLabel>Responsibilities</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="List key responsibilities..."
-                className="min-h-[150px]"
+                placeholder="List the key responsibilities for this role..."
+                className="min-h-[100px]"
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  form.trigger('responsibilities'); // Trigger validation on change
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Benefits */}
+      <FormField
+        control={form.control}
+        name="benefits"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Benefits</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Describe the benefits offered (e.g., health insurance, remote work)..."
+                className="min-h-[100px]"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  form.trigger('benefits'); // Trigger validation on change
+                }}
               />
             </FormControl>
             <FormMessage />

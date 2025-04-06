@@ -1,12 +1,13 @@
 // Dashboard.jsx
 import { motion } from 'framer-motion';
-import Sidebar from './Sidebar';
 import QuickActions from './QuickActions';
-import Tips from './Tips';
+import { RecruiterTips } from './RecruiterTips'; // Use RecruiterTips instead of Tips
 import PostJob from './PostJob';
 import CandidateApplications from './CandidateApplications';
 import AnalyticsOverview from './AnalyticsOverview';
 import RecentJobListings from './RecentJobListings';
+import { WelcomeSection } from './recruiter/WelcomeSection';
+import { Sideba } from './recruiter/Sideba';
 
 const Dashboard = ({ companyId, companyData }) => {
   const mockTips = [
@@ -29,18 +30,11 @@ const Dashboard = ({ companyId, companyData }) => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex flex-col lg:flex-row min-h-screen gap-8">
-        <Sidebar companyId={companyId} />
+        <Sideba companyId={companyId} />
         <main className="flex-1 space-y-6">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="text-3xl font-bold"
-          >
-            Hello, {companyData?.name || 'Eddy'}!
-          </motion.h2>
+          <WelcomeSection companyName={companyData?.name || "Eddy"} />
           <QuickActions companyId={companyId} />
-          <Tips tips={mockTips} />
+          <RecruiterTips tips={mockTips} /> {/* Pass mockTips to RecruiterTips */}
           <PostJob companyId={companyId} />
           <CandidateApplications applicationCount={mockJobs.length} />
           <AnalyticsOverview

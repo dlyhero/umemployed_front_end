@@ -1,9 +1,12 @@
-"use client"
+// src/app/recruiter/company/create/page.jsx
+"use client";
 
 import dynamic from "next/dynamic";
 
-const CompanyCreatePage = dynamic(() => import("./CompanyCreationPage"), {
-  ssr: false, // Disables SSR
+const CompanyCreationPage = dynamic(() => import("./CompanyCreationPage"), {
+  ssr: false,
 });
 
-export default CompanyCreatePage;
+export default function CompanyCreatePage() {
+  return <CompanyCreationPage />;
+}

@@ -1,10 +1,13 @@
-'use client'; // Mark as Client Component since we use hooks
-
-import { useSearchParams } from 'next/navigation';
+'use client'; // Must be at the very top of the component's scope
+import { useSearchParams } from 'next/navigation'; // Import at the top
+// src/app/error/page.jsx
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, ArrowRight, Home, MailCheck, Lock, Ghost } from 'lucide-react';
 
-export default function AuthErrorPage() {
+// Client Component with useSearchParams
+function ErrorContent() {
+
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
@@ -60,11 +63,10 @@ export default function AuthErrorPage() {
     }
   };
 
-  // Handle 404 errors
   const currentError = errorMessages[error] || errorMessages.Default;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 ">
+    <>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-white shadow-sm mb-4">
@@ -103,6 +105,17 @@ export default function AuthErrorPage() {
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+// Server Component with Suspense
+export default function AuthErrorPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <Suspense fallback={<div className="text-center">Loading...</div>}>
+        <ErrorContent />
+      </Suspense>
     </div>
   );
 }

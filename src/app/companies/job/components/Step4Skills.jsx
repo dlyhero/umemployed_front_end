@@ -1,95 +1,73 @@
 // /job/components/Step4Skills.jsx
-import { useState } from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+'use client';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { X } from 'lucide-react';
 
 export const Step4Skills = ({ form }) => {
-  const [requiredSkill, setRequiredSkill] = useState("");
-  const [preferredSkill, setPreferredSkill] = useState("");
+  const [skillInput, setSkillInput] = useState('');
 
-  const handleAddRequiredSkill = () => {
-    if (requiredSkill.trim()) {
-      const currentSkills = form.getValues("skills.requiredSkills") || [];
-      form.setValue("skills.requiredSkills", [...currentSkills, requiredSkill.trim()]);
-      setRequiredSkill("");
-    }
-  };
-
-  const handleAddPreferredSkill = () => {
-    if (preferredSkill.trim()) {
-      const currentSkills = form.getValues("skills.preferredSkills") || [];
-      form.setValue("skills.preferredSkills", [...currentSkills, preferredSkill.trim()]);
-      setPreferredSkill("");
+  const addSkill = (field) => {
+    if (skillInput.trim() && !field.value.includes(skillInput.trim())) {
+      const newSkills = [...field.value, skillInput.trim()];
+      field.onChange(newSkills);
+      form.trigger('skills');
+      setSkillInput('');
     }
   };
 
   return (
-    <div className="space-y-4 bg-white p-6 rounded-lg shadow">
+    <div className="space-y-4">
       <FormField
         control={form.control}
-        name="skills.requiredSkills"
+        name="skills"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Required Skills</FormLabel>
-            <FormControl>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    value={requiredSkill}
-                    onChange={(e) => setRequiredSkill(e.target.value)}
-                    placeholder="Add a required skill"
-                  />
-                  <Button type="button" onClick={handleAddRequiredSkill}>
-                    Add
-                  </Button>
+            <FormLabel>Skills Required</FormLabel>
+            <div className="flex gap-2">
+              <FormControl>
+                <Input
+                  placeholder="e.g., JavaScript, Python"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addSkill(field);
+                    }
+                  }}
+                />
+              </FormControl>
+              <Button
+                type="button"
+                onClick={() => addSkill(field)}
+                className="bg-[#1e90ff] text-white hover:bg-[#1e90ff]/90"
+              >
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {field.value.map((skill, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 bg-[#1e90ff]/10 text-[#1e90ff] px-3 py-1 rounded-full text-sm"
+                >
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSkills = field.value.filter((_, i) => i !== index);
+                      field.onChange(newSkills);
+                      form.trigger('skills');
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {field.value?.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="bg-brand text-white px-2 py-1 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="skills.preferredSkills"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Preferred Skills (Optional)</FormLabel>
-            <FormControl>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    value={preferredSkill}
-                    onChange={(e) => setPreferredSkill(e.target.value)}
-                    placeholder="Add a preferred skill"
-                  />
-                  <Button type="button" onClick={handleAddPreferredSkill}>
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {field.value?.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-200 text-gray-800 px-2 py-1 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </FormControl>
+              ))}
+            </div>
             <FormMessage />
           </FormItem>
         )}
