@@ -48,7 +48,7 @@ export async function middleware(req) {
     } else if (token.role === "applicant") {
       url.pathname = "/applicant/dashboard"
     } else if (token.role === "recruiter") {
-      url.pathname = "/companies/1024/dashboard"
+      url.pathname = "/companies/dashboard"
     }
     return NextResponse.redirect(url)
   }
@@ -60,7 +60,7 @@ export async function middleware(req) {
     } else if (token.role === "applicant") {
       url.pathname = "/applicant/dashboard"
     } else if (token.role === "recruiter") {
-      url.pathname = "/companies/1024/dashboard"
+      url.pathname = "/companies/dashboard"
     }
     return NextResponse.redirect(url)
   }
@@ -82,7 +82,7 @@ export async function middleware(req) {
   // 7. Handle recruiters
   if (token.role === "recruiter") {
     if (!RECRUITER_PATTERN.test(path) && path !== "/api/auth/signout") {
-      url.pathname = "/companies/1024/dashboard"
+      url.pathname = "/companies/dashboard"
       return NextResponse.redirect(url)
     }
   }
