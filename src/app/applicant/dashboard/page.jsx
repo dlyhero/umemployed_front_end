@@ -10,7 +10,7 @@ import {
   Sideba,
   StatsGrid,
   WelcomeSection
-} from '../../../components/common/dashboard'
+} from '../../companies/[companyId]/dashboard'
 
 const ModernDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
