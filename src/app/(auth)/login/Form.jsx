@@ -28,7 +28,7 @@ export default function LoginForm() {
                 if (role === 'applicant') {
                     router.replace('/applicant/dashboard');
                 } else if (role === 'recruiter') {
-                    router.replace('/recruiter/dashboard');
+                    router.replace('/companies/1024/dashboard');
                 } else {
                     // Default case - including 'none' and undefined
                     router.replace('/select-role');

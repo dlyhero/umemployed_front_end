@@ -1,78 +1,98 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
+import { getToken } from "next-auth/jwt"
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl;
-    const { token } = req;
+// Public routes accessible to logged-out users
+const PUBLIC_ROUTES = [
+  "/",         // homepage
+  "/login",
+  "/signup",
+  "/verify_email",
+  "/forgotPassword",
+  "/auth/error"
+]
 
-    // Define route categories
-    const loggedOutOnlyRoutes = ['/', '/login', '/signup', '/verify_email', '/forgotPassword']; // Added '/signup'
-    const selectRoleRoute = '/select-role';
-    const publicApiRoutes = ['/api/auth', '/error'];
+// Route patterns
+const AUTH_API_PATTERN = /^\/api\/auth\/.*/
+const APPLICANT_PATTERN = /^\/applicant\/.*/
+const RECRUITER_PATTERN = /^\/recruiter\/.*/
+const PUBLIC_PATTERN = new RegExp(`^(${PUBLIC_ROUTES.map(route => 
+  route === '/' ? '\\/' : route.replace('/', '\\/')
+).join('|')})$`)
+const ROLE_SELECTION = "/select-role"
 
-    // 1. First check for select-role route
-    if (pathname.startsWith(selectRoleRoute)) {
-      if (!token) return NextResponse.redirect(new URL('/login', req.url));
-      if (token.role && token.role !== 'none') {
-        return NextResponse.redirect(
-          token.role === 'applicant' 
-            ? new URL('/applicant/dashboard', req.url)
-            : new URL('/recruiter/dashboard', req.url)
-        );
-      }
-      return NextResponse.next(); // Only allow if role is 'none'
-    }
+export async function middleware(req) {
+  const url = req.nextUrl.clone()
+  const path = url.pathname
 
-    // 2. Handle public API routes
-    if (publicApiRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.next();
-    }
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
-    // 3. Check authentication status
-    if (!token) {
-      // Unauthenticated users can only access loggedOutOnlyRoutes
-      if (loggedOutOnlyRoutes.some(route => pathname.startsWith(route))) {
-        return NextResponse.next();
-      }
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
-
-    // 4. At this point, user is authenticated - enforce role restrictions
-    if (token.role === 'none') {
-      // Users with 'none' role can ONLY access select-role
-      return NextResponse.redirect(new URL(selectRoleRoute, req.url));
-    }
-
-    // 5. Handle role-specific routes for authenticated users with roles
-    if (token.role === 'applicant') {
-      if (pathname.startsWith('/applicant')) {
-        return NextResponse.next();
-      }
-      return NextResponse.redirect(new URL('/applicant/dashboard', req.url));
-    }
-
-    if (token.role === 'recruiter') {
-      if (pathname.startsWith('/recruiter')) {
-        return NextResponse.next();
-      }
-      return NextResponse.redirect(new URL('/recruiter/dashboard', req.url));
-    }
-
-    // Fallback - should never reach here
-    return NextResponse.redirect(new URL('/login', req.url));
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => true, // Always run middleware
-    },
-    pages: {
-      signIn: "/login",
-      error: "/error",
-    },
+  // 1. Always allow auth API for everyone
+  if (AUTH_API_PATTERN.test(path)) {
+    return NextResponse.next()
   }
-);
+
+  // 2. Handle logged-out users (no token)
+  if (!token) {
+    // Redirect to login if trying to access non-public route
+    if (!PUBLIC_ROUTES.includes(path)) {
+      url.pathname = "/login"
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next()
+  }
+
+  // 3. Prevent logged-in users from accessing public routes
+  if (PUBLIC_ROUTES.includes(path) && path !== "/") {
+    if (token.role === "none") {
+      url.pathname = ROLE_SELECTION
+    } else if (token.role === "applicant") {
+      url.pathname = "/applicant/dashboard"
+    } else if (token.role === "recruiter") {
+      url.pathname = "/companies/1024/dashboard"
+    }
+    return NextResponse.redirect(url)
+  }
+
+  // 4. Block homepage for logged-in users (all roles)
+  if (path === "/") {
+    if (token.role === "none") {
+      url.pathname = ROLE_SELECTION
+    } else if (token.role === "applicant") {
+      url.pathname = "/applicant/dashboard"
+    } else if (token.role === "recruiter") {
+      url.pathname = "/companies/1024/dashboard"
+    }
+    return NextResponse.redirect(url)
+  }
+
+  // 5. Handle users with role "none"
+  if (token.role === "none" && path !== ROLE_SELECTION && path !== "/api/auth/signout") {
+    url.pathname = ROLE_SELECTION
+    return NextResponse.redirect(url)
+  }
+
+  // 6. Handle applicants
+  if (token.role === "applicant") {
+    if (!APPLICANT_PATTERN.test(path) && path !== "/api/auth/signout") {
+      url.pathname = "/applicant/dashboard"
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // 7. Handle recruiters
+  if (token.role === "recruiter") {
+    if (!RECRUITER_PATTERN.test(path) && path !== "/api/auth/signout") {
+      url.pathname = "/companies/1024/dashboard"
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // 8. Allow all other valid cases
+  return NextResponse.next()
+}
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-};
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|svg)$).*)",
+  ],
+}
