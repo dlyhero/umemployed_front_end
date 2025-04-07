@@ -30,6 +30,7 @@ export const authOptions = {
 
           return {
             email: response.data.email || credentials.email,
+            name: response.data.name || credentials.email.split('@')[0], // Fallback to email prefix
             accessToken: response.data.access,
             refreshToken: response.data.refresh,
             role: response.data.role || 'none'
@@ -72,9 +73,13 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
+      // Copy token properties to session
+      console.log(session);
       session.user.role = token.role;
+      session.user.name = token.name || session.user.name; // Preserve from provider if exists
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
+      
       return session;
     },
     async redirect({ url, baseUrl }) {

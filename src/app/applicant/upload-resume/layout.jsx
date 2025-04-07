@@ -18,7 +18,7 @@ export default function AccountTypeLayout({ children }) {
       > 
        <AuthProvider>
        <Header />
-       {children}                                     
+       {children}  
        </AuthProvider>
       </body>
     </html>
