@@ -28,6 +28,8 @@ export const authOptions = {
           if (response.status === 403) throw new Error("EMAIL_NOT_VERIFIED");
           if (response.status !== 200) throw new Error("INVALID_CREDENTIALS");
 
+          console.log(response.data.access)
+
           return {
             email: response.data.email || credentials.email,
             name: response.data.name || credentials.email.split('@')[0], // Fallback to email prefix
