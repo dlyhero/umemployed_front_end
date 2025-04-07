@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, LogIn } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AuthButtons() {
   const { data: session, status, update } = useSession();
@@ -31,7 +32,7 @@ export default function AuthButtons() {
     <div className={`flex items-center gap-4 ${session ? 'min-w-[150px]' : 'w-fit'}`}>
       {status === "authenticated" ? (
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+          <Link href="/applicant/dashboard" className="flex items-center gap-3 cursor-pointer">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200">
               <Image
                 src={session.user?.image || "/default-avatar.png"}
@@ -39,7 +40,6 @@ export default function AuthButtons() {
                 width={40}
                 height={40}
                 className="object-cover"
-               
               />
               {isLoading && (
                 <div className="absolute inset-0 bg-gray-200 animate-pulse" />
@@ -55,7 +55,7 @@ export default function AuthButtons() {
                 userEmail.split('@')[0] // Show only the name part of email
               )}
             </span>
-          </div>
+          </Link>
           <Button
             variant="outline"
             size="sm"

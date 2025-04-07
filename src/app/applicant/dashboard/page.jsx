@@ -13,7 +13,7 @@ import {
 } from '../../../components/common/dashboard'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/outline'
 
-const ModernDashboard = () => {
+const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -46,11 +46,11 @@ const ModernDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 ">
+    <div className="h-fit pb-2 bg-gray-50 ">
       <MobileMenu mobileMenuOpen={mobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
 
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
         <div className="flex flex-col lg:flex-row gap-6">
           <Sideba activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -75,4 +75,4 @@ const ModernDashboard = () => {
   )
 }
 
-export default ModernDashboard
+export default applicantDashBoard
