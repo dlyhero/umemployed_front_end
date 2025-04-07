@@ -2,6 +2,7 @@
 import { Header } from "@/src/components/common/Header";
 import "../../globals.css";
 import AuthProvider from "@/src/components/AuthProvider";
+import Footer from "@/src/components/common/Footer";
 
 
 
@@ -38,6 +39,7 @@ export default function AccountTypeLayout({ children }) {
        <Header />
        {children}                                     
        </AuthProvider>
+       <Footer />
       </body>
     </html>
   );

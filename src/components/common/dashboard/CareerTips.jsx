@@ -1,6 +1,6 @@
 'use client'
 import { FileText, User } from 'lucide-react'
-import { CareerTipCard } from './CareerTipCard'
+import { CareerTipCard } from '.'
 
 export const CareerTips = () => (
   <section className="bg-white rounded-xl shadow-sm p-6">

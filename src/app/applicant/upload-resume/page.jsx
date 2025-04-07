@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, User, FileText, Clock, CheckCircle, ArrowRight, SkipForward, Loader2 } from "lucide-react";
+import Footer from "@/src/components/common/Footer/Footer";
 
 export default function ResumeUploadPage() {
   const [fileName, setFileName] = useState("");
@@ -51,7 +52,8 @@ export default function ResumeUploadPage() {
   };
 
   return (
-    <motion.main 
+    <main className="bg-white min-h-screen">
+      <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -75,7 +77,7 @@ export default function ResumeUploadPage() {
               duration: 3 
             }}
           >
-            <User className="w-8 h-8 text-blue-500" strokeWidth={1.5} />
+            <User className="w-8 h-8 text-brand" strokeWidth={1.5} />
           </motion.div>
           <h1 className="text-xl md:text-2xl text-3xl font-bold bg-gradient-to-r from-brand to-brand/60 bg-clip-text text-transparent">
             Welcome back, <span className="text-gray-800">Angelina!</span>
@@ -94,7 +96,7 @@ export default function ResumeUploadPage() {
           <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-200 rounded-full opacity-10"></div>
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div>
-              <FileText className="w-10 h-10 text-blue-500 mb-4" strokeWidth={1.5} />
+              <FileText className="w-10 h-10 text-brand mb-4" strokeWidth={1.5} />
               <h2 className="text-lg md:text-xl font-semibold mb-2">Manual Profile Setup</h2>
               <p className="text-gray-600 mb-6">Build your profile step-by-step without uploading files</p>
             </div>
@@ -105,8 +107,8 @@ export default function ResumeUploadPage() {
             >
               <span className="font-medium text-brand">Enter details manually</span>
               <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors">Skip</span>
-                <SkipForward className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
+                <span className="text-sm text-gray-500 group-hover:text-brand transition-colors">Skip</span>
+                <SkipForward className="w-4 h-4 text-gray-500 group-hover:text-brand transition-colors" />
               </div>
             </motion.a>
           </div>
@@ -136,9 +138,9 @@ export default function ResumeUploadPage() {
                 className="mb-6"
               >
                 {isUploading ? (
-                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                  <Loader2 className="w-12 h-12 text-brand animate-spin" />
                 ) : (
-                  <UploadCloud className={`w-12 h-12 ${isDragging ? 'text-blue-500' : 'text-gray-400'} transition-colors`} />
+                  <UploadCloud className={`w-12 h-12 ${isDragging ? 'text-brand' : 'text-gray-400'} transition-colors`} />
                 )}
               </motion.div>
               
@@ -197,7 +199,7 @@ export default function ResumeUploadPage() {
             <div className="bg-gray-50 p-6 rounded-xl">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-medium flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  <Loader2 className="w-4 h-4 animate-spin text-brand" />
                   Upload Progress
                 </h3>
                 <span className="text-sm font-medium text-brand">{uploadProgress}%</span>
@@ -228,24 +230,24 @@ export default function ResumeUploadPage() {
         className="bg-gray-50 p-6 rounded-xl border border-gray-200"
       >
         <h3 className="text-lg font-medium mb-6 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-blue-500" />
+          <Clock className="w-5 h-5 text-brand" />
           What happens next?
         </h3>
         
         <div className="space-y-6">
           {[
             { 
-              icon: <UploadCloud className="w-5 h-5 text-blue-500" />,
+              icon: <UploadCloud className="w-5 h-5 text-brand" />,
               title: "Instant Upload",
               description: "We'll process your resume in under 60 seconds"
             },
             { 
-              icon: <FileText className="w-5 h-5 text-blue-500" />,
+              icon: <FileText className="w-5 h-5 text-brand" />,
               title: "Smart Extraction",
               description: "AI-powered parsing of your skills and experience"
             },
             { 
-              icon: <CheckCircle className="w-5 h-5 text-blue-500" />,
+              icon: <CheckCircle className="w-5 h-5 text-brand" />,
               title: "Profile Review",
               description: "Verify and enhance your automatically filled profile"
             }
@@ -266,6 +268,8 @@ export default function ResumeUploadPage() {
           ))}
         </div>
       </motion.div>
-    </motion.main>
+    </motion.div>
+    <Footer />
+    </main>
   );
 }
