@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
 
-// Public routes accessible to logged-out users
+// Public routes accessible to everyone (logged-in or not)
 const PUBLIC_ROUTES = [
   "/",         // homepage
   "/auth/error"
 ]
 
+// Routes only accessible to logged-out users
 const ROUTES_FOR_LOGGED_OUT_USERS = [
   "/login",
   "/signup",
@@ -18,13 +19,9 @@ const ROUTES_FOR_LOGGED_OUT_USERS = [
 // Route patterns
 const AUTH_API_PATTERN = /^\/api\/auth\/.*/
 const APPLICANT_PATTERN = /^\/applicant\/.*/
-const RECRUITER_PATTERN = /^\/recruiter\/.*/
-const PUBLIC_PATTERN = new RegExp(`^(${PUBLIC_ROUTES.map(route => 
-  route === '/' ? '\\/' : route.replace('/', '\\/')
-).join('|')})$`)
-const ROLE_SELECTION = "/select-role"
+const RECRUITER_PATTERN = /^\/companies\/.*/
 
-const VERIFY_EMAIL = "/verify_email"
+const ROLE_SELECTION = "/select-role"
 
 export async function middleware(req) {
   const url = req.nextUrl.clone()
@@ -39,7 +36,7 @@ export async function middleware(req) {
   
   // 2. Handle logged-out users (no token)
   if (!token) {
-    // Redirect to login if trying to access non-public route
+    // Redirect to login if trying to access protected route
     if (!ROUTES_FOR_LOGGED_OUT_USERS.includes(path) && !PUBLIC_ROUTES.includes(path)) {
       url.pathname = "/login"
       return NextResponse.redirect(url)
@@ -47,8 +44,8 @@ export async function middleware(req) {
     return NextResponse.next()
   }
 
-  // 3. Prevent logged-in users from accessing public routes
-  if (ROUTES_FOR_LOGGED_OUT_USERS.includes(path) && !PUBLIC_ROUTES.includes(path) ) {
+  // 3. Prevent logged-in users from accessing auth-only routes
+  if (ROUTES_FOR_LOGGED_OUT_USERS.includes(path)) {
     if (token.role === "none") {
       url.pathname = ROLE_SELECTION
     } else if (token.role === "applicant") {
@@ -59,22 +56,21 @@ export async function middleware(req) {
     return NextResponse.redirect(url)
   }
 
-  // 4. Block homepage for logged-in users (all roles)
-  if (path === "/") {
-    if (token.role === "none") {
-      url.pathname = ROLE_SELECTION
-    } else if (token.role === "applicant") {
-      url.pathname = "/applicant/dashboard"
-    } else if (token.role === "recruiter") {
-      url.pathname = "/companies/dashboard"
+  // 4. Handle users with role "none"
+  if (token.role === "none") {
+    // Allow access to role selection and public routes
+    if (path === ROLE_SELECTION || PUBLIC_ROUTES.includes(path)) {
+      return NextResponse.next()
     }
-    return NextResponse.redirect(url)
-  }
-
-  // 5. Handle users with role "none"
-  if (token.role === "none" && path !== ROLE_SELECTION && path !== "/api/auth/signout") {
+    // Redirect all other requests to role selection
     url.pathname = ROLE_SELECTION
     return NextResponse.redirect(url)
+  }
+
+  // 5. Public routes handling for logged-in users with valid roles
+  if (PUBLIC_ROUTES.includes(path)) {
+    // Allow access to public routes for users with valid roles
+    return NextResponse.next()
   }
 
   // 6. Handle applicants

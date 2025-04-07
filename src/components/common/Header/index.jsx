@@ -4,7 +4,7 @@ import { Logo } from "./Logo";
 import { NavLinks } from "./NavLinks";
 import { Menu } from "./Menu";
 import { Search } from "lucide-react";
-import SearchBar from "../SearchBar";
+import SearchBar from "../SearchBar/SearchBar";
 import AuthButtons from "./AuthButtons";
 
 
@@ -28,7 +28,7 @@ export function Header() {
          <>
           <div className="flex-1 max-w-xl mx-4">
             {(pathname === '/signup' || pathname !== '/login') && (
-              <SearchBar />
+              <SearchBar  />
             )}
           </div>
         

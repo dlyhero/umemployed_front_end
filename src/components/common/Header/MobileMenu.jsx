@@ -37,7 +37,7 @@ export function MobileMenu({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed inset-0 flex flex-col bg-white max-w-sm w-full p-6 shadow-lg z-50 md:hidden"
+            className="fixed inset-0 flex flex-col bg-white max-w-sm w-full p-6 shadow-lg z-100 md:hidden"
           >
             <div className="flex justify-between items-center mb-8">
               <Logo />

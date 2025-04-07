@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "countries-list": "^3.1.1",
     "framer-motion": "^12.6.2",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.483.0",
     "motion": "^12.6.2",
     "next": "15.2.3",

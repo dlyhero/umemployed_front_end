@@ -1,5 +1,5 @@
 'use client'
-import { PremiumCTA } from './PremiumCTA'
+import { PremiumCTA } from '@/src/components/common/dashboard'
 import { SidebarNav } from './SidebarNav'
 
 export const Sideba = ({ activeTab, setActiveTab }) => (
