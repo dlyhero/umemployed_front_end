@@ -24,10 +24,10 @@ export const authOptions = {
               validateStatus: (status) => status === 403 || status < 400
             }
           );
-      
+
           if (response.status === 403) throw new Error("EMAIL_NOT_VERIFIED");
           if (response.status !== 200) throw new Error("INVALID_CREDENTIALS");
-          
+
           return {
             email: response.data.email || credentials.email,
             accessToken: response.data.access,
@@ -35,26 +35,32 @@ export const authOptions = {
             role: response.data.role || 'none'
           };
         } catch (error) {
-          if (error.response?.status === 403) throw new Error("EMAIL_NOT_VERIFIED");
-          throw new Error("INVALID_CREDENTIALS");
+          console.error("Error:", error);
+          // Throw specific errors that will be caught in the NextAuth error page
+          if (error.message === 'EMAIL_NOT_VERIFIED') {
+            throw new Error('EMAIL_NOT_VERIFIED');
+          } else if (error.status === 400) {
+            throw new Error('INVALID_CREDENTIALS');
+          } else {
+            throw new Error('Please make sure you are connected to the internet');
+          }
         }
       }
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),   
+    }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: { 
     strategy: "jwt",
-    // Session expires after 30 minutes of inactivity
-    maxAge: 30 * 60, // 30 minutes in seconds
-    updateAge: 0, // The session is updated (and maxAge reset) on every activity
+    maxAge: 30 * 60, // 30 minutes
+    updateAge: 0,
   },
   pages: {
     signIn: "/login",
-    error: "/auth/error",
+    error: "/auth/error", // Custom error page
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -72,7 +78,7 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to select-role after login if no role is assigned
+      // Redirect to select-role if no role is assigned
       if (url === baseUrl) {
         return `${baseUrl}/select-role`;
       }
