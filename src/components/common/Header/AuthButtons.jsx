@@ -98,7 +98,8 @@ export default function AuthButtons() {
           </Link>
           
           <Button
-            className={'text-brand border border-brand min-w-[85px] bg-white'}
+          variant={"outline"}
+            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand'}
             size="sm"
             onClick={handleSignOut}
             disabled={signingOut}
@@ -114,8 +115,11 @@ export default function AuthButtons() {
           </Button>
         </>
       ) : (
+
         <Button
-          className={'text-brand border border-brand bg-white'}
+        variant="outline"
+          className=
+          {'text-brand border border-brand bg-white hover:bg-none hover:text-brand'}
           size="sm"
           onClick={() => signIn(undefined, { callbackUrl: '/' })}
         >
