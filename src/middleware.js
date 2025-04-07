@@ -4,6 +4,10 @@ import { getToken } from "next-auth/jwt"
 // Public routes accessible to logged-out users
 const PUBLIC_ROUTES = [
   "/",         // homepage
+  "/auth/error"
+]
+
+const ROUTES_FOR_LOGGED_OUT_USERS = [
   "/login",
   "/signup",
   "/verify_email",
@@ -20,6 +24,8 @@ const PUBLIC_PATTERN = new RegExp(`^(${PUBLIC_ROUTES.map(route =>
 ).join('|')})$`)
 const ROLE_SELECTION = "/select-role"
 
+const VERIFY_EMAIL = "/verify_email"
+
 export async function middleware(req) {
   const url = req.nextUrl.clone()
   const path = url.pathname
@@ -30,11 +36,11 @@ export async function middleware(req) {
   if (AUTH_API_PATTERN.test(path)) {
     return NextResponse.next()
   }
-
+  
   // 2. Handle logged-out users (no token)
   if (!token) {
     // Redirect to login if trying to access non-public route
-    if (!PUBLIC_ROUTES.includes(path)) {
+    if (!ROUTES_FOR_LOGGED_OUT_USERS.includes(path) && !PUBLIC_ROUTES.includes(path)) {
       url.pathname = "/login"
       return NextResponse.redirect(url)
     }
@@ -42,7 +48,7 @@ export async function middleware(req) {
   }
 
   // 3. Prevent logged-in users from accessing public routes
-  if (PUBLIC_ROUTES.includes(path) && path !== "/") {
+  if (ROUTES_FOR_LOGGED_OUT_USERS.includes(path) && !PUBLIC_ROUTES.includes(path) ) {
     if (token.role === "none") {
       url.pathname = ROLE_SELECTION
     } else if (token.role === "applicant") {

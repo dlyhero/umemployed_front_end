@@ -49,19 +49,25 @@ export default function LoginForm() {
                 password: data.password,
                 redirect: false
             });
+             console.log("error", result.error);
 
-            if (result?.error === "EMAIL_NOT_VERIFIED") {
-                return router.push(`/verify_email?email=${encodeURIComponent(data.email)}`);
-            }
+             if (result?.error === "EMAIL_NOT_VERIFIED") {
+                const redirectUrl = `/verify_email?email=${data.email}`;
+                
+                // Open the URL in a new tab
+                window.open(redirectUrl, '_blank');
+                
+                // Manipulate the history to prevent navigation
+                window.history.pushState(null, '', redirectUrl);  // Add a new state to the history stack
+                window.history.replaceState(null, '', redirectUrl);  // Replace the current state in the history
+                
+              }
+              
         
-            if (result?.error) {
-                throw new Error(
-                    result.error === "INVALID_CREDENTIALS" 
-                        ? "Invalid email or password" 
-                        : "Login failed"
-                );
+            else if (result?.error === "INVALID_CREDENTIALS") {
+                throw new Error("Invalid email or password");
             }
-
+             
             // The useEffect will handle the redirect after session updates
             
         } catch (err) {
