@@ -1,10 +1,11 @@
-// /job/components/Step1BasicInfo.jsx
 'use client';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Step1BasicInfo = ({ form }) => {
+  const jobLocationTypes = ['remote', 'onsite', 'hybrid'];
+  const jobTypes = ['Full_time', 'Part_time', 'Internship', 'Contract'];
   const countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
     'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
@@ -25,20 +26,27 @@ export const Step1BasicInfo = ({ form }) => {
     'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates',
     'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
   ];
-
   const salaryRanges = [
-    'Less than $30,000',
-    '$30,000 - $50,000',
-    '$50,000 - $70,000',
-    '$70,000 - $90,000',
-    '$90,000 - $120,000',
-    '$120,000 - $150,000',
-    '$150,000 - $200,000',
-    'More than $200,000',
+    '0-30000',
+    '30001-50000',
+    '50001-70000',
+    '70001-100000',
+    '100001-120000',
+    '120001-150000',
+    '150001-200000',
+    '200001+',
+    'Not specified',
+  ];
+  const categories = [
+    { id: 1, name: 'Technology' },
+    { id: 2, name: 'Healthcare' },
+    { id: 3, name: 'Finance' },
+    // Add more categories as needed
   ];
 
   return (
     <div className="space-y-4">
+      {/* Title */}
       <FormField
         control={form.control}
         name="title"
@@ -59,16 +67,106 @@ export const Step1BasicInfo = ({ form }) => {
           </FormItem>
         )}
       />
+
+      {/* Hire Number */}
       <FormField
         control={form.control}
-        name="country"
+        name="hire_number"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Country</FormLabel>
+            <FormLabel>Number of Hires</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min="1"
+                placeholder="e.g., 2"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(parseInt(e.target.value, 10) || 1); // Ensure integer
+                  form.trigger('hire_number');
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Job Location Type */}
+      <FormField
+        control={form.control}
+        name="job_location_type"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Job Location Type</FormLabel>
             <Select
               onValueChange={(value) => {
                 field.onChange(value);
-                form.trigger('country');
+                form.trigger('job_location_type');
+              }}
+              defaultValue={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job location type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {jobLocationTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Job Type */}
+      <FormField
+        control={form.control}
+        name="job_type"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Job Type</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+                form.trigger('job_type');
+              }}
+              defaultValue={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {jobTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type.replace('_', ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Location */}
+      <FormField
+        control={form.control}
+        name="location"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Location</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+                form.trigger('location');
               }}
               defaultValue={field.value}
             >
@@ -89,19 +187,20 @@ export const Step1BasicInfo = ({ form }) => {
           </FormItem>
         )}
       />
+
+      {/* Salary Range */}
       <FormField
         control={form.control}
-        name="salary"
+        name="salary_range"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Salary Range (Optional)</FormLabel>
+            <FormLabel>Salary Range</FormLabel>
             <Select
               onValueChange={(value) => {
-                // If "not-specified" is selected, set the field value to undefined (optional field)
-                field.onChange(value === 'not-specified' ? undefined : value);
-                form.trigger('salary');
+                field.onChange(value);
+                form.trigger('salary_range');
               }}
-              defaultValue={field.value || 'not-specified'} // Default to "not-specified" if no value
+              defaultValue={field.value || 'Not specified'}
             >
               <FormControl>
                 <SelectTrigger>
@@ -109,10 +208,45 @@ export const Step1BasicInfo = ({ form }) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="not-specified">Not specified</SelectItem>
                 {salaryRanges.map((range) => (
                   <SelectItem key={range} value={range}>
-                    {range}
+                    {range === 'Not specified'
+                      ? 'Not specified'
+                      : range === '200001+'
+                      ? 'More than $200,000'
+                      : `$${range.split('-')[0]} - $${range.split('-')[1]}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Category */}
+      <FormField
+        control={form.control}
+        name="category"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Category</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                field.onChange(parseInt(value, 10)); // Convert to integer
+                form.trigger('category');
+              }}
+              defaultValue={field.value?.toString()}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id.toString()}>
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
