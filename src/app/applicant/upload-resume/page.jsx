@@ -91,7 +91,7 @@ export default function ResumeUploadPage() {
         {/* Manual Entry Option */}
         <motion.div 
           whileHover={{ y: -5 }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden"
+          className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 shadow-md relative overflow-hidden"
         >
           <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-200 rounded-full opacity-10"></div>
           <div className="relative z-10 flex flex-col h-full justify-between">
@@ -118,7 +118,7 @@ export default function ResumeUploadPage() {
         <motion.div 
           initial={{ scale: 1 }}
           animate={{ scale: isDragging ? 1.02 : 1 }}
-          className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors relative overflow-hidden"
+          className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors relative overflow-hidden shadow-md"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -227,7 +227,7 @@ export default function ResumeUploadPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="bg-gray-50 p-6 rounded-xl border border-gray-200"
+        className="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-md"
       >
         <h3 className="text-lg font-medium mb-6 flex items-center gap-2">
           <Clock className="w-5 h-5 text-brand" />

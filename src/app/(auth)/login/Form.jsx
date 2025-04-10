@@ -32,7 +32,7 @@ export default function LoginForm() {
                         if (session?.user?.has_resume) {
                             router.replace('/applicant/dashboard');
                         } else {
-                            router.replace('/upload-resume');
+                            router.replace('applicant/upload-resume');
                         }
                         break;
                     case 'recruiter':
@@ -71,7 +71,7 @@ export default function LoginForm() {
             } else if (result?.error === "INVALID_CREDENTIALS") {
                 throw new Error("Invalid email or password");
             } else if (result?.error) {
-                throw new Error("Login failed. Please try again.");
+                throw new Error("Please make sure you are connected to the internet");
             }
             
         } catch (err) {
