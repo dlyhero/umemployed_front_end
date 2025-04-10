@@ -31,13 +31,13 @@ export function Header() {
         !feedBackPages.includes(pathname) && (
          <>
           <div className="flex-1 max-w-xl mx-4">
-            {(pathname === '/signup' || pathname !== '/login') && (
+            {(pathname !== '/signup' &&  pathname !== '/login') && (
               <SearchBar  />
             )}
           </div>
         
 
-        {(pathname === '/signup' || pathname !== '/login') && (
+        {(pathname !== '/signup' && pathname !== '/login') && (
           <div className="flex items-center gap-4">
             <AuthButtons className="hidden md:flex" />
             <Menu />
