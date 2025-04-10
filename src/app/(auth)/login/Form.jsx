@@ -23,17 +23,30 @@ export default function LoginForm() {
             // Add a small delay to ensure session is fully loaded
             const timer = setTimeout(() => {
                 const role = session?.user?.role;
-                console.log("Current role:", role);
-                
-                if (role === 'applicant') {
-                    router.replace('/applicant/dashboard');
-                } else if (role === 'recruiter') {
-                    router.replace('/companies/dashboard');
-                } else {
-                    // Default case - including 'none' and undefined
-                    router.replace('/select-role');
+                console.log("Current session:", session);
+        
+
+                // Handle redirects based on role and status
+                switch(role) {
+                    case 'job_seeker':
+                        if (session?.user?.has_resume) {
+                            router.replace('/applicant/dashboard');
+                        } else {
+                            router.replace('applicant/upload-resume');
+                        }
+                        break;
+                    case 'recruiter':
+                        if (session?.user?.has_company) {
+                            router.replace('/companies/dashboard');
+                        } else {
+                            router.replace('/companies/create');
+                        }
+                        break;
+                    case 'none':
+                    default:
+                        router.replace('/select-role');
                 }
-            }, 100); // 100ms delay
+            }, 100);
 
             return () => clearTimeout(timer);
         }
@@ -49,26 +62,17 @@ export default function LoginForm() {
                 password: data.password,
                 redirect: false
             });
-             console.log("error", result.error);
 
-             if (result?.error === "EMAIL_NOT_VERIFIED") {
+            if (result?.error === "EMAIL_NOT_VERIFIED") {
                 const redirectUrl = `/verify_email?email=${data.email}`;
-                
-                // Open the URL in a new tab
                 window.open(redirectUrl, '_blank');
-                
-                // Manipulate the history to prevent navigation
-                window.history.pushState(null, '', redirectUrl);  // Add a new state to the history stack
-                window.history.replaceState(null, '', redirectUrl);  // Replace the current state in the history
-                
-              }
-              
-        
-            else if (result?.error === "INVALID_CREDENTIALS") {
+                window.history.pushState(null, '', redirectUrl);
+                window.history.replaceState(null, '', redirectUrl);
+            } else if (result?.error === "INVALID_CREDENTIALS") {
                 throw new Error("Invalid email or password");
+            } else if (result?.error) {
+                throw new Error("Please make sure you are connected to the internet");
             }
-             
-            // The useEffect will handle the redirect after session updates
             
         } catch (err) {
             setError(err.message);
@@ -76,7 +80,6 @@ export default function LoginForm() {
             setLoading(false);
         }
     };
-
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

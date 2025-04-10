@@ -28,18 +28,19 @@ export const authOptions = {
           if (response.status === 403) throw new Error("EMAIL_NOT_VERIFIED");
           if (response.status !== 200) throw new Error("INVALID_CREDENTIALS");
 
-          console.log(response.data.access)
-
           return {
             email: response.data.email || credentials.email,
-            name: response.data.name || credentials.email.split('@')[0], // Fallback to email prefix
-            accessToken: response.data.access,
-            refreshToken: response.data.refresh,
-            role: response.data.role || 'none'
+            name: response.data.name || credentials.email.split('@')[0],
+            accessToken: response.data.access_token,
+            refreshToken: response.data.refresh_token,
+            role: response.data.role || 'none',
+            has_resume: response.data.has_resume || false,
+            has_company: response.data.has_company || false,
+            company_id: response.data.company_id || null,
+            user_id: response.data.user_id
           };
         } catch (error) {
           console.error("Error:", error);
-          // Throw specific errors that will be caught in the NextAuth error page
           if (error.message === 'EMAIL_NOT_VERIFIED') {
             throw new Error('EMAIL_NOT_VERIFIED');
           } else if (error.status === 400) {
@@ -63,7 +64,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
-    error: "/auth/error", // Custom error page
+    error: "/auth/error",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -71,25 +72,27 @@ export const authOptions = {
         token.role = user.role || 'none';
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.has_resume = user.has_resume;
+        token.has_company = user.has_company;
+        token.company_id = user.company_id;
+        token.user_id = user.user_id;
       }
       return token;
     },
     async session({ session, token }) {
-      // Copy token properties to session
-      console.log(session);
       session.user.role = token.role;
-      session.user.name = token.name || session.user.name; // Preserve from provider if exists
+      session.user.name = token.name || session.user.name;
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
+      session.user.has_resume = token.has_resume;
+      session.user.has_company = token.has_company;
+      session.user.company_id = token.company_id;
+      session.user.user_id = token.user_id;
       
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to select-role if no role is assigned
-      if (url === baseUrl) {
-        return `${baseUrl}/select-role`;
-      }
-      return url;
+      return url.startsWith(baseUrl) ? url : baseUrl;
     }
   },
 };
