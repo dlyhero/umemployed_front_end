@@ -22,12 +22,23 @@ export default function AuthButtons() {
     const loadSession = async () => {
       try {
         if (status === "authenticated") {
+          // Add null checks for session
           if (!session?.user?.email) {
             const updated = await update();
-            setUserEmail(updated?.user?.email || "");
+            if (updated?.user?.email) {
+              setUserEmail(updated.user.email);
+            }
           } else {
             setUserEmail(session.user.email);
           }
+          
+          // Debug log - only when session is available
+          console.log("Current user session:", {
+            role: session.user?.role,
+            has_resume: session.user?.has_resume,
+            company_id: session.user?.company_id,
+            has_company: session.user?.has_company
+          });
         }
       } finally {
         setIsLoading(false);
@@ -45,6 +56,21 @@ export default function AuthButtons() {
     }
   };
 
+  const getNavigationPath = () => {
+    if (!session?.user) return "/";
+    
+    if (session.user.role === "job_seeker") {
+      return session.user.has_resume 
+        ? "/applicant/dashboard" 
+        : "/applicant/upload-resume";
+    } else if (session.user.role === "recruiter") {
+      return session.user.has_company
+        ? `/companies/${session.user.company_id}/dashboard`
+        : "/company/create";
+    }
+    return "/";
+  };
+
   // Hybrid loading render
   if (showSkeleton) {
     return (
@@ -56,7 +82,7 @@ export default function AuthButtons() {
             <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
           </div>
         </div>
-        
+
         {/* Spinner for button area */}
         <div className="w-20 h-9 flex items-center justify-center">
           <Spinner size="sm" />
@@ -69,7 +95,10 @@ export default function AuthButtons() {
     <div className="flex items-center gap-4">
       {status === "authenticated" ? (
         <>
-          <Link href="/applicant/dashboard" className="flex items-center gap-3">
+          <Link
+            href={getNavigationPath()}
+            className="flex items-center gap-3"
+          >
             <div className="relative w-10 h-10 rounded-full border border-gray-200">
               {session.user?.image ? (
                 <>
@@ -96,9 +125,9 @@ export default function AuthButtons() {
               {username}
             </span>
           </Link>
-          
+
           <Button
-          variant={"outline"}
+            variant={"outline"}
             className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand'}
             size="sm"
             onClick={handleSignOut}
@@ -115,11 +144,9 @@ export default function AuthButtons() {
           </Button>
         </>
       ) : (
-
         <Button
-        variant="outline"
-          className=
-          {'text-brand border border-brand bg-white hover:bg-none hover:text-brand'}
+          variant="outline"
+          className={'text-brand border border-brand bg-white hover:bg-none hover:text-brand'}
           size="sm"
           onClick={() => signIn(undefined, { callbackUrl: '/' })}
         >
