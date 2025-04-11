@@ -1,100 +1,116 @@
-import { NextResponse } from "next/server"
-import { getToken } from "next-auth/jwt"
+import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
-// Public routes accessible to everyone (logged-in or not)
-const PUBLIC_ROUTES = [
-  "/",         // homepage
-  "/auth/error"
-]
+// Cache control headers to prevent caching of sensitive pages
+const noCacheHeaders = {
+  'Cache-Control': 'no-store, max-age=0',
+  'Pragma': 'no-cache'
+}
 
-// Routes only accessible to logged-out users
-const ROUTES_FOR_LOGGED_OUT_USERS = [
-  "/login",
-  "/signup",
-  "/verify_email",
-  "/forgotPassword",
-  "/auth/error"
-]
-
-// Route patterns
-const AUTH_API_PATTERN = /^\/api\/auth\/.*/
-const APPLICANT_PATTERN = /^\/applicant\/.*/
-const RECRUITER_PATTERN = /^\/companies\/.*/
-
-const ROLE_SELECTION = "/select-role"
-
-export async function middleware(req) {
-  const url = req.nextUrl.clone()
+export async function middleware(request) {
+  const url = request.nextUrl.clone()
   const path = url.pathname
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-
-  // 1. Always allow auth API for everyone
-  if (AUTH_API_PATTERN.test(path)) {
+  // 1. Handle API routes and public assets
+  if (path.startsWith('/api') || 
+      path.startsWith('/_next') || 
+      path.includes('.') || 
+      ['/favicon.ico', '/robots.txt'].includes(path)) {
     return NextResponse.next()
   }
-  
-  // 2. Handle logged-out users (no token)
+
+  // 2. Public routes (available to everyone)
+  const publicRoutes = ['/', '/auth/error', '/job/listing', '/companies/listing']
+  if (publicRoutes.includes(path)) {
+    return NextResponse.next()
+  }
+
+  // 3. Auth-only routes (for logged-out users)
+  const authOnlyRoutes = ['/login', '/signup', '/verify-email', '/forgot-password']
+  if (authOnlyRoutes.includes(path)) {
+    if (token) {
+      // Logged-in users trying to access auth pages get redirected
+      url.pathname = getDefaultRedirect(token)
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next()
+  }
+
+  // 4. Handle unauthenticated users
   if (!token) {
-    // Redirect to login if trying to access protected route
-    if (!ROUTES_FOR_LOGGED_OUT_USERS.includes(path) && !PUBLIC_ROUTES.includes(path)) {
-      url.pathname = "/login"
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // 5. Handle users without role
+  if (token.role === 'none') {
+    if (path !== '/select-role') {
+      url.pathname = '/select-role'
       return NextResponse.redirect(url)
     }
     return NextResponse.next()
   }
 
-  // 3. Prevent logged-in users from accessing auth-only routes
-  if (ROUTES_FOR_LOGGED_OUT_USERS.includes(path)) {
-    if (token.role === "none") {
-      url.pathname = ROLE_SELECTION
-    } else if (token.role === "applicant") {
-      url.pathname = "/applicant/dashboard"
-    } else if (token.role === "recruiter") {
-      url.pathname = "/companies/dashboard"
+  // 6. Applicant routes
+  if (token.role === 'applicant') {
+    // Block access to any recruiter pages
+    if (path.startsWith('/companies') && !path.startsWith('/companies/listing')) {
+      url.pathname = token.has_resume ? '/applicant/dashboard' : '/upload-resume'
+      return NextResponse.redirect(url, { headers: noCacheHeaders })
     }
-    return NextResponse.redirect(url)
-  }
-
-  // 4. Handle users with role "none"
-  if (token.role === "none") {
-    // Allow access to role selection and public routes
-    if (path === ROLE_SELECTION || PUBLIC_ROUTES.includes(path)) {
-      return NextResponse.next()
+    
+    // Allow applicant routes and shared listings
+    if (path.startsWith('/applicant') || path === '/companies/listing' || path === '/job/listing') {
+      return NextResponse.next({ headers: noCacheHeaders })
     }
-    // Redirect all other requests to role selection
-    url.pathname = ROLE_SELECTION
-    return NextResponse.redirect(url)
+    
+    // Redirect all other requests
+    url.pathname = token.has_resume ? '/applicant/dashboard' : '/upload-resume'
+    return NextResponse.redirect(url, { headers: noCacheHeaders })
   }
 
-  // 5. Public routes handling for logged-in users with valid roles
-  if (PUBLIC_ROUTES.includes(path)) {
-    // Allow access to public routes for users with valid roles
-    return NextResponse.next()
-  }
-
-  // 6. Handle applicants
-  if (token.role === "applicant") {
-    if (!APPLICANT_PATTERN.test(path) && path !== "/api/auth/signout") {
-      url.pathname = "/applicant/dashboard"
-      return NextResponse.redirect(url)
+  // 7. Recruiter routes
+  if (token.role === 'recruiter') {
+    // Block access to any applicant pages
+    if (path.startsWith('/applicant')) {
+      url.pathname = token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create'
+      return NextResponse.redirect(url, { headers: noCacheHeaders })
     }
-  }
-
-  // 7. Handle recruiters
-  if (token.role === "recruiter") {
-    if (!RECRUITER_PATTERN.test(path) && path !== "/api/auth/signout") {
-      url.pathname = "/companies/dashboard"
-      return NextResponse.redirect(url)
+    
+    // Allow recruiter routes and shared listings
+    if (path.startsWith('/companies') || path === '/job/listing') {
+      return NextResponse.next({ headers: noCacheHeaders })
     }
+    
+    // Redirect all other requests
+    url.pathname = token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create'
+    return NextResponse.redirect(url, { headers: noCacheHeaders })
   }
 
-  // 8. Allow all other valid cases
+  // Fallback for any unhandled cases
   return NextResponse.next()
+}
+
+// Helper function to determine default redirect
+function getDefaultRedirect(token) {
+  if (!token) return '/login'
+  if (token.role === 'none') return '/select-role'
+  if (token.role === 'applicant') return token.has_resume ? '/applicant/dashboard' : '/upload-resume'
+  if (token.role === 'recruiter') return token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create'
+  return '/'
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|svg)$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 }
