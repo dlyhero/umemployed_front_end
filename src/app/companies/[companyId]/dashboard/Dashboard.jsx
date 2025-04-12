@@ -1,7 +1,8 @@
-// Dashboard.jsx
+'use client';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import QuickActions from './QuickActions';
-import { RecruiterTips } from './RecruiterTips'; // Use RecruiterTips instead of Tips
+import { RecruiterTips } from './RecruiterTips';
 import PostJob from './PostJob';
 import CandidateApplications from './CandidateApplications';
 import AnalyticsOverview from './AnalyticsOverview';
@@ -10,6 +11,8 @@ import { WelcomeSection } from './recruiter/WelcomeSection';
 import { Sideba } from './recruiter/Sideba';
 
 const Dashboard = ({ companyId, companyData }) => {
+  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/dashboard`);
+
   const mockTips = [
     { title: 'Tip 1', content: 'Optimize your job postings. lkbsdlkfblbslkbksdbkjv jksd vkjbskjdbvkjsabdkjvkjbvkjbk' },
     { title: 'Tip 2', content: 'Respond to candidates quickly.' },
@@ -30,11 +33,11 @@ const Dashboard = ({ companyId, companyData }) => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex flex-col lg:flex-row min-h-screen gap-8">
-        <Sideba companyId={companyId} />
+        <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
         <main className="flex-1 space-y-6">
           <WelcomeSection companyName={companyData?.name || "Eddy"} />
           <QuickActions companyId={companyId} />
-          <RecruiterTips tips={mockTips} /> {/* Pass mockTips to RecruiterTips */}
+          <RecruiterTips tips={mockTips} />
           <PostJob companyId={companyId} />
           <CandidateApplications applicationCount={mockJobs.length} />
           <AnalyticsOverview
