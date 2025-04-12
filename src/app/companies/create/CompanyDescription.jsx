@@ -59,7 +59,7 @@ const CompanyDescription = ({ formData, handleChange }) => {
             name="job_openings"
             value={formData.job_openings}
             onChange={handleChange}
-            placeholder="List job openings"
+            placeholder="List job openings (e.g., Software Engineer, Marketing Manager)"
             className="w-full pl-10 p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             rows={4}
           />

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
 import Dashboard from './Dashboard';
 import Loader from "@/src/components/common/Loader/Loader"; // Imported Loader
-import toast from 'react-hot-toast';
+import { useToast } from '@/lib/useToast';
 
 const DashboardPage = () => {
   const { data: session, status } = useSession();
