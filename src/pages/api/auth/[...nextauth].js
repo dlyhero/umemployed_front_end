@@ -65,6 +65,7 @@ export const authOptions = {
   pages: {
     signIn: "/login",
     error: "/auth/error",
+    OfflinePage: "/offline",
   },
   callbacks: {
     async jwt({ token, user }) {
