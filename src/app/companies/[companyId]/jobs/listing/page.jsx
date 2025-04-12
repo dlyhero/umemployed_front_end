@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { JobTabs } from './components/JobTabs';
-import { MobileSearch } from './components/MobileSearch';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { JobListContainer } from './components/JobListContainer';
-import { Filter } from 'lucide-react';
+import { MobileMenu } from '../../dashboard/MobileMenu';
 import { Sideba } from '../../dashboard/recruiter/Sideba';
+import { Filter, Menu } from 'lucide-react';
 
 const mockJobs = [
   {
@@ -29,7 +29,7 @@ const mockJobs = [
     shifts: "dayShift",
     created_at: "2025-04-01T10:00:00Z",
     application_count: 12,
-    hired_count: 1, // Added
+    hired_count: 1,
   },
   {
     id: 2,
@@ -50,7 +50,7 @@ const mockJobs = [
     shifts: "eveningShift",
     created_at: "2025-04-02T14:30:00Z",
     application_count: 8,
-    hired_count: 0, // Added
+    hired_count: 0,
   },
   {
     id: 3,
@@ -71,7 +71,7 @@ const mockJobs = [
     shifts: "morningShift",
     created_at: "2025-04-03T09:15:00Z",
     application_count: 5,
-    hired_count: 2, // Added
+    hired_count: 2,
   },
   {
     id: 4,
@@ -92,7 +92,7 @@ const mockJobs = [
     shifts: "nightShift",
     created_at: "2025-04-04T16:45:00Z",
     application_count: 15,
-    hired_count: 0, // Added
+    hired_count: 0,
   },
   {
     id: 5,
@@ -113,7 +113,7 @@ const mockJobs = [
     shifts: "twelveHourShift",
     created_at: "2025-04-05T11:20:00Z",
     application_count: 3,
-    hired_count: 1, // Added
+    hired_count: 1,
   },
 ];
 
@@ -128,6 +128,7 @@ export default function CompanyJobsListing() {
   const [keywordFilter, setKeywordFilter] = useState('');
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [activeTab, setActiveTab] = useState(`/companies/${companyId}/jobs/listing`);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setJobs(mockJobs);
@@ -173,19 +174,31 @@ export default function CompanyJobsListing() {
   return (
     <div className="max-w-6xl mx-auto p-6 flex gap-6">
       <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
-      <main className="flex-1">
-        <JobTabs />
-        <MobileSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <SearchAndFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <Button
-          variant="outline"
-          className="mb-6 border-[#1e40af] text-[#1e40af] hover:bg-[#1e40af] hover:text-white transition-all rounded-md"
-          onClick={() => setFilterVisible(!filterVisible)}
-        >
-          <Filter className="w-4 h-4 mr-2" /> Toggle Filters
-        </Button>
-        <JobListContainer jobs={filteredJobs} companyId={companyId} />
-      </main>
+      <div className="flex-1">
+        <header className="flex justify-between items-center md:hidden mb-6">
+          <h1 className="text-xl font-semibold text-gray-900">Job Listings</h1>
+          <Button
+            variant="ghost"
+            className="p-2 text-gray-900"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+        </header>
+        <MobileMenu
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          companyId={companyId}
+        />
+        <main>
+          <JobTabs />
+          <SearchAndFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
+          <JobListContainer jobs={filteredJobs} companyId={companyId} />
+        </main>
+      </div>
     </div>
   );
 }
