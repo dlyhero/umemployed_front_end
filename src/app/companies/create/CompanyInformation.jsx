@@ -7,7 +7,6 @@ import { countries } from 'countries-list';
 import { Building2, Globe, Users, MapPin, Calendar, Link as LinkIcon } from 'lucide-react';
 
 const CompanyInformation = ({ formData, handleChange }) => {
-  // Map country codes to names, sorted alphabetically by name
   const countryList = Object.entries(countries)
     .map(([code, { name }]) => ({ code, name }))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -29,7 +28,7 @@ const CompanyInformation = ({ formData, handleChange }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Company Name
+            Company Name *
           </label>
           <div className="relative">
             <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -41,6 +40,7 @@ const CompanyInformation = ({ formData, handleChange }) => {
               placeholder="e.g., UmEmployed"
               maxLength={100}
               className="pl-10"
+              required
             />
           </div>
         </div>
@@ -116,8 +116,8 @@ const CompanyInformation = ({ formData, handleChange }) => {
               value={formData.founded}
               onChange={handleChange}
               placeholder="e.g., 2020"
-              min={-2147483648}
-              max={2147483647}
+              min={1800}
+              max={new Date().getFullYear()}
               className="pl-10"
             />
           </div>

@@ -1,10 +1,9 @@
 'use client';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { BarChart2, Briefcase, FileText, Home, Settings, Users } from 'lucide-react';
 
-export const SidebarNav = ({ activeTab, setActiveTab, companyId }) => {
+export const MobileNav = ({ companyId, closeMenu, activeTab, setActiveTab }) => {
+  const router = useRouter();
   const pathname = usePathname();
 
   const menuItems = [
@@ -17,28 +16,26 @@ export const SidebarNav = ({ activeTab, setActiveTab, companyId }) => {
   ];
 
   return (
-    <nav className="space-y-1">
+    <nav className="flex flex-col space-y-2">
       {menuItems.map((item, index) => {
         const isActive = activeTab === item.path || pathname === item.path || pathname.startsWith(item.path.split('/listing')[0]);
         return (
-          <Link key={index} href={item.path} passHref>
-            <motion.button
-              whileHover={{ x: 5 }}
-              className={`group flex items-center w-full p-3 rounded-lg transition-colors duration-200 ${
-                isActive ? 'bg-[#1e90ff]/10 text-[#1e90ff]' : 'text-gray-600 hover:bg-[#1e90ff]/10 hover:text-[#1e90ff]'
-              }`}
-              onClick={() => setActiveTab(item.path)}
-            >
-              <span
-                className={`${
-                  isActive ? 'text-[#1e90ff]' : 'text-gray-600 group-hover:text-[#1e90ff]'
-                } transition-colors duration-200`}
-              >
-                {item.icon}
-              </span>
-              <span className="ml-3 font-medium">{item.label}</span>
-            </motion.button>
-          </Link>
+          <button
+            key={index}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${
+              isActive
+                ? 'bg-[#1e40af]/10 text-[#1e40af]'
+                : 'text-gray-900 hover:bg-[#1e40af]/10 hover:text-[#1e40af]'
+            }`}
+            onClick={() => {
+              router.push(item.path);
+              setActiveTab(item.path);
+              closeMenu();
+            }}
+          >
+            <span className={isActive ? 'text-[#1e40af]' : 'text-gray-600'}>{item.icon}</span>
+            <span className="font-medium">{item.label}</span>
+          </button>
         );
       })}
     </nav>

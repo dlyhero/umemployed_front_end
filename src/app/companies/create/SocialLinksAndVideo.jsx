@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Link as LinkIcon, Video, Upload } from 'lucide-react';
 
-const SocialLinksAndVideo = ({ formData, handleChange, handleFileChange, logoFile }) => {
+const SocialLinksAndVideo = ({ formData, handleChange, handleFileChange, logoFile, coverPhotoFile }) => {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -14,7 +14,7 @@ const SocialLinksAndVideo = ({ formData, handleChange, handleFileChange, logoFil
       className="space-y-6"
     >
       <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-blue-500 pb-2">
-        Social Links & Video
+        Social Links & Media
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -57,7 +57,7 @@ const SocialLinksAndVideo = ({ formData, handleChange, handleFileChange, logoFil
           <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
             Company Logo
           </label>
-          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
             <Input
               id="logo"
               name="logo"
@@ -78,6 +78,33 @@ const SocialLinksAndVideo = ({ formData, handleChange, handleFileChange, logoFil
               </label>
             </Button>
             <span className="text-gray-600 text-sm">{logoFile ? logoFile.name : 'No file chosen'}</span>
+          </div>
+        </div>
+        <div className="md:col-span-2">
+          <label htmlFor="cover_photo" className="block text-sm font-medium text-gray-700 mb-1">
+            Cover Photo
+          </label>
+          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <Input
+              id="cover_photo"
+              name="cover_photo"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              asChild
+              variant="brand"
+              size="sm"
+              className="rounded-full w-full sm:w-auto"
+            >
+              <label htmlFor="cover_photo" className="cursor-pointer flex items-center justify-center">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Cover Photo
+              </label>
+            </Button>
+            <span className="text-gray-600 text-sm">{coverPhotoFile ? coverPhotoFile.name : 'No file chosen'}</span>
           </div>
         </div>
       </div>
