@@ -11,6 +11,7 @@ import { ProcessSteps } from "./components/ProcessSteps";
 
 export default function ResumeUploadPage() {
   const { data: session, status } = useSession();
+  const token = session?.accessToken; // Added optional chaining
   const {
     fileName,
     isDragging,
@@ -20,28 +21,8 @@ export default function ResumeUploadPage() {
     handleFileChange,
     handleDragOver,
     handleDragLeave,
-    handleDrop
-  } = useResumeUpload();
-
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please sign in to upload your resume</h2>
-          <button 
-            onClick={() => signIn()}
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
-  }
+    handleDrop,
+  } = useResumeUpload(token); // Pass token directly
 
   return (
     <main className="bg-white min-h-screen">
