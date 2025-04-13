@@ -7,11 +7,11 @@ import {
   JobCard,
   MobileMenu,
   RecommendedJobs,
-  Sideba,
   StatsGrid,
-  WelcomeSection
 } from '../../../components/common/dashboard'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/outline'
+import { WelcomeSection } from './components/WelcomeSection'
+import { Sidebar } from './components/Sidebar'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -52,7 +52,7 @@ const applicantDashBoard = () => {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
         <div className="flex flex-col lg:flex-row gap-6">
-          <Sideba activeTab={activeTab} setActiveTab={setActiveTab} />
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
           <main className="flex-1">
 

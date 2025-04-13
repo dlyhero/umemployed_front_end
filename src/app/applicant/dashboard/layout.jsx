@@ -29,7 +29,7 @@ export const metadata = {
   },                        
 };
 
-export default function AccountTypeLayout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
     <html lang="en">
       <body

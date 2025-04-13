@@ -1,9 +1,10 @@
 'use client'
+import useUser from '@/src/hooks/useUser';
 import { motion } from 'framer-motion'
-import { useSession } from 'next-auth/react';
 
-export const WelcomeSection = () => {
-  const {ata: session} = useSession();
+export const WelcomeSection = (session) => {
+  const user = useUser();
+
 
   return (<motion.section
     initial={{ opacity: 0, y: 20 }}
@@ -13,7 +14,7 @@ export const WelcomeSection = () => {
   >
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {session.user?.name}!</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {user?.name} !</h1>
         <p className="opacity-90 max-w-lg">Your personalized dashboard to help you land your dream job faster.</p>
       </div>
       <button className="mt-4 md:mt-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-2 rounded-full font-medium transition">
