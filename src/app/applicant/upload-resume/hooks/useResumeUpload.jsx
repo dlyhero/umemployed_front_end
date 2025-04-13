@@ -1,72 +1,78 @@
-"use client"
+'use client'
 import { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export const useResumeUpload = (token) => {
   const router = useRouter();
-  const [fileName, setFileName] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  const [feedback, setFeedback] = useState(null);
-  const [error, setError] = useState(null);
+  const [state, setState] = useState({
+    fileName: "",
+    isDragging: false,
+    uploadProgress: 0,
+    isUploading: false,
+    isProcessing: false,
+    isComplete: false,
+    feedback: null,
+    error: null
+  });
 
   const startUploadRef = useRef();
 
   const resetStates = () => {
-    setUploadProgress(0);
-    setIsUploading(false);
-    setIsProcessing(false);
-    setIsComplete(false);
-    setFeedback(null);
-    setError(null);
+    setState(prev => ({
+      ...prev,
+      uploadProgress: 0,
+      isUploading: false,
+      isProcessing: false,
+      isComplete: false,
+      feedback: null,
+      error: null
+    }));
   };
 
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+  const updateState = (updates) => {
+    setState(prev => ({ ...prev, ...updates }));
+  };
 
   const startUpload = useCallback(async (file) => {
-    console.log('[DEBUG] Upload started with token:', token);
+    console.group('[DEBUG] Upload Process');
     
     if (!token) {
-      console.error('[ERROR] No token provided');
-      setError("Authentication token is missing");
+      console.error('Authentication token is missing');
+      updateState({ error: "Authentication token is missing" });
+      console.groupEnd();
       return { error: "Authentication token is missing" };
     }
 
     if (!file) {
-      console.error('[ERROR] No file provided');
-      setError("No file selected");
+      console.error('No file provided');
+      updateState({ error: "No file selected" });
+      console.groupEnd();
       return { error: "No file selected" };
     }
 
     resetStates();
     
     if (file.size > 5 * 1024 * 1024) {
-      console.error('[ERROR] File too large');
-      setError("File size exceeds 5MB limit");
+      console.error('File too large');
+      updateState({ error: "File size exceeds 5MB limit" });
+      console.groupEnd();
       return { error: "File too large" };
     }
 
-    setFileName(file.name);
-    setIsUploading(true);
-    
+    updateState({ 
+      fileName: file.name,
+      isUploading: true 
+    });
+
     try {
       const formData = new FormData();
-      formData.append('resume', file);  // Changed from 'file' to 'resume' if your API expects that
+      // Changed from 'resume' to 'file' to match backend expectation
+      formData.append('file', file);
 
-      // Debug FormData contents
+      console.log('FormData contents:');
       for (let [key, value] of formData.entries()) {
-        console.log(`FormData: ${key} =`, value);
+        console.log(`${key}:`, value);
       }
 
       const config = {
@@ -76,33 +82,23 @@ export const useResumeUpload = (token) => {
         },
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
-            const uploadPercent = (progressEvent.loaded * 90) / progressEvent.total;
-            const progress = Math.min(90, Math.round(uploadPercent));
-            setUploadProgress(progress);
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            updateState({ uploadProgress: Math.min(90, progress) });
             
-            if (uploadPercent >= 90 && !isProcessing) {
-              setIsProcessing(true);
-              const processingInterval = setInterval(() => {
-                setUploadProgress(prev => {
-                  const newProgress = Math.min(prev + 1, 100);
-                  if (newProgress >= 100) {
-                    clearInterval(processingInterval);
-                  }
-                  return newProgress;
+            if (progress >= 90 && !state.isProcessing) {
+              updateState({ isProcessing: true });
+              const interval = setInterval(() => {
+                updateState(prev => {
+                  const newProgress = Math.min(prev.uploadProgress + 1, 100);
+                  if (newProgress >= 100) clearInterval(interval);
+                  return { uploadProgress: newProgress };
                 });
               }, 200);
             }
           }
-        }
+        },
+        timeout: 30000
       };
-
-      console.log('[DEBUG] Request config:', config);
-
-      // Add request interceptor for debugging
-      const requestInterceptor = axios.interceptors.request.use(request => {
-        console.log('[DEBUG] Outgoing request:', request);
-        return request;
-      });
 
       const response = await axios.post(
         'https://umemployed-app-afec951f7ec7.herokuapp.com/api/resume/upload-resume/',
@@ -110,68 +106,80 @@ export const useResumeUpload = (token) => {
         config
       );
 
-      // Remove interceptor after request
-      axios.interceptors.request.eject(requestInterceptor);
-
-      console.log('[DEBUG] Server response:', response);
+      console.log('Server response:', response);
 
       if (response.status === 200) {
-        if (!response.data.extracted_text?.trim()) {
-          setError("The uploaded file doesn't contain readable text. Please upload a valid CV/Resume document.");
-        } else {
-          setFeedback("Resume processed successfully. Redirecting...");
-          setIsComplete(true);
-          
-          setTimeout(() => {
-            router.push('/applicant/update_profile');
-          }, 2000);
+        if (!response.data?.extracted_text?.trim()) {
+          throw new Error("The uploaded file doesn't contain readable text");
         }
+
+        updateState({
+          feedback: "Resume processed successfully. Redirecting...",
+          isComplete: true,
+          uploadProgress: 100,
+          isProcessing: false
+        });
+
+        const resumeData = encodeURIComponent(JSON.stringify(response.data?.extracted_text));
+
+        
+        setTimeout(() => router.push(`/applicant/update_profile?resume_data=${resumeData}`), 2000);
+        
+        console.groupEnd();
+        return { success: true, data: response.data };
       }
 
-      setUploadProgress(100);
-      setIsProcessing(false);
-      
-      return { 
-        success: true,
-        data: response.data
-      };
+      throw new Error("Unexpected response from server");
 
     } catch (error) {
-      console.error('[ERROR] Upload failed:', {
+      console.error('Upload error:', {
+        name: error.name,
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
-        headers: error.config?.headers
+        config: error.config
       });
 
-      resetStates();
-      
       let errorMessage = "Upload failed";
+      
       if (error.response) {
         errorMessage = error.response.data?.message || 
                       error.response.data?.error ||
-                      error.response.statusText;
+                      error.response.statusText ||
+                      `Server responded with ${error.response.status}`;
+      } else if (error.request) {
+        errorMessage = "No response from server";
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
-      setError(errorMessage);
-      return { 
-        success: false,
-        error: errorMessage 
-      };
-    } finally {
-      setTimeout(() => setIsUploading(false), 500);
+
+      updateState({ 
+        error: errorMessage,
+        isUploading: false,
+        isProcessing: false
+      });
+
+      console.groupEnd();
+      return { success: false, error: errorMessage };
     }
-  }, [token, router, isProcessing]);
+  }, [token, router, state.isProcessing]);
 
   useEffect(() => {
     startUploadRef.current = startUpload;
   }, [startUpload]);
 
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    updateState({ isDragging: true });
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    updateState({ isDragging: false });
+  }, []);
+
   const handleDrop = useCallback((e) => {
     e.preventDefault();
-    setIsDragging(false);
+    updateState({ isDragging: false });
     if (e.dataTransfer.files?.length > 0) {
       startUploadRef.current?.(e.dataTransfer.files[0]);
     }
@@ -184,14 +192,7 @@ export const useResumeUpload = (token) => {
   }, []);
 
   return {
-    fileName,
-    isDragging,
-    uploadProgress,
-    isUploading,
-    isProcessing,
-    isComplete,
-    error,
-    feedback,
+    ...state,
     handleFileChange,
     handleDragOver,
     handleDragLeave,
