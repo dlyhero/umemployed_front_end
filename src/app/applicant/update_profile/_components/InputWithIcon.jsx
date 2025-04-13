@@ -5,6 +5,7 @@ export function InputWithIcon({
   label,
   type = "text",
   options,
+  value,
   name,
   required = false
 }) {
@@ -20,9 +21,10 @@ export function InputWithIcon({
         </div>
         {options ? (
           <select
+          value={value}
             name={name}
             required={required}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand focus:border-brand"
           >
             {options.map(option => (
               <option key={option.value} value={option.value}>
@@ -32,6 +34,7 @@ export function InputWithIcon({
           </select>
         ) : (
           <input
+          value={value}
             type={type}
             name={name}
             required={required}
