@@ -1,22 +1,29 @@
+// src/app/companies/[companyId]/jobs/listing/components/JobListContainer.jsx
 'use client';
+
+import { motion } from 'framer-motion';
 import { JobItem } from './JobItem';
-import { Card, CardContent } from '@/components/ui/card';
 
 export const JobListContainer = ({ jobs, companyId }) => {
   return (
     <section className="flex-1">
       {jobs.length > 0 ? (
         <div className="grid gap-4">
-          {jobs.map((job) => (
-            <JobItem key={job.id} job={job} companyId={companyId} />
+          {jobs.map((job, index) => (
+            <motion.div
+              key={job.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+              <JobItem job={job} companyId={companyId} />
+            </motion.div>
           ))}
         </div>
       ) : (
-        <Card className="bg-white border border-gray-200 rounded-md">
-          <CardContent className="flex justify-center items-center h-64">
-            <p className="text-gray-600 text-lg font-medium">No job postings found</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center">
+          <p className="text-gray-600 text-lg font-medium">No job postings found</p>
+        </div>
       )}
     </section>
   );

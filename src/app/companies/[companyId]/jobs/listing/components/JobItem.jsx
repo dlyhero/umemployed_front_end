@@ -1,18 +1,26 @@
+// src/app/companies/[companyId]/jobs/listing/components/JobItem.jsx
 'use client';
+
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { MoreVertical, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 
 export const JobItem = ({ job, companyId }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-6 hover:shadow-md transition-all relative">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white rounded-xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100"
+    >
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1">
           <Link href={`/companies/${companyId}/jobs/${job.id}/applications`}>
-            <h4 className="text-lg font-medium text-gray-900 hover:text-[#1e40af] transition-colors">
+            <h4 className="text-lg font-semibold text-gray-800 hover:text-blue-500 transition-colors">
               {job.title}
             </h4>
           </Link>
@@ -20,43 +28,48 @@ export const JobItem = ({ job, companyId }) => {
             Posted {new Date(job.created_at).toLocaleDateString()}
           </p>
           <div className="flex gap-2 mt-3">
-            <span className="text-xs bg-[#15803d]/10 text-[#15803d] px-2.5 py-1 rounded-full font-medium">
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
               {job.job_type}
             </span>
-            <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-medium">
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
               {job.job_location_type}
             </span>
           </div>
         </div>
         <Button
           variant="ghost"
-          className="text-gray-500 hover:text-[#1e40af] p-2"
+          className="text-gray-500 hover:text-blue-500 hover:bg-gray-100 p-2 rounded-full"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <MoreVertical className="w-5 h-5" />
         </Button>
       </div>
-      <div className="mt-4 flex justify-between items-center">
-        <div className="flex gap-6 text-sm">
+      <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
           <div>
-            <span className="text-[#1e40af] font-medium">{job.application_count || 0}</span> Proposals
+            <span className="text-blue-500 font-semibold">{job.application_count || 0}</span> Proposals
           </div>
+          <div className="hidden sm:block w-px h-6 bg-gray-300" />
           <div>
-            <span className="text-[#1e40af] font-medium">{job.hired_count || 0}</span> Hired
+            <span className="text-blue-500 font-semibold">{job.hired_count || 0}</span> Hired
           </div>
+          <div className="hidden sm:block w-px h-6 bg-gray-300" />
           <div>
-            <span className="text-[#1e40af] font-medium">{job.hire_number}</span> Openings
+            <span className="text-blue-500 font-semibold">{job.hire_number}</span> Openings
           </div>
         </div>
-        <Link
-          href={`/companies/${companyId}/jobs/${job.id}/applications`}
-          className="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[#1e40af] border border-[#1e40af] rounded-md hover:bg-[#1e40af] hover:text-white transition-colors"
+        <Button
+          asChild
+          variant="outline"
+          className="w-full sm:w-auto text-blue-500 border-blue-500 hover:bg-blue-50 flex items-center gap-2 text-sm font-semibold"
         >
-          View Proposals
-        </Link>
+          <Link href={`/companies/${companyId}/jobs/${job.id}/applications`}>
+            View Proposals <ArrowRight size={16} />
+          </Link>
+        </Button>
       </div>
       {menuOpen && (
-        <div className="absolute right-4 top-14 w-48 bg-white border border-gray-200 shadow-lg rounded-md z-10">
+        <div className="absolute right-4 top-16 w-48 bg-white border border-gray-100 shadow-lg rounded-md z-20">
           <ul className="py-1 text-sm text-gray-700">
             <li>
               <Link
@@ -96,6 +109,6 @@ export const JobItem = ({ job, companyId }) => {
           </ul>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
