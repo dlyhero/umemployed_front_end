@@ -10,7 +10,7 @@ export default function CompanyHeader({ company }) {
       initial={{ y: 30, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="relative bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-xl p-6 sm:p-8 shadow-lg overflow-hidden"
+      className="relative bg-gradient-to-r from-blue-400 to-blue-200 text-white rounded-xl p-6 sm:p-8 shadow-lg overflow-hidden"
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10" />

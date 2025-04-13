@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
-import Loader from '@/src/components/common/Loader/Loader';
 
 export default function Skills() {
   const currentStep = 'skills';
@@ -17,33 +16,31 @@ export default function Skills() {
   const router = useRouter();
 
   const handleSubmit = async (data) => {
+    setLoading(true);
     try {
       const result = await onSubmit(data);
       if (result?.error) {
         toast.error(result.error);
-        return result;
+        return;
       }
       toast.success('Job created successfully!');
-      setLoading(true);
       router.push(`/companies/${companyId}/dashboard`);
-      return result;
     } catch (error) {
       toast.error('Failed to create job');
-      return { error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!jobId) return <div className="text-center p-6">Please complete the previous step first.</div>;
 
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
     <>
       <Toaster position="top-right" />
-      {form.formState.isSubmitting ? (
-        <Loader />
+      {loading || form.formState.isSubmitting ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+        </div>
       ) : (
         <FormContainer
           step={step}

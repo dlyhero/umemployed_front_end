@@ -1,10 +1,8 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { step1Schema, step2Schema, step3Schema, step4Schema } from '../app/companies/jobs/schemas/jobSchema';
-
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
@@ -99,7 +97,6 @@ export const useJobForm = (currentStep) => {
       if (savedData) form.reset(JSON.parse(savedData));
       if (savedJobId) setJobId(savedJobId);
 
-      // Define parsedSkills with a default value
       let parsedSkills = [];
       if (savedSkills) {
         const skills = JSON.parse(savedSkills);
@@ -108,7 +105,6 @@ export const useJobForm = (currentStep) => {
         console.log('Loaded extracted_skills from localStorage:', parsedSkills);
       }
 
-      // If on Step 4 and jobId exists but no skills are loaded, fetch them
       if (currentStep === 'skills' && savedJobId && parsedSkills.length === 0) {
         const loadSkills = async () => {
           setIsLoadingSkills(true);
@@ -133,16 +129,13 @@ export const useJobForm = (currentStep) => {
   const fetchExtractedSkills = async (jobId) => {
     console.log('fetchExtractedSkills called with jobId:', jobId, 'token:', session?.accessToken || session?.token);
     try {
-      const response = await fetch(
-        `https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/jobs/${jobId}/extracted-skills/`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken || session?.token}`,
-          },
-        }
-      );
+      const response = await fetch(`https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/jobs/${jobId}/extracted-skills/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+        },
+      });
       console.log('fetchExtractedSkills response status:', response.status);
       if (!response.ok) {
         const errorData = await response.json();
@@ -160,7 +153,7 @@ export const useJobForm = (currentStep) => {
   };
 
   const onSubmit = async (data) => {
-    const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+    const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com/api'; // Use the real backend URL
     console.log('onSubmit called with data:', data);
 
     if (status === 'loading') return { error: 'Session is still loading' };
@@ -179,7 +172,7 @@ export const useJobForm = (currentStep) => {
           location: data.location,
         };
         console.log('Submitting Step 1 data:', step1Data);
-        const response = await fetch(`${baseUrl}/api/job/create-step1/`, {
+        const response = await fetch(`${baseUrl}/job/create-step1/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,7 +196,7 @@ export const useJobForm = (currentStep) => {
       } else if (currentStep === 'requirements' && jobId) {
         const step2Data = step2Schema.parse(data);
         console.log('Submitting Step 2 data:', step2Data);
-        const response = await fetch(`${baseUrl}/api/job/${jobId}/create-step2/`, {
+        const response = await fetch(`${baseUrl}/job/${jobId}/create-step2/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -221,7 +214,7 @@ export const useJobForm = (currentStep) => {
         return result;
       } else if (currentStep === 'description' && jobId) {
         const step3Data = step3Schema.parse(data);
-        const response = await fetch(`${baseUrl}/api/job/${jobId}/create-step3/`, {
+        const response = await fetch(`${baseUrl}/job/${jobId}/create-step3/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -247,12 +240,11 @@ export const useJobForm = (currentStep) => {
         return result;
       } else if (currentStep === 'skills' && jobId) {
         const step4Data = {
-          ...step4Schema.parse(data),
           requirements: Array.isArray(data.requirements) ? data.requirements : [],
-          level: data.level,
+          level: data.level || 'Beginner',
         };
         console.log('Submitting Step 4 data:', step4Data);
-        const response = await fetch(`${baseUrl}/api/job/${jobId}/create-step4/`, {
+        const response = await fetch(`${baseUrl}/job/${jobId}/create-step4/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -260,18 +252,19 @@ export const useJobForm = (currentStep) => {
           },
           body: JSON.stringify(step4Data),
         });
+
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Step 4 error response:', errorData);
-          throw new Error(errorData.message || 'Failed to update step 4');
+          console.error('Step 4 submission failed:', errorData);
+          throw new Error(errorData.message || 'Failed to save job');
         }
-        const result = await response.json();
+
         localStorage.clear();
-        return result;
+        return { success: true };
       }
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
-      console.error('API error:', error);
+      console.error('API error:', error.message);
       return { error: error.message };
     } finally {
       await form.setValue('isSubmitting', false, { shouldValidate: false });

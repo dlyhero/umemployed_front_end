@@ -1,15 +1,15 @@
 'use client';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
 
-export default function Requirements() {
+function RequirementsInner() {
   const currentStep = 'requirements';
   const searchParams = useSearchParams();
   const jobId = searchParams.get('jobId');
   const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills } = useJobForm(currentStep);
-
   const router = useRouter();
 
   const handleSubmit = async (data) => {
@@ -44,5 +44,13 @@ export default function Requirements() {
         extractedSkills={extractedSkills}
       />
     </>
+  );
+}
+
+export default function Requirements() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading...</div>}>
+      <RequirementsInner />
+    </Suspense>
   );
 }
