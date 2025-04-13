@@ -1,6 +1,7 @@
 'use client';
+
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button.jsx';
+import { Button } from '@/components/ui/button';
 
 export const JobTabs = () => {
   const router = useRouter();

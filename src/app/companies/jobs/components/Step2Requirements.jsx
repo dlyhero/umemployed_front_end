@@ -1,43 +1,34 @@
-// /job/components/Step2Requirements.jsx
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 
-export const Step2Requirements = ({ form }) => {
-  const jobTypes = ['Full Time', 'Part Time', 'Internship', 'Contract'];
-  const experienceLevels = ['No Experience Needed', 'Under 1 Year', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years'];
-  const weeklyRanges = ['Monday to Friday', 'Weekends needed', 'Every weekend', 'Rotating weekend', 'No weekend', 'Weekends only', 'Other', 'None'];
-  const shifts = ['Morning shift', 'Day shift', 'Evening shift', 'Night shift', '8 hours shift', '10 hours shift', '12 hours shift', 'Other', 'None'];
-
+export const Step2Requirements = ({ form, jobOptions }) => {
   return (
     <div className="space-y-6">
-      {/* Job Types */}
       <FormField
         control={form.control}
-        name="jobTypes"
+        name="job_type" // Renamed from job_types
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-sm font-semibold text-gray-700">Job Types</FormLabel>
             <div className="flex flex-wrap gap-2">
-              {jobTypes.map((type) => (
+              {Object.keys(jobOptions.job_types || {}).map((type) => (
                 <Button
                   key={type}
                   type="button"
-                  variant={field.value.includes(type) ? 'default' : 'outline'}
+                  variant={field.value === type ? 'default' : 'outline'}
                   className={`rounded-full text-sm ${
-                    field.value.includes(type)
+                    field.value === type
                       ? 'bg-[#1e90ff] text-white hover:bg-[#1e90ff]/90'
                       : 'border-[#1e90ff]/50 text-[#1e90ff] hover:bg-[#1e90ff]/10'
                   }`}
                   onClick={() => {
-                    const newValue = field.value.includes(type)
-                      ? field.value.filter((v) => v !== type)
-                      : [...field.value, type];
+                    const newValue = field.value === type ? '' : type; // Toggle: select or deselect
                     field.onChange(newValue);
-                    form.trigger('jobTypes');
+                    form.trigger('job_type');
                   }}
                 >
-                  {type}
+                  {jobOptions.job_types[type]}
                 </Button>
               ))}
             </div>
@@ -45,34 +36,30 @@ export const Step2Requirements = ({ form }) => {
           </FormItem>
         )}
       />
-
-      {/* Experience Level */}
       <FormField
         control={form.control}
-        name="experienceLevel"
+        name="experience_levels"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-sm font-semibold text-gray-700">Experience Level</FormLabel>
+            <FormLabel className="text-sm font-semibold text-gray-700">Experience Levels</FormLabel>
             <div className="flex flex-wrap gap-2">
-              {experienceLevels.map((level) => (
+              {Object.keys(jobOptions.experience_levels || {}).map((level) => (
                 <Button
                   key={level}
                   type="button"
-                  variant={field.value.includes(level) ? 'default' : 'outline'}
+                  variant={field.value === level ? 'default' : 'outline'}
                   className={`rounded-full text-sm ${
-                    field.value.includes(level)
+                    field.value === level
                       ? 'bg-[#1e90ff] text-white hover:bg-[#1e90ff]/90'
                       : 'border-[#1e90ff]/50 text-[#1e90ff] hover:bg-[#1e90ff]/10'
                   }`}
                   onClick={() => {
-                    const newValue = field.value.includes(level)
-                      ? field.value.filter((v) => v !== level)
-                      : [...field.value, level];
+                    const newValue = field.value === level ? '' : level;
                     field.onChange(newValue);
-                    form.trigger('experienceLevel');
+                    form.trigger('experience_levels');
                   }}
                 >
-                  {level}
+                  {jobOptions.experience_levels[level]}
                 </Button>
               ))}
             </div>
@@ -80,34 +67,30 @@ export const Step2Requirements = ({ form }) => {
           </FormItem>
         )}
       />
-
-      {/* Weekly Range */}
       <FormField
         control={form.control}
-        name="weeklyRange"
+        name="weekly_ranges"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-sm font-semibold text-gray-700">Weekly Range</FormLabel>
+            <FormLabel className="text-sm font-semibold text-gray-700">Weekly Ranges</FormLabel>
             <div className="flex flex-wrap gap-2">
-              {weeklyRanges.map((range) => (
+              {Object.keys(jobOptions.weekly_ranges || {}).map((range) => (
                 <Button
                   key={range}
                   type="button"
-                  variant={field.value.includes(range) ? 'default' : 'outline'}
+                  variant={field.value === range ? 'default' : 'outline'}
                   className={`rounded-full text-sm ${
-                    field.value.includes(range)
+                    field.value === range
                       ? 'bg-[#1e90ff] text-white hover:bg-[#1e90ff]/90'
                       : 'border-[#1e90ff]/50 text-[#1e90ff] hover:bg-[#1e90ff]/10'
                   }`}
                   onClick={() => {
-                    const newValue = field.value.includes(range)
-                      ? field.value.filter((v) => v !== range)
-                      : [...field.value, range];
+                    const newValue = field.value === range ? '' : range;
                     field.onChange(newValue);
-                    form.trigger('weeklyRange');
+                    form.trigger('weekly_ranges');
                   }}
                 >
-                  {range}
+                  {jobOptions.weekly_ranges[range]}
                 </Button>
               ))}
             </div>
@@ -115,34 +98,30 @@ export const Step2Requirements = ({ form }) => {
           </FormItem>
         )}
       />
-
-      {/* Shift */}
       <FormField
         control={form.control}
-        name="shift"
+        name="shifts"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-sm font-semibold text-gray-700">Shift</FormLabel>
+            <FormLabel className="text-sm font-semibold text-gray-700">Shifts</FormLabel>
             <div className="flex flex-wrap gap-2">
-              {shifts.map((shift) => (
+              {Object.keys(jobOptions.shifts || {}).map((shift) => (
                 <Button
                   key={shift}
                   type="button"
-                  variant={field.value.includes(shift) ? 'default' : 'outline'}
+                  variant={field.value === shift ? 'default' : 'outline'}
                   className={`rounded-full text-sm ${
-                    field.value.includes(shift)
+                    field.value === shift
                       ? 'bg-[#1e90ff] text-white hover:bg-[#1e90ff]/90'
                       : 'border-[#1e90ff]/50 text-[#1e90ff] hover:bg-[#1e90ff]/10'
                   }`}
                   onClick={() => {
-                    const newValue = field.value.includes(shift)
-                      ? field.value.filter((v) => v !== shift)
-                      : [...field.value, shift];
+                    const newValue = field.value === shift ? '' : shift;
                     field.onChange(newValue);
-                    form.trigger('shift');
+                    form.trigger('shifts');
                   }}
                 >
-                  {shift}
+                  {jobOptions.shifts[shift]}
                 </Button>
               ))}
             </div>

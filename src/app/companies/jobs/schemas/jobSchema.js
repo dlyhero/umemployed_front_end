@@ -3,45 +3,18 @@ import { z } from 'zod';
 export const step1Schema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long').max(100),
   hire_number: z.number().min(1, 'Hire number must be at least 1').int(),
-  job_location_type: z.enum(['remote', 'onsite', 'hybrid'], { required_error: 'Job location type is required' }),
-  job_type: z.enum(['Full_time', 'Part_time', 'Internship', 'Contract'], { required_error: 'Job type is required' }),
-  location: z.string().min(1, 'Location is required').max(100),
-  salary_range: z.enum([
-    '0-30000',
-    '30001-50000',
-    '50001-70000',
-    '70001-100000',
-    '100001-120000',
-    '120001-150000',
-    '150001-200000',
-    '200001+',
-    'Not specified',
-  ]),
+  job_type: z.string().min(1, 'Job type is required'),
+  job_location_type: z.string().min(1, 'Job location type is required'),
+  location: z.string().length(2, 'Location must be a 2-letter country code'),
+  salary_range: z.string().min(1, 'Salary range is required'),
   category: z.number().int().min(1, 'Category is required'),
 });
 
 export const step2Schema = z.object({
-  job_type: z.enum(['Full_time', 'Part_time', 'Internship', 'Contract']),
-  experience_levels: z.enum(['0-1Year', '1-3Years', '3-5Years', '5-10Years', '10+Years']),
-  weekly_ranges: z.enum([
-    'mondayToFriday',
-    'weekendsNeeded',
-    'everyWeekend',
-    'rotatingWeekend',
-    'noWeekend',
-    'weekendsOnly',
-    'other',
-  ]),
-  shifts: z.enum([
-    'morningShift',
-    'dayShift',
-    'eveningShift',
-    'nightShift',
-    '8HourShift',
-    '10HourShift',
-    '12HourShift',
-    'other',
-  ]),
+  job_type: z.string().min(1, 'Job type is required'),
+  experience_levels: z.string().min(1, 'Experience level is required'),
+  weekly_ranges: z.string().min(1, 'Weekly range is required'),
+  shifts: z.string().min(1, 'Shift is required'),
 });
 
 export const step3Schema = z.object({
@@ -51,8 +24,13 @@ export const step3Schema = z.object({
 });
 
 export const step4Schema = z.object({
-  requirements: z.array(z.number()).min(1, 'At least one skill is required'),
-  level: z.enum(['Beginner', 'Mid', 'Senior']),
+  requirements: z
+    .array(z.number())
+    .min(1, 'At least one skill is required')
+    .max(5, 'You can select up to 5 skills only'), // Add max 5 validation
+  level: z.enum(['Beginner', 'Mid', 'Senior'], {
+    required_error: 'Experience level is required',
+  }),
 });
 
 export const jobSchema = z.object({

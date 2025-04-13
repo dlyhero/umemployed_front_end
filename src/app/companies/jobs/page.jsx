@@ -1,47 +1,48 @@
 'use client';
-
-import { useRouter } from 'next/navigation';
-import { useJobForm } from '@/src/hooks/useJobForm';
-import { FormContainer } from './components';
-import axios from 'axios';
+import { useRouter, useParams } from 'next/navigation';
+import { Toaster, toast } from 'react-hot-toast';
+import { FormContainer } from '../jobs/components/FormContainer';
+import { useJobForm } from '../../../hooks/useJobForm';
 
 export default function JobPostingPage() {
   const router = useRouter();
-  const { step, form, nextStep, prevStep, stepIsValid } = useJobForm();
+  const { companyId } = useParams();
+  const { step, form, onSubmit: handleSubmit, stepIsValid, nextStep, prevStep, jobOptions, extractedSkills } = useJobForm('basicinformation');
 
   const onSubmit = async (data) => {
     try {
-      // Post the form data
-      await axios.post(
-        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/create-job/',
-        data
-      );
-
-      // If final step, show success and redirect
+      const result = await handleSubmit(data);
+      if (result?.error) {
+        toast.error(result.error);
+        return { error: result.error };
+      }
       if (step === 4) {
-        alert('Job posted successfully!');
-        router.push('/recruiter/dashboard');
+        toast.success('Job created successfully!');
+        router.push(`/companies/${companyId}/dashboard`);
       } else {
-        // Go to next step
+        toast.success(`Step ${step} saved successfully!`);
         nextStep();
       }
-
       return { success: true };
     } catch (error) {
-      console.error('Error posting job:', error);
-      alert('Failed to post job. Please try again.');
-      return { error: 'Submission failed' };
+      toast.error('Failed to submit step');
+      return { error: error.message };
     }
   };
 
   return (
-    <FormContainer
-      step={step}
-      form={form}
-      nextStep={nextStep}
-      prevStep={prevStep}
-      onSubmit={onSubmit}
-      stepIsValid={stepIsValid}
-    />
+    <>
+      <Toaster position="top-right" />
+      <FormContainer
+        step={step}
+        form={form}
+        nextStep={nextStep}
+        prevStep={prevStep}
+        onSubmit={onSubmit}
+        stepIsValid={stepIsValid}
+        jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
+      />
+    </>
   );
 }

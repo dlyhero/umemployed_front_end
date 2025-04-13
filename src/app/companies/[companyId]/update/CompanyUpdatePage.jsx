@@ -9,10 +9,11 @@ import CompanyDescription from './CompanyDescription';
 import SocialLinksAndVideo from './SocialLinksAndVideo';
 import Loader from '@/src/components/common/Loader/Loader';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useToast } from '@/lib/useToast';
 
-const CompanyCreationPage = () => {
+const CompanyUpdatePage = () => {
+  const { companyId } = useParams();
   const { data: session, status } = useSession();
   const router = useRouter();
   const toast = useToast();
@@ -31,28 +32,83 @@ const CompanyCreationPage = () => {
     linkedin: '',
     video_introduction: '',
     job_openings: '',
+    logo: '',
+    cover_photo: '',
   });
   const [logoFile, setLogoFile] = useState(null);
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
   useEffect(() => {
     if (status === 'authenticated') {
       if (session?.user?.role !== 'recruiter') {
+        toast.error('Only recruiters can update company profiles.');
         router.push('/select-role');
-      } else if (session?.user?.has_company) {
-        router.push(`/companies/${session.user.companyId}/dashboard`);
+        return;
       }
+      const fetchCompanyData = async () => {
+        if (!session?.accessToken) {
+          toast.error('Authentication token missing. Please sign in again.');
+          router.push('/login?callbackUrl=/companies/' + companyId + '/update');
+          return;
+        }
+        try {
+          const response = await axios.get(
+            `${BASE_URL}/api/company/company-details/${companyId}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+              },
+            }
+          );
+          console.log('GET Response:', response.data); // Debug
+          setFormData({
+            name: response.data.name || '',
+            industry: response.data.industry || '',
+            size: response.data.size || '',
+            location: response.data.location || '',
+            founded: response.data.founded || '',
+            website_url: response.data.website_url || '',
+            country: response.data.country || '',
+            contact_email: response.data.contact_email || '',
+            contact_phone: response.data.contact_phone || '',
+            description: response.data.description || '',
+            mission_statement: response.data.mission_statement || '',
+            linkedin: response.data.linkedin || '',
+            video_introduction: response.data.video_introduction || '',
+            job_openings: response.data.job_openings || '',
+            logo: response.data.logo || '',
+            cover_photo: response.data.cover_photo || '',
+          });
+        } catch (err) {
+          console.error('Error fetching company:', {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message,
+          });
+          let errorMessage = 'Failed to load company data. Please try again.';
+          if (err.response?.status === 404) {
+            errorMessage = 'Company not found. Please check the company ID.';
+          } else if (err.response?.status === 401) {
+            errorMessage = 'Unauthorized. Please sign in again.';
+            router.push('/login?callbackUrl=/companies/' + companyId + '/update');
+          }
+          toast.error(errorMessage);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCompanyData();
     } else if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/companies/create');
+      router.push('/login?callbackUrl=/companies/' + companyId + '/update');
     }
-  }, [status, session, router]);
+  }, [status, session, companyId, router, toast]);
 
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return <Loader />;
   }
-  if (session?.user?.has_company) return null;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -62,8 +118,7 @@ const CompanyCreationPage = () => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
-      // Validate file size (e.g., max 5MB) and type
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      const maxSize = 5 * 1024 * 1024; // 5MB
       if (files[0].size > maxSize) {
         toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be under 5MB.`);
         return;
@@ -87,11 +142,11 @@ const CompanyCreationPage = () => {
       toast.error('Company name and country are required.');
       return;
     }
-    setLoading(true);
+    setSubmitting(true);
 
     const data = new FormData();
     for (const key in formData) {
-      if (formData[key]) {
+      if (formData[key] && key !== 'logo' && key !== 'cover_photo') {
         data.append(key, formData[key]);
       }
     }
@@ -104,7 +159,7 @@ const CompanyCreationPage = () => {
       console.log('Cover photo appended:', coverPhotoFile.name); // Debug
     }
 
-    // Debug FormData contents
+    // Debug FormData
     for (let [key, value] of data.entries()) {
       console.log(`FormData: ${key} =`, value);
     }
@@ -112,13 +167,13 @@ const CompanyCreationPage = () => {
     const token = session?.accessToken;
     if (!token) {
       toast.error('No authentication token found. Please sign in again.');
-      setLoading(false);
+      setSubmitting(false);
       return;
     }
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/company/create-company/`,
+      const response = await axios.put(
+        `${BASE_URL}/api/company/update-company/${companyId}`,
         data,
         {
           headers: {
@@ -127,21 +182,17 @@ const CompanyCreationPage = () => {
         }
       );
 
-      console.log('API response:', response.data); // Debug response
-
-      session.user.has_company = true;
-      session.user.companyId = response.data.id;
-
-      toast.success('Company created successfully!');
-      router.push(`/companies/${response.data.id}/dashboard`);
+      console.log('Update API response:', response.data); // Debug
+      toast.success('Company updated successfully!');
+      router.push(`/companies/${companyId}/dashboard`);
     } catch (err) {
-      console.error('Error creating company:', {
+      console.error('Error updating company:', {
         status: err.response?.status,
         data: err.response?.data,
         message: err.message,
       });
 
-      let errorMessage = 'Failed to create company. Please try again.';
+      let errorMessage = 'Failed to update company. Please try again.';
       if (err.response?.data) {
         if (err.response.data.detail) {
           errorMessage = err.response.data.detail;
@@ -154,10 +205,9 @@ const CompanyCreationPage = () => {
           errorMessage = errors.join(', ');
         }
       }
-
       toast.error(errorMessage);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -170,8 +220,8 @@ const CompanyCreationPage = () => {
           className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
         />
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800">Create Your Company Profile</h2>
-          <p className="text-gray-600 mt-1">Provide your company details below.</p>
+          <h2 className="text-3xl font-bold text-gray-800">Update Your Company Profile</h2>
+          <p className="text-gray-600 mt-1">Modify your company details below.</p>
         </div>
       </div>
       {loading ? (
@@ -195,9 +245,9 @@ const CompanyCreationPage = () => {
               variant="destructive"
               size="default"
               className="rounded-full w-full sm:w-auto"
-              disabled={loading}
+              disabled={submitting}
               type="button"
-              onClick={() => router.push('/select-role')}
+              onClick={() => router.push(`/companies/${companyId}/dashboard`)}
             >
               Cancel
             </Button>
@@ -205,10 +255,32 @@ const CompanyCreationPage = () => {
               variant="brand"
               size="default"
               type="submit"
-              className="rounded-full w-full sm:w-auto"
-              disabled={loading}
+              className="rounded-full w-full sm:w-auto flex items-center justify-center"
+              disabled={submitting}
             >
-              {loading ? 'Creating...' : 'Create Company'}
+              {submitting && (
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z"
+                  ></path>
+                </svg>
+              )}
+              {submitting ? 'Updating...' : 'Update Company'}
             </Button>
           </div>
         </form>
@@ -217,4 +289,4 @@ const CompanyCreationPage = () => {
   );
 };
 
-export default CompanyCreationPage;
+export default CompanyUpdatePage;
