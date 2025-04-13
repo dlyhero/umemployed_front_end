@@ -9,9 +9,9 @@ import {
   RecommendedJobs,
   Sideba,
   StatsGrid,
-  WelcomeSection
 } from '../../../components/common/dashboard'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/outline'
+import { WelcomeSection } from './WelcomeSection'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
