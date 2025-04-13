@@ -31,7 +31,7 @@ export default function AuthButtons() {
           } else {
             setUserEmail(session.user.email);
           }
-          
+
           // Debug log - only when session is available
           console.log("Current user session:", {
             role: session.user?.role,
@@ -58,10 +58,10 @@ export default function AuthButtons() {
 
   const getNavigationPath = () => {
     if (!session?.user) return "/";
-    
+
     if (session.user.role === "job_seeker") {
-      return session.user.has_resume 
-        ? "/applicant/dashboard" 
+      return session.user.has_resume
+        ? "/applicant/dashboard"
         : "/applicant/upload-resume";
     } else if (session.user.role === "recruiter") {
       return session.user.has_company
@@ -91,10 +91,14 @@ export default function AuthButtons() {
     );
   }
 
+  console.log(session)
+
   return (
     <div className="flex items-center gap-4">
       {status === "authenticated" ? (
         <>
+         {session.user.role === 'job_seeker' && <Link href="/applicant/upload-resume" className="text-gray-700 text-sm font-medium">Resume</Link> }
+
           <Link
             href={getNavigationPath()}
             className="flex items-center gap-3"
@@ -125,6 +129,7 @@ export default function AuthButtons() {
               {username}
             </span>
           </Link>
+
 
           <Button
             variant={"outline"}
