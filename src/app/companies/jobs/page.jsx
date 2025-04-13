@@ -1,8 +1,8 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
-import { FormContainer } from '../../../components/FormContainer';
-import { useJobForm } from '../../../../hooks/useJobForm';
+import { FormContainer } from '../jobs/components/FormContainer';
+import { useJobForm } from '../../../hooks/useJobForm';
 
 export default function JobPostingPage() {
   const router = useRouter();

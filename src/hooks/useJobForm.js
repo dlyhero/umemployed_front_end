@@ -1,8 +1,10 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { step1Schema, step2Schema, step3Schema, step4Schema } from '../app/companies/jobs/schemas/jobSchema';
+
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
@@ -21,6 +23,7 @@ export const useJobForm = (currentStep) => {
     shifts: {},
     locations: [],
   });
+  const [isLoadingSkills, setIsLoadingSkills] = useState(false);
 
   const stepSchemas = {
     basicinformation: step1Schema,
@@ -53,7 +56,7 @@ export const useJobForm = (currentStep) => {
       description: '',
       responsibilities: '',
       benefits: '',
-      requirements: [], // Array of numbers (temporary IDs)
+      requirements: [],
       level: 'Beginner',
       isSubmitting: false,
     },
@@ -91,17 +94,69 @@ export const useJobForm = (currentStep) => {
       const savedData = localStorage.getItem('jobFormData');
       const savedJobId = localStorage.getItem('jobId');
       const savedSkills = localStorage.getItem('extracted_skills');
+      console.log('Loading from localStorage - jobId:', savedJobId, 'savedSkills:', savedSkills);
+
       if (savedData) form.reset(JSON.parse(savedData));
       if (savedJobId) setJobId(savedJobId);
+
+      // Define parsedSkills with a default value
+      let parsedSkills = [];
       if (savedSkills) {
         const skills = JSON.parse(savedSkills);
-        setExtractedSkills(Array.isArray(skills) ? skills : []);
+        parsedSkills = Array.isArray(skills) ? skills : [];
+        setExtractedSkills(parsedSkills);
+        console.log('Loaded extracted_skills from localStorage:', parsedSkills);
+      }
+
+      // If on Step 4 and jobId exists but no skills are loaded, fetch them
+      if (currentStep === 'skills' && savedJobId && parsedSkills.length === 0) {
+        const loadSkills = async () => {
+          setIsLoadingSkills(true);
+          const skills = await fetchExtractedSkills(savedJobId);
+          setExtractedSkills(skills);
+          localStorage.setItem('extracted_skills', JSON.stringify(skills));
+          setIsLoadingSkills(false);
+          console.log('Fetched extracted_skills on Step 4 load:', skills);
+          if (skills.length === 0) {
+            form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+          }
+        };
+        loadSkills();
       }
     }
-  }, [form]);
+  }, [form, currentStep]);
 
   const saveFormData = (data) => {
     localStorage.setItem('jobFormData', JSON.stringify(data));
+  };
+
+  const fetchExtractedSkills = async (jobId) => {
+    console.log('fetchExtractedSkills called with jobId:', jobId, 'token:', session?.accessToken || session?.token);
+    try {
+      const response = await fetch(
+        `https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/jobs/${jobId}/extracted-skills/`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+          },
+        }
+      );
+      console.log('fetchExtractedSkills response status:', response.status);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('fetchExtractedSkills error:', errorData);
+        throw new Error(errorData.message || 'Failed to fetch extracted skills');
+      }
+      const data = await response.json();
+      const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
+      console.log('fetchExtractedSkills successful, skills:', skills);
+      return skills;
+    } catch (error) {
+      console.error('Error fetching extracted skills:', error.message);
+      return [];
+    }
   };
 
   const onSubmit = async (data) => {
@@ -176,18 +231,18 @@ export const useJobForm = (currentStep) => {
         });
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('Step 3 error response:', errorData);
           throw new Error(errorData.message || 'Failed to update step 3');
         }
         const result = await response.json();
-        // Map extracted_skills (array of strings) to array of objects with temporary IDs
-        const skills = Array.isArray(result.extracted_skills)
-          ? result.extracted_skills.map((skill, index) => ({
-              id: index + 1, // Assign temporary ID starting from 1
-              name: skill,
-            }))
-          : [];
+        setIsLoadingSkills(true);
+        const skills = await fetchExtractedSkills(jobId);
         setExtractedSkills(skills);
         localStorage.setItem('extracted_skills', JSON.stringify(skills));
+        setIsLoadingSkills(false);
+        if (skills.length === 0) {
+          form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+        }
         saveFormData({ ...form.getValues(), ...step3Data });
         return result;
       } else if (currentStep === 'skills' && jobId) {
@@ -207,6 +262,7 @@ export const useJobForm = (currentStep) => {
         });
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('Step 4 error response:', errorData);
           throw new Error(errorData.message || 'Failed to update step 4');
         }
         const result = await response.json();
@@ -251,6 +307,10 @@ export const useJobForm = (currentStep) => {
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
+      if (currentStep === 'description' && isLoadingSkills) {
+        console.log('Waiting for skills to load before navigating to Step 4...');
+        return;
+      }
       router.push(`/companies/jobs/create/${steps[currentIndex + 1]}${jobId ? `?jobId=${jobId}` : ''}`);
     }
   };
@@ -265,5 +325,16 @@ export const useJobForm = (currentStep) => {
 
   const getStepNumber = () => stepNumbers[currentStep] || 1;
 
-  return { step: getStepNumber(), form, onSubmit, stepIsValid, nextStep, prevStep, jobId, extracted_skills, jobOptions };
+  return { 
+    step: getStepNumber(), 
+    form, 
+    onSubmit, 
+    stepIsValid, 
+    nextStep, 
+    prevStep, 
+    jobId, 
+    extracted_skills, 
+    jobOptions, 
+    isLoadingSkills 
+  };
 };

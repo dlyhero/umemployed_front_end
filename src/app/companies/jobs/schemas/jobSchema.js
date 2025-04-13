@@ -24,7 +24,10 @@ export const step3Schema = z.object({
 });
 
 export const step4Schema = z.object({
-  requirements: z.array(z.number()), // Temporary IDs (numbers)
+  requirements: z
+    .array(z.number())
+    .min(1, 'At least one skill is required')
+    .max(5, 'You can select up to 5 skills only'), // Add max 5 validation
   level: z.enum(['Beginner', 'Mid', 'Senior'], {
     required_error: 'Experience level is required',
   }),

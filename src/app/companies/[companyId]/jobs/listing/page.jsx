@@ -6,21 +6,20 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, Filter, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Menu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchCompanyJobs } from '../../../../api/companies/job_listing';
 import { JobListContainer } from './components/JobListContainer';
 import { MobileMenu } from '../../dashboard/MobileMenu';
 import { Sideba } from '../../dashboard/recruiter/Sideba';
-import Link from 'next/link';
+import { MobileSearch } from './components/MobileSearch';
+import { JobHeader } from './components/JobHeader';
 
 export default function CompanyJobsListing() {
   const { companyId } = useParams();
   const { data: session, status } = useSession();
   const [jobs, setJobs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterVisible, setFilterVisible] = useState(false);
   const [jobTypeFilters, setJobTypeFilters] = useState([]);
   const [salaryFilters, setSalaryFilters] = useState([]);
   const [locationFilter, setLocationFilter] = useState('');
@@ -124,7 +123,7 @@ export default function CompanyJobsListing() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Mobile Header */}
         <header className="flex justify-between items-center md:hidden mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Job Listings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Available Jobs</h1>
           <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
@@ -141,6 +140,11 @@ export default function CompanyJobsListing() {
           companyId={companyId}
         />
 
+        {/* Mobile Search */}
+        <div className="md:hidden mb-6">
+          <MobileSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
+
         <div className="flex gap-6">
           {/* Sidebar (Desktop, Scrolls with Content) */}
           <div className="hidden md:block w-64 flex-shrink-0">
@@ -149,38 +153,10 @@ export default function CompanyJobsListing() {
 
           {/* Main Content */}
           <main className="flex-1">
-            {/* Sticky Header with Search and Post Job */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white/90 backdrop-blur-md shadow-sm rounded-xl p-4 mb-6 sticky top-0 z-10"
-            >
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="relative w-full sm:w-96">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search jobs, companies, or locations"
-                    className="w-full pl-10 pr-10 py-2 text-gray-900 placeholder-gray-400 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <Filter
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-blue-500 cursor-pointer"
-                    onClick={() => setFilterVisible(!filterVisible)}
-                  />
-                </div>
-                <Button
-                  asChild
-                  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
-                >
-                  <Link href={`/companies/jobs/create/basicinformation`}>
-                    Post a Job
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
+            {/* Desktop Header */}
+            <div className="hidden md:block mb-6">
+              <JobHeader />
+            </div>
 
             {/* Job List */}
             {isLoading ? (
