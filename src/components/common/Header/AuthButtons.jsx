@@ -90,7 +90,7 @@ export default function AuthButtons() {
     <div className="flex items-center gap-4">
       {status === "authenticated" ? (
         <>
-         {session.user.role === 'job_seeker' && <Link href="/applicant/upload-resume" className="text-gray-700 text-sm font-medium">Resume</Link> }
+         {session.user.role === 'job_seeker' && <Link href="/applicant/upload-resume" className="text-gray-700 text-sm font-medium hidden md:block">Resume</Link> }
 
           <Link
             href={getNavigationPath()}
