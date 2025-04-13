@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MoreVertical, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import Link from 'next/link';
 
 export const JobItem = ({ job, companyId }) => {
@@ -21,19 +22,23 @@ export const JobItem = ({ job, companyId }) => {
         <div className="flex-1">
           <Link href={`/companies/${companyId}/jobs/${job.id}/applications`}>
             <h4 className="text-lg font-semibold text-gray-800 hover:text-blue-500 transition-colors">
-              {job.title}
+              {job.title || 'Untitled Job'}
             </h4>
           </Link>
           <p className="text-sm text-gray-500 mt-1">
-            Posted {new Date(job.created_at).toLocaleDateString()}
+            Posted {job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown'}
           </p>
           <div className="flex gap-2 mt-3">
-            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-              {job.job_type}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
-              {job.job_location_type}
-            </span>
+            {job.job_type && (
+              <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                {job.job_type}
+              </span>
+            )}
+            {job.job_location_type && (
+              <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                {job.job_location_type}
+              </span>
+            )}
           </div>
         </div>
         <Button
@@ -47,15 +52,12 @@ export const JobItem = ({ job, companyId }) => {
       <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
           <div>
-            <span className="text-blue-500 font-semibold">{job.application_count || 0}</span> Proposals
+            <span className="text-blue-500 font-semibold">{job.application_count || 0}</span>{' '}
+            Proposals
           </div>
           <div className="hidden sm:block w-px h-6 bg-gray-300" />
           <div>
             <span className="text-blue-500 font-semibold">{job.hired_count || 0}</span> Hired
-          </div>
-          <div className="hidden sm:block w-px h-6 bg-gray-300" />
-          <div>
-            <span className="text-blue-500 font-semibold">{job.hire_number}</span> Openings
           </div>
         </div>
         <Button
@@ -83,7 +85,7 @@ export const JobItem = ({ job, companyId }) => {
               <Link
                 href="#"
                 className="block px-4 py-2 hover:bg-gray-50"
-                onClick={() => alert('Feature not implemented')}
+                onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Invite Freelancer
               </Link>
@@ -92,7 +94,7 @@ export const JobItem = ({ job, companyId }) => {
               <Link
                 href="#"
                 className="block px-4 py-2 hover:bg-gray-50"
-                onClick={() => alert('Feature not implemented')}
+                onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Edit Posting
               </Link>
@@ -101,7 +103,7 @@ export const JobItem = ({ job, companyId }) => {
               <Link
                 href="#"
                 className="block px-4 py-2 hover:bg-gray-50 text-red-600"
-                onClick={() => alert('Feature not implemented')}
+                onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Delete Posting
               </Link>

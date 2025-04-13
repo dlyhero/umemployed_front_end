@@ -1,4 +1,3 @@
-// src/app/companies/[companyId]/jobs/listing/components/JobListContainer.jsx
 'use client';
 
 import { motion } from 'framer-motion';

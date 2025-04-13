@@ -3,125 +3,21 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, Filter } from 'lucide-react';
+import { Search, Menu, Filter, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { fetchCompanyJobs } from '../../../../api/companies/job_listing';
 import { JobListContainer } from './components/JobListContainer';
 import { MobileMenu } from '../../dashboard/MobileMenu';
 import { Sideba } from '../../dashboard/recruiter/Sideba';
 import Link from 'next/link';
 
-const mockJobs = [
-  {
-    id: 1,
-    title: 'Senior Software Engineer',
-    hire_number: 2,
-    job_location_type: 'Remote',
-    job_type: 'Full-Time',
-    location: 'Remote',
-    salary_range: '70001+',
-    category: 1,
-    description: 'Develop cutting-edge software solutions.',
-    responsibilities: 'Code, test, and deploy applications.',
-    benefits: 'Health insurance, 401k, remote work.',
-    requirements: [1, 2, 3],
-    level: 'Expert',
-    experience_levels: '5-10Years',
-    weekly_ranges: 'mondayToFriday',
-    shifts: 'dayShift',
-    created_at: '2025-04-01T10:00:00Z',
-    application_count: 12,
-    hired_count: 1,
-  },
-  {
-    id: 2,
-    title: 'Marketing Specialist',
-    hire_number: 1,
-    job_location_type: 'On-site',
-    job_type: 'Part-Time',
-    location: 'New York',
-    salary_range: '30000-50000',
-    category: 2,
-    description: 'Create marketing campaigns.',
-    responsibilities: 'Plan and execute strategies.',
-    benefits: 'Flexible hours.',
-    requirements: [4],
-    level: 'Mid',
-    experience_levels: '1-3Years',
-    weekly_ranges: 'weekendsNeeded',
-    shifts: 'eveningShift',
-    created_at: '2025-04-02T14:30:00Z',
-    application_count: 8,
-    hired_count: 0,
-  },
-  {
-    id: 3,
-    title: 'Product Designer',
-    hire_number: 3,
-    job_location_type: 'Hybrid',
-    job_type: 'Contract',
-    location: 'San Francisco',
-    salary_range: '50001-70000',
-    category: 3,
-    description: 'Design user-friendly interfaces.',
-    responsibilities: 'Wireframe and prototype designs.',
-    benefits: 'Stock options.',
-    requirements: [5, 6],
-    level: 'Beginner',
-    experience_levels: 'under1Year',
-    weekly_ranges: 'rotatingWeekend',
-    shifts: 'morningShift',
-    created_at: '2025-04-03T09:15:00Z',
-    application_count: 5,
-    hired_count: 2,
-  },
-  {
-    id: 4,
-    title: 'DevOps Engineer',
-    hire_number: 1,
-    job_location_type: 'Remote',
-    job_type: 'Full-Time',
-    location: 'Remote',
-    salary_range: '70001+',
-    category: 4,
-    description: 'Manage cloud infrastructure.',
-    responsibilities: 'Automate deployments.',
-    benefits: 'Unlimited PTO.',
-    requirements: [7],
-    level: 'Expert',
-    experience_levels: '10+Years',
-    weekly_ranges: 'noneWeekend',
-    shifts: 'nightShift',
-    created_at: '2025-04-04T16:45:00Z',
-    application_count: 15,
-    hired_count: 0,
-  },
-  {
-    id: 5,
-    title: 'Customer Support Lead',
-    hire_number: 2,
-    job_location_type: 'On-site',
-    job_type: 'Full-Time',
-    location: 'Chicago',
-    salary_range: '30000-50000',
-    category: 5,
-    description: 'Lead support team.',
-    responsibilities: 'Handle escalations.',
-    benefits: 'Health benefits.',
-    requirements: [8],
-    level: 'Mid',
-    experience_levels: '3-5Years',
-    weekly_ranges: 'weekendsOnly',
-    shifts: 'twelveHourShift',
-    created_at: '2025-04-05T11:20:00Z',
-    application_count: 3,
-    hired_count: 1,
-  },
-];
-
 export default function CompanyJobsListing() {
   const { companyId } = useParams();
+  const { data: session, status } = useSession();
   const [jobs, setJobs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
@@ -132,11 +28,39 @@ export default function CompanyJobsListing() {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [activeTab, setActiveTab] = useState(`/companies/${companyId}/jobs/listing`);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setJobs(mockJobs);
-    setFilteredJobs(mockJobs);
-  }, []);
+    async function getJobs() {
+      if (status === 'loading' || !session) {
+        return; // Wait for session
+      }
+
+      if (!session.accessToken) {
+        setError('Unauthorized: No access token available');
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetchCompanyJobs(companyId, session.accessToken);
+        setJobs(response);
+        setFilteredJobs(response);
+      } catch (error) {
+        console.error('Error fetching company jobs:', error);
+        setError(error.message || 'Failed to load job listings. Please try again.');
+        toast.error(error.message || 'Failed to load job listings.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (companyId && status === 'authenticated') {
+      getJobs();
+    }
+  }, [companyId, session, status]);
 
   useEffect(() => {
     let result = [...jobs];
@@ -144,8 +68,8 @@ export default function CompanyJobsListing() {
     if (searchQuery) {
       result = result.filter(
         (job) =>
-          job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.location.toLowerCase().includes(searchQuery.toLowerCase())
+          job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.location?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -159,20 +83,36 @@ export default function CompanyJobsListing() {
 
     if (locationFilter) {
       result = result.filter((job) =>
-        job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        job.location?.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
 
     if (keywordFilter) {
       result = result.filter(
         (job) =>
-          job.description.toLowerCase().includes(keywordFilter.toLowerCase()) ||
-          job.title.toLowerCase().includes(keywordFilter.toLowerCase())
+          job.description?.toLowerCase().includes(keywordFilter.toLowerCase()) ||
+          job.title?.toLowerCase().includes(keywordFilter.toLowerCase())
       );
     }
 
     setFilteredJobs(result);
   }, [searchQuery, jobTypeFilters, salaryFilters, locationFilter, keywordFilter, jobs]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center text-red-600">Please log in to view job listings.</div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -202,7 +142,7 @@ export default function CompanyJobsListing() {
         />
 
         <div className="flex gap-6">
-          {/* Sidebar (Desktop) */}
+          {/* Sidebar (Desktop, Scrolls with Content) */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
           </div>
@@ -243,7 +183,16 @@ export default function CompanyJobsListing() {
             </motion.div>
 
             {/* Job List */}
-            <JobListContainer jobs={filteredJobs} companyId={companyId} />
+            {isLoading ? (
+              <div className="text-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto" />
+                <p className="text-gray-600 mt-2">Loading jobs...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 text-red-600">{error}</div>
+            ) : (
+              <JobListContainer jobs={filteredJobs} companyId={companyId} />
+            )}
           </main>
         </div>
       </div>
