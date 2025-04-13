@@ -8,9 +8,19 @@ import { useSession } from 'next-auth/react';
 
 export const useJobForm = (currentStep) => {
   const router = useRouter();
-  const { data: session, status } = useSession(); // Get session from NextAuth
+  const { data: session, status } = useSession();
   const [jobId, setJobId] = useState(null);
-  const [extractedSkills, setExtractedSkills] = useState([]);
+  const [extracted_skills, setExtractedSkills] = useState([]);
+  const [jobOptions, setJobOptions] = useState({
+    categories: [],
+    salary_ranges: {},
+    job_location_types: {},
+    job_types: {},
+    experience_levels: {},
+    weekly_ranges: {},
+    shifts: {},
+    locations: [],
+  });
 
   const stepSchemas = {
     basicinformation: step1Schema,
@@ -19,36 +29,74 @@ export const useJobForm = (currentStep) => {
     skills: step4Schema,
   };
 
+  const stepNumbers = {
+    basicinformation: 1,
+    requirements: 2,
+    description: 3,
+    skills: 4,
+  };
+
   const form = useForm({
     resolver: zodResolver(stepSchemas[currentStep]),
     defaultValues: {
       title: '',
       hire_number: 1,
-      job_location_type: '',
       job_type: '',
+      job_location_type: '',
       location: '',
       salary_range: 'Not specified',
       category: null,
+      job_type: '',
       experience_levels: '',
       weekly_ranges: '',
       shifts: '',
       description: '',
       responsibilities: '',
       benefits: '',
-      requirements: [],
+      requirements: [], // Array of numbers (temporary IDs)
       level: 'Beginner',
+      isSubmitting: false,
     },
     mode: 'onChange',
   });
 
   useEffect(() => {
+    const fetchJobOptions = async () => {
+      try {
+        const response = await fetch('https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/job-options/', {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Failed to fetch job options');
+        const data = await response.json();
+        setJobOptions({
+          categories: data.categories || [],
+          salary_ranges: data.salary_ranges || {},
+          job_location_types: data.job_location_types || {},
+          job_types: data.job_types || {},
+          experience_levels: data.experience_levels || {},
+          weekly_ranges: data.weekly_ranges || {},
+          shifts: data.shifts || {},
+          locations: data.locations || [],
+        });
+      } catch (error) {
+        console.error('Error fetching job options:', error);
+        form.setError('root', { message: 'Failed to load job options.' });
+      }
+    };
+    fetchJobOptions();
+  }, [form]);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedData = localStorage.getItem('jobFormData');
       const savedJobId = localStorage.getItem('jobId');
-      const savedSkills = localStorage.getItem('extractedSkills');
+      const savedSkills = localStorage.getItem('extracted_skills');
       if (savedData) form.reset(JSON.parse(savedData));
       if (savedJobId) setJobId(savedJobId);
-      if (savedSkills) setExtractedSkills(JSON.parse(savedSkills));
+      if (savedSkills) {
+        const skills = JSON.parse(savedSkills);
+        setExtractedSkills(Array.isArray(skills) ? skills : []);
+      }
     }
   }, [form]);
 
@@ -60,28 +108,21 @@ export const useJobForm = (currentStep) => {
     const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
     console.log('onSubmit called with data:', data);
 
-    if (status === 'loading') {
-      console.log('Session still loading...');
-      return { error: 'Session is still loading' };
-    }
+    if (status === 'loading') return { error: 'Session is still loading' };
+    if (status === 'unauthenticated') return { error: 'Please log in to create a job.' };
 
-    if (status === 'unauthenticated') {
-      form.setError('root', { message: 'Please log in to create a job.' });
-      return { error: 'Please log in to create a job.' };
-    }
-
-    const token = session?.accessToken || session?.token; // Adjust based on your NextAuth token key
-    console.log('Session:', session);
-    console.log('Token:', token);
-
-    if (!token) {
-      form.setError('root', { message: 'No authentication token found. Please log in again.' });
-      return { error: 'No authentication token found' };
-    }
+    const token = session?.accessToken || session?.token;
+    if (!token) return { error: 'No authentication token found' };
 
     try {
+      await form.setValue('isSubmitting', true, { shouldValidate: false });
+
       if (currentStep === 'basicinformation') {
-        const step1Data = step1Schema.parse(data);
+        const step1Data = {
+          ...step1Schema.parse(data),
+          category: parseInt(data.category, 10),
+          location: data.location,
+        };
         console.log('Submitting Step 1 data:', step1Data);
         const response = await fetch(`${baseUrl}/api/job/create-step1/`, {
           method: 'POST',
@@ -92,42 +133,21 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step1Data),
         });
 
-        const responseText = await response.text();
-        console.log('Raw response:', responseText);
-
         if (!response.ok) {
-          let errorMessage = 'Failed to create job';
-          try {
-            const errorData = JSON.parse(responseText);
-            errorMessage = errorData.message || errorData.detail || errorMessage;
-          } catch (e) {
-            errorMessage = `Server returned non-JSON response: ${responseText.slice(0, 100)}...`;
-          }
-          throw new Error(errorMessage);
+          const errorData = await response.json();
+          console.error('Step 1 error response:', errorData);
+          throw new Error(errorData.message || 'Failed to create job');
         }
 
-        const result = JSON.parse(responseText);
-        console.log('Step 1 response:', result);
+        const result = await response.json();
         setJobId(result.id);
         localStorage.setItem('jobId', result.id);
-        const updatedData = {
-          ...form.getValues(),
-          ...step1Data,
-          description: result.description || '',
-          responsibilities: result.responsibilities || '',
-          benefits: result.benefits || '',
-          requirements: result.requirements || [],
-          level: result.level || 'Beginner',
-          experience_levels: result.experience_levels || '',
-          weekly_ranges: result.weekly_ranges || '',
-          shifts: result.shifts || '',
-        };
-        saveFormData(updatedData);
-        form.reset(updatedData);
-        router.push(`/jobs/create/requirements?jobId=${result.id}`);
+        saveFormData({ ...form.getValues(), ...step1Data });
+        form.reset({ ...form.getValues(), ...step1Data });
         return result;
       } else if (currentStep === 'requirements' && jobId) {
         const step2Data = step2Schema.parse(data);
+        console.log('Submitting Step 2 data:', step2Data);
         const response = await fetch(`${baseUrl}/api/job/${jobId}/create-step2/`, {
           method: 'PATCH',
           headers: {
@@ -137,12 +157,12 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step2Data),
         });
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(JSON.parse(errorText).message || 'Failed to update step 2');
+          const errorData = await response.json();
+          console.error('Step 2 error response:', errorData);
+          throw new Error(errorData.message || 'Failed to update step 2');
         }
         const result = await response.json();
         saveFormData({ ...form.getValues(), ...step2Data });
-        router.push(`/jobs/create/description?jobId=${jobId}`);
         return result;
       } else if (currentStep === 'description' && jobId) {
         const step3Data = step3Schema.parse(data);
@@ -155,17 +175,28 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step3Data),
         });
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(JSON.parse(errorText).message || 'Failed to update step 3');
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update step 3');
         }
         const result = await response.json();
-        setExtractedSkills(result.extracted_skills || []);
-        localStorage.setItem('extractedSkills', JSON.stringify(result.extracted_skills || []));
+        // Map extracted_skills (array of strings) to array of objects with temporary IDs
+        const skills = Array.isArray(result.extracted_skills)
+          ? result.extracted_skills.map((skill, index) => ({
+              id: index + 1, // Assign temporary ID starting from 1
+              name: skill,
+            }))
+          : [];
+        setExtractedSkills(skills);
+        localStorage.setItem('extracted_skills', JSON.stringify(skills));
         saveFormData({ ...form.getValues(), ...step3Data });
-        router.push(`/jobs/create/skills?jobId=${jobId}`);
         return result;
       } else if (currentStep === 'skills' && jobId) {
-        const step4Data = step4Schema.parse(data);
+        const step4Data = {
+          ...step4Schema.parse(data),
+          requirements: Array.isArray(data.requirements) ? data.requirements : [],
+          level: data.level,
+        };
+        console.log('Submitting Step 4 data:', step4Data);
         const response = await fetch(`${baseUrl}/api/job/${jobId}/create-step4/`, {
           method: 'PATCH',
           headers: {
@@ -175,52 +206,64 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step4Data),
         });
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(JSON.parse(errorText).message || 'Failed to update step 4');
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update step 4');
         }
         const result = await response.json();
         localStorage.clear();
-        router.push('/jobs');
         return result;
       }
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
       console.error('API error:', error);
-      form.setError('root', { message: error.message || `Failed to submit Step ${currentStep}` });
       return { error: error.message };
+    } finally {
+      await form.setValue('isSubmitting', false, { shouldValidate: false });
     }
   };
 
   const stepIsValid = () => {
     const errors = form.formState.errors;
-    console.log('Step validation errors:', errors);
-    if (currentStep === 'basicinformation')
+    if (currentStep === 'basicinformation') {
       return (
         !errors.title &&
         !errors.hire_number &&
-        !errors.job_location_type &&
         !errors.job_type &&
+        !errors.job_location_type &&
         !errors.location &&
         !errors.salary_range &&
         !errors.category
       );
-    if (currentStep === 'requirements')
+    }
+    if (currentStep === 'requirements') {
       return !errors.job_type && !errors.experience_levels && !errors.weekly_ranges && !errors.shifts;
-    if (currentStep === 'description') return !errors.description && !errors.responsibilities && !errors.benefits;
-    if (currentStep === 'skills') return !errors.requirements && !errors.level;
+    }
+    if (currentStep === 'description') {
+      return !errors.description && !errors.responsibilities && !errors.benefits;
+    }
+    if (currentStep === 'skills') {
+      return !errors.requirements && !errors.level;
+    }
     return false;
   };
 
-  const prevStep = () => {
-    if (currentStep === 'requirements') router.push('/jobs/create/basicinformation');
-    else if (currentStep === 'description') router.push('/jobs/create/requirements');
-    else if (currentStep === 'skills') router.push('/jobs/create/description');
-  };
-
-  const getStepNumber = () => {
+  const nextStep = () => {
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
-    return steps.indexOf(currentStep) + 1;
+    const currentIndex = steps.indexOf(currentStep);
+    if (currentIndex < steps.length - 1) {
+      router.push(`/companies/jobs/create/${steps[currentIndex + 1]}${jobId ? `?jobId=${jobId}` : ''}`);
+    }
   };
 
-  return { form, onSubmit, stepIsValid, prevStep, jobId, extractedSkills, getStepNumber };
+  const prevStep = () => {
+    const steps = ['basicinformation', 'requirements', 'description', 'skills'];
+    const currentIndex = steps.indexOf(currentStep);
+    if (currentIndex > 0) {
+      router.push(`/companies/jobs/create/${steps[currentIndex - 1]}${jobId ? `?jobId=${jobId}` : ''}`);
+    }
+  };
+
+  const getStepNumber = () => stepNumbers[currentStep] || 1;
+
+  return { step: getStepNumber(), form, onSubmit, stepIsValid, nextStep, prevStep, jobId, extracted_skills, jobOptions };
 };

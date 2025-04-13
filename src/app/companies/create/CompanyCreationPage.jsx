@@ -114,7 +114,7 @@ const CompanyCreationPage = () => {
       toast.success('Company created successfully!');
       router.push(`/companies/${response.data.id}/dashboard`);
     } catch (err) {
-      // Log detailed error for debugging
+      
       console.error('Error creating company:', {
         status: err.response?.status,
         data: err.response?.data,

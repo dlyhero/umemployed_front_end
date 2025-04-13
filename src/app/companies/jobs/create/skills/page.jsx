@@ -1,37 +1,60 @@
 'use client';
-import { Form } from '@/components/ui/form';
-import { ProgressStepper } from '../../components/ProgressStepper';
-import { FormNavigation } from '../../components/FormNavigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { useState } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
+import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
-import { Step4Skills } from '../../components';
-import Loader from '@/src/components/common/Loader/Loader';
 
 export default function Skills() {
   const currentStep = 'skills';
-  const { form, onSubmit, stepIsValid, prevStep, jobId, sessionStatus, extractedSkills, getStepNumber } = useJobForm(currentStep);
+  const searchParams = useSearchParams();
+  const { companyId } = useParams();
+  const jobId = searchParams.get('jobId');
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extracted_skills } = useJobForm(currentStep);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (data) => {
-    const response = await onSubmit(data);
-    if (response.error) form.setError('root', { message: response.error });
+    try {
+      const result = await onSubmit(data);
+      if (result?.error) {
+        toast.error(result.error);
+        return result;
+      }
+      toast.success('Job created successfully!');
+      setLoading(true);
+      router.push(`/companies/${companyId}/dashboard`);
+      return result;
+    } catch (error) {
+      toast.error('Failed to create job');
+      return { error: error.message };
+    }
   };
 
   if (!jobId) return <div className="text-center p-6">Please complete the previous step first.</div>;
 
-  return (
-    <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl mt-5">
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Post a New Job</h2>
-        <p className="text-gray-600 mt-1">Fill in the details to create a job posting.</p>
-        <p className="text-gray-600 mt-1">Step: {getStepNumber()} | Job ID: {jobId}</p>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
       </div>
-      <ProgressStepper step={getStepNumber()} />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <Step4Skills form={form} extractedSkills={extractedSkills} />
-          <FormNavigation step={getStepNumber()} prevStep={prevStep} isSubmitting={form.formState.isSubmitting} isValid={stepIsValid()} />
-          {form.formState.errors.root && <p className="text-red-500 text-sm">{form.formState.errors.root.message}</p>}
-        </form>
-      </Form>
-    </main>
+    );
+  }
+
+  return (
+    <>
+      <Toaster position="top-right" />
+      <FormContainer
+        step={step}
+        form={form}
+        nextStep={() => form.handleSubmit(handleSubmit)()}
+        prevStep={prevStep}
+        onSubmit={handleSubmit}
+        stepIsValid={stepIsValid}
+        jobOptions={jobOptions}
+        extracted_skills={extracted_skills} // Pass extracted_skills
+      />
+    </>
   );
 }

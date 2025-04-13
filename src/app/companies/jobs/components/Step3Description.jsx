@@ -1,7 +1,6 @@
-// /job/components/Step3Description.jsx
 'use client';
-import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 
 export const Step3Description = ({ form }) => {
   return (
@@ -12,16 +11,17 @@ export const Step3Description = ({ form }) => {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Job Description</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Provide an overview of the job role..."
-                className="min-h-[100px]"
+                placeholder="Describe the job in detail..."
                 {...field}
                 onChange={(e) => {
                   field.onChange(e);
-                  form.trigger('description'); // Trigger validation on change
+                  form.trigger('description');
                 }}
+                rows={6}
+                className="border-gray-300 focus:border-[#1e90ff] focus:ring-[#1e90ff]"
               />
             </FormControl>
             <FormMessage />
@@ -38,13 +38,14 @@ export const Step3Description = ({ form }) => {
             <FormLabel>Responsibilities</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="List the key responsibilities for this role..."
-                className="min-h-[100px]"
+                placeholder="List key responsibilities..."
                 {...field}
                 onChange={(e) => {
                   field.onChange(e);
-                  form.trigger('responsibilities'); // Trigger validation on change
+                  form.trigger('responsibilities');
                 }}
+                rows={6}
+                className="border-gray-300 focus:border-[#1e90ff] focus:ring-[#1e90ff]"
               />
             </FormControl>
             <FormMessage />
@@ -61,13 +62,14 @@ export const Step3Description = ({ form }) => {
             <FormLabel>Benefits</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Describe the benefits offered (e.g., health insurance, remote work)..."
-                className="min-h-[100px]"
+                placeholder="Describe benefits offered..."
                 {...field}
                 onChange={(e) => {
                   field.onChange(e);
-                  form.trigger('benefits'); // Trigger validation on change
+                  form.trigger('benefits');
                 }}
+                rows={6}
+                className="border-gray-300 focus:border-[#1e90ff] focus:ring-[#1e90ff]"
               />
             </FormControl>
             <FormMessage />
