@@ -32,13 +32,7 @@ export default function AuthButtons() {
             setUserEmail(session.user.email);
           }
 
-          // Debug log - only when session is available
-          console.log("Current user session:", {
-            role: session.user?.role,
-            has_resume: session.user?.has_resume,
-            company_id: session.user?.company_id,
-            has_company: session.user?.has_company
-          });
+          
         }
       } finally {
         setIsLoading(false);
@@ -91,7 +85,6 @@ export default function AuthButtons() {
     );
   }
 
-  console.log(session)
 
   return (
     <div className="flex items-center gap-4">

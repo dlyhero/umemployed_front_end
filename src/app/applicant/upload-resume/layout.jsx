@@ -10,7 +10,7 @@ export const metadata = {
   title: "Upload Resume",
 };
 
-export default function AccountTypeLayout({ children }) {
+export default function ResumeLayout({ children }) {
   return (
     <html lang="en">
       <body
