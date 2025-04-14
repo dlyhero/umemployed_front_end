@@ -47,7 +47,7 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
             }}
             size="sm"
             variant="outline"
-            className="text-brand hover:bg-brand hover:text-white"
+            className="text-brand hover:bg-white hover:text-brand"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Experience
