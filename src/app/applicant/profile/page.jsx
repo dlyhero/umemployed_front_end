@@ -8,8 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import { Card } from "@/components/ui/card";
-
-const API_BASE_URL = "https://umemployed-app-afec951f7ec7.herokuapp.com/api";
+import baseUrl from "../../api/baseUrl";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -27,15 +26,15 @@ export default function ProfilePage() {
       
       try {
         const detailsResponse = await axios.get(
-          `${API_BASE_URL}/resume/resume-details/`,
+          `${baseUrl}/resume/resume-details/`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         
         const [skillsRes, experiencesRes, educationsRes, languagesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/resume/skills/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/resume/work-experiences/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/resume/educations/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/resume/languages/`, { headers: { 'Authorization': `Bearer ${token}` } })
+          axios.get(`${baseUrl}/resume/skills/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          axios.get(`${baseUrl}/resume/work-experiences/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          axios.get(`${baseUrl}/resume/educations/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          axios.get(`${baseUrl}/resume/languages/`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         const details = detailsResponse.data;
