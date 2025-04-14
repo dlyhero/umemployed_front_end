@@ -31,7 +31,7 @@ export const EducationSection = ({ educations = [], isOwner }) => {
   };
 
   return (
-    <Card className="p-6 max-h-72 overflow-auto">
+    <Card className="p-6 max-h-96 overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="text-gray-700 h-5 w-5" />
