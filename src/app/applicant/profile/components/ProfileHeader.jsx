@@ -66,9 +66,9 @@ export const ProfileHeader = ({ user, isOwner }) => {
 
   return (
     <>
-      <Card className="overflow-hidden  pt-0">
+      <Card className="overflow-hidden border-t-0 pt-0 rounded-xl border-b">
         {/* Cover Photo with Upload Option */}
-        <div className="h-56 bg-gradient-to-r from-brand to-brand-dark relative group">
+        <div className="h-56 bg-gradient-to-r  from-brand to-purple-600 relative group">
           {coverImage && (
             <img
               src={coverImage}
@@ -157,7 +157,7 @@ export const ProfileHeader = ({ user, isOwner }) => {
               </div>
 
               <div className="mt-2 sm:mt-12 lg:mt-12 space-y-1">
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
                 <p className="text-brand font-medium">{user.headline}</p>
                 <p className="text-gray-500 text-sm">
                   {user.location?.city}, {user.location?.country} · {user.connections} connections

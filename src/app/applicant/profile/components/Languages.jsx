@@ -46,7 +46,6 @@ export const LanguagesSection = ({ languages = [], isOwner, onAddLanguage, onEdi
     <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <Languages className="text-gray-700 h-5 w-5" />
           <h2 className="text-xl font-bold text-gray-900">Languages</h2>
         </div>
         

@@ -7,12 +7,12 @@ import { Card } from '@/components/ui/card';
 import { ProfileHeader } from './ProfileHeader';
 import { AboutSection } from './About';
 import { ExperienceSection } from './Experiences';
-import { SkillsSection } from './Skills';
 import { LanguagesSection } from './Languages';
 import { LocationSection } from './Location';
 import { CVSection } from './CV';
 import { EducationSection } from './Education';
 import { JobPreferencesSection } from './JobPreferences';
+import { SkillsSection } from './Skills';
 
 export const Profile = ({ user, isOwner = false }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
