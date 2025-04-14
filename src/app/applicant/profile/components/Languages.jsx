@@ -71,7 +71,7 @@ export const LanguagesSection = ({ languages = [], isOwner, onAddLanguage, onEdi
                 <div>
                   <h3 className="font-medium text-gray-900">{lang.name}</h3>
                   <p className="text-gray-500 text-sm capitalize">
-                    {lang.proficiency.toLowerCase()}
+                    {lang.proficiency?.toLowerCase()}
                   </p>
                 </div>
                 

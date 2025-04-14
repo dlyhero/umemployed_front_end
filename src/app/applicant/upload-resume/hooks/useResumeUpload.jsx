@@ -97,7 +97,7 @@ export const useResumeUpload = (token) => {
             }
           }
         },
-        timeout: 30000
+        timeout: 60000
       };
 
       const response = await axios.post(
@@ -120,10 +120,9 @@ export const useResumeUpload = (token) => {
           isProcessing: false
         });
 
-        const resumeData = encodeURIComponent(JSON.stringify(response.data?.extracted_text));
 
         
-        setTimeout(() => router.push(`/applicant/update_profile?resume_data=${resumeData}`), 2000);
+        setTimeout(() => router.push(`/applicant/profile`), 2000);
         
         console.groupEnd();
         return { success: true, data: response.data };
