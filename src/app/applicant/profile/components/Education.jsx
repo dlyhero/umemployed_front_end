@@ -31,7 +31,7 @@ export const EducationSection = ({ educations = [], isOwner }) => {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 max-h-72 overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="text-gray-700 h-5 w-5" />
@@ -64,13 +64,13 @@ export const EducationSection = ({ educations = [], isOwner }) => {
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{edu.school}</h3>
+                    <h3 className="font-semibold text-gray-900">{edu.institution_name}</h3>
                     <p className="text-gray-700">{edu.degree}</p>
                     <p className="text-gray-500 text-sm">
                       {edu.startYear} - {edu.endYear || 'Present'}
                     </p>
-                    {edu.fieldOfStudy && (
-                      <p className="text-gray-700 mt-1">Field of study: {edu.fieldOfStudy}</p>
+                    {edu.field_of_study && (
+                      <p className="text-gray-700 mt-1">{edu.field_of_study}</p>
                     )}
                     {edu.description && (
                       <p className="text-gray-700 mt-2 whitespace-pre-line">{edu.description}</p>
@@ -121,8 +121,8 @@ export const EducationSection = ({ educations = [], isOwner }) => {
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="school">School *</Label>
-            <Input id="school" placeholder="e.g. Stanford University" required />
+            <Label htmlFor="institution_name">School *</Label>
+            <Input id="institution_name" placeholder="e.g. Stanford University" required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="degree">Degree *</Label>
@@ -139,8 +139,8 @@ export const EducationSection = ({ educations = [], isOwner }) => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="fieldOfStudy">Field of Study</Label>
-            <Input id="fieldOfStudy" placeholder="e.g. Computer Science" />
+            <Label htmlFor="field_of_study">Field of Study</Label>
+            <Input id="field_of_study" placeholder="e.g. Computer Science" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
@@ -160,10 +160,10 @@ export const EducationSection = ({ educations = [], isOwner }) => {
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-school">School *</Label>
+              <Label htmlFor="edit-institution_name">School *</Label>
               <Input 
-                id="edit-school" 
-                defaultValue={editingEducation.school}
+                id="edit-institution_name" 
+                defaultValue={editingEducation.institution_name}
                 placeholder="e.g. Stanford University" 
                 required 
               />
@@ -177,33 +177,25 @@ export const EducationSection = ({ educations = [], isOwner }) => {
                 required 
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-startYear">Start Year *</Label>
-                <Input 
-                  id="edit-startYear" 
-                  defaultValue={editingEducation.startYear}
-                  placeholder="e.g. 2015" 
-                  required 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-endYear">End Year (or expected)</Label>
-                <Input 
-                  id="edit-endYear" 
-                  defaultValue={editingEducation.endYear}
-                  placeholder="e.g. 2019" 
-                />
-              </div>
-            </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="edit-fieldOfStudy">Field of Study</Label>
+              <Label htmlFor="edit-field_of_study">Field of Study</Label>
               <Input 
-                id="edit-fieldOfStudy" 
-                defaultValue={editingEducation.fieldOfStudy}
+                id="edit-field_of_study" 
+                defaultValue={editingEducation.field_of_study}
                 placeholder="e.g. Computer Science" 
               />
             </div>
+            <div className="space-y-2">
+                <Label htmlFor="graduation_year">Graduation Year *</Label>
+                <Input
+                  id="graduation_year"
+                  name="graduation_year"
+                  defaultValue={editingEducation?.graduation_year || ''}
+                  placeholder="e.g. 2015"
+                  required
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="edit-description">Description</Label>
               <Input 

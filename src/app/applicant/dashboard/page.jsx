@@ -5,13 +5,13 @@ import { Award, Briefcase, Clock, User } from 'lucide-react'
 import {
   CareerTips,
   JobCard,
-  MobileMenu,
   RecommendedJobs,
   StatsGrid,
 } from '../../../components/common/dashboard'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/outline'
 import { WelcomeSection } from './components/WelcomeSection'
 import { Sidebar } from './components/Sidebar'
+import { MobileMenu } from './components/MobileMenu'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -56,7 +56,7 @@ const applicantDashBoard = () => {
 
           <main className="flex-1">
 
-            <div className="flex justify-end mb-2 md:hidden px-1">
+            <div className="flex justify-end mb-2 lg:hidden px-1">
               <button
                 className=" p-2 flex items-center justify-end bg-gradient-to-r from-brand to-purple-600 py-2 px-4 rounded-md  text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
