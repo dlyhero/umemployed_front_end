@@ -58,7 +58,7 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
       {userExperiences.length === 0 ? (
         <p className="text-gray-500">No experiences added yet.</p>
       ) : (
-        <div className="space-y-4 max-h-72 overflow-auto">
+        <div className="space-y-4 max-h-96 overflow-auto">
           {userExperiences.map((exp) => (
             <div key={exp.id} className="pb-4 last:border-0 group">
               <div className="flex justify-between items-start">
