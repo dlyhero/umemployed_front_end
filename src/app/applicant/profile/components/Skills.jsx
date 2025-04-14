@@ -27,7 +27,7 @@ export const SkillsSection = ({ skills = [], isOwner, onAddSkill, onEditSkill, o
   };
 
   return (
-    <Card className="p-6 ax-h-96 overflow-y-auto overflow-x-hidden">
+    <Card className="p-6 max-h-96 overflow-y-auto overflow-x-hidden">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">Skills</h2>
         
