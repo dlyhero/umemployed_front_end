@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import baseUrl from "@/src/app/api/baseUrl";
 
 export const useResumeUpload = (token) => {
   const router = useRouter();
@@ -101,7 +102,7 @@ export const useResumeUpload = (token) => {
       };
 
       const response = await axios.post(
-        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/resume/upload-resume/',
+        `${baseUrl}/resume/upload-resume/`,
         formData,
         config
       );
