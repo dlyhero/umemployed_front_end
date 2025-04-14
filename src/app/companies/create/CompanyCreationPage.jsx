@@ -11,11 +11,12 @@ import Loader from '@/src/components/common/Loader/Loader';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/lib/useToast';
+import toast from 'react-hot-toast';
 
 const CompanyCreationPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const toast = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -34,6 +35,8 @@ const CompanyCreationPage = () => {
   });
   const [logoFile, setLogoFile] = useState(null);
   const [coverPhotoFile, setCoverPhotoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
@@ -49,6 +52,13 @@ const CompanyCreationPage = () => {
     }
   }, [status, session, router]);
 
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+      if (coverPhotoPreview) URL.revokeObjectURL(coverPhotoPreview);
+    };
+  }, [logoPreview, coverPhotoPreview]);
+
   if (status === 'loading') {
     return <Loader />;
   }
@@ -62,8 +72,7 @@ const CompanyCreationPage = () => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
-      // Validate file size (e.g., max 5MB) and type
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      const maxSize = 5 * 1024 * 1024; // 5MB
       if (files[0].size > maxSize) {
         toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be under 5MB.`);
         return;
@@ -72,11 +81,16 @@ const CompanyCreationPage = () => {
         toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be an image.`);
         return;
       }
-      console.log(`${name} selected:`, files[0].name, files[0].size, files[0].type); // Debug
+
+      const file = files[0];
+      const previewUrl = URL.createObjectURL(file);
+
       if (name === 'logo') {
-        setLogoFile(files[0]);
+        setLogoFile(file);
+        setLogoPreview(previewUrl);
       } else if (name === 'cover_photo') {
-        setCoverPhotoFile(files[0]);
+        setCoverPhotoFile(file);
+        setCoverPhotoPreview(previewUrl);
       }
     }
   };
@@ -96,17 +110,10 @@ const CompanyCreationPage = () => {
       }
     }
     if (logoFile) {
-      data.append('logo', logoFile);
-      console.log('Logo appended:', logoFile.name); // Debug
+      data.append('logo', logoFile, logoFile.name);
     }
     if (coverPhotoFile) {
-      data.append('cover_photo', coverPhotoFile);
-      console.log('Cover photo appended:', coverPhotoFile.name); // Debug
-    }
-
-    // Debug FormData contents
-    for (let [key, value] of data.entries()) {
-      console.log(`FormData: ${key} =`, value);
+      data.append('cover_photo', coverPhotoFile, coverPhotoFile.name);
     }
 
     const token = session?.accessToken;
@@ -123,11 +130,10 @@ const CompanyCreationPage = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
-
-      console.log('API response:', response.data); // Debug response
 
       session.user.has_company = true;
       session.user.companyId = response.data.id;
@@ -189,6 +195,8 @@ const CompanyCreationPage = () => {
             handleFileChange={handleFileChange}
             logoFile={logoFile}
             coverPhotoFile={coverPhotoFile}
+            logoPreview={logoPreview}
+            coverPhotoPreview={coverPhotoPreview}
           />
           <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
             <Button

@@ -56,7 +56,7 @@ const Dashboard = ({ companyId, companyData }) => {
           companyId={companyId}
         />
         <main className="space-y-6">
-          <WelcomeSection companyName={companyData?.name || "Eddy"} />
+          <WelcomeSection companyName={companyData?.name || 'Company'} />
           <QuickActions companyId={companyId} />
           <RecruiterTips tips={mockTips} />
           <PostJob companyId={companyId} />

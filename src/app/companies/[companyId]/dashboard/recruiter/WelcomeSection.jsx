@@ -1,8 +1,8 @@
-// WelcomeSection.jsx
-'use client'
-import { motion } from 'framer-motion'
+// components/recruiter/WelcomeSection.jsx
+'use client';
+import { motion } from 'framer-motion';
 
-export const WelcomeSection = ({ companyName = "" }) => (
+export const WelcomeSection = ({ companyName = '' }) => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -21,4 +21,4 @@ export const WelcomeSection = ({ companyName = "" }) => (
       </button>
     </div>
   </motion.section>
-)
+);
