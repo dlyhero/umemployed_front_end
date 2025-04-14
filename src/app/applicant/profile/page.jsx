@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import baseUrl from "../../api/baseUrl";
+import baseUrl from "@/src/pages/api/auth/baseUrl";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
