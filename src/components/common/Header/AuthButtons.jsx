@@ -6,9 +6,11 @@ import { LogOut, LogIn, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../Spinner";
+import useUser from "@/src/hooks/useUser";
 
 export default function AuthButtons() {
   const { data: session, status, update } = useSession();
+  const user = useUser();
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
@@ -94,7 +96,7 @@ export default function AuthButtons() {
 
           <Link
             href={getNavigationPath()}
-            className="flex items-center gap-3"
+            className="flex items-center gap-2"
           >
             <div className="relative w-10 h-10 rounded-full border border-gray-200">
               {session.user?.image ? (
@@ -118,8 +120,8 @@ export default function AuthButtons() {
                 <User className="w-5 h-5 text-gray-500 absolute inset-0 m-auto" />
               )}
             </div>
-            <span className="hidden sm:block text-sm font-medium text-gray-700 truncate max-w-[120px]">
-              {username}
+            <span className="hidden sm:block text-sm font-bold text-gray-700 truncate max-w-[120px]">
+              {user.username || username}
             </span>
           </Link>
 
