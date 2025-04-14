@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
 import Dashboard from './Dashboard';
-import Loader from "@/src/components/common/Loader/Loader"; // Imported Loader
+import Loader from "@/src/components/common/Loader/Loader";
 import { useToast } from '@/lib/useToast';
 
 const DashboardPage = () => {
   const { data: session, status } = useSession();
   const { companyId } = useParams();
+  const { toast } = useToast();
   const [companyData, setCompanyData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -31,7 +32,7 @@ const DashboardPage = () => {
 
       try {
         const response = await fetch(
-          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/dashboard/`,
+          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company-details/${companyId}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -41,7 +42,12 @@ const DashboardPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setCompanyData(data);
+          console.log('API Response:', data); // Debug: Log the raw API response
+          setCompanyData({
+            name: data.name || 'Company',
+            job_openings: data.job_openings || '',
+            location: data.location || 'Unknown',
+          });
         } else {
           const errorMsg = `Error: ${response.status} - ${response.statusText}`;
           toast.error(errorMsg);
@@ -57,7 +63,7 @@ const DashboardPage = () => {
     if (companyId) {
       fetchCompanyData();
     }
-  }, [companyId, session, status]);
+  }, [companyId, session, status, toast]);
 
   if (status === 'loading' || !companyData) {
     return (
@@ -68,9 +74,10 @@ const DashboardPage = () => {
   }
 
   if (error) {
-    return null; // Toast handles error display, no need for inline message
+    return null; // Toast handles error display
   }
 
+  console.log('companyData passed to Dashboard:', companyData); // Debug: Log what’s passed
   return <Dashboard companyId={companyId} companyData={companyData} />;
 };
 
