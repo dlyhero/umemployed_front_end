@@ -66,7 +66,7 @@ export const ProfileHeader = ({ user, isOwner }) => {
 
   return (
     <>
-      <Card className="overflow-hidden  pt-0">
+      <Card className="overflow-hidden border-t-0 pt-0 rounded-xl border-b">
         {/* Cover Photo with Upload Option */}
         <div className="h-56 bg-gradient-to-r from-brand to-brand-dark relative group">
           {coverImage && (
