@@ -50,7 +50,7 @@ const HeroSection = ({ session, status }) => {
 
             <motion.h1 
               variants={itemVariants}
-              className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
             >
               Unlock Your <span className="text-brand">Dream Job</span> <br/>
               The Future Starts Now!
@@ -58,7 +58,7 @@ const HeroSection = ({ session, status }) => {
 
             <motion.p 
               variants={itemVariants}
-              className="text-lg text-gray-600"
+              className="text-lg md:text-xl text-gray-600"
             >
               Browse thousands of job listings and seize the opportunity<br />
               to advance your career with our platform.
@@ -134,12 +134,12 @@ const HeroSection = ({ session, status }) => {
             transition={{ duration: 0.8 }}
             className="relative lg:ml-12"
           >
-            <div className="relative rounded-xl shadow-lg overflow-hidden  border border-gray-100">
+            <div className="relative rounded-xl overflow-hidden  border border-gray-100">
               {/* Your original image with parallax effect */}
               <motion.img 
-                src="/images/ue3.avif" 
+                src="/images/cta.avif" 
                 alt="Professionals networking" 
-                className="w-full h-auto object-cover"
+                className="w-full h-96 object-cover"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               />

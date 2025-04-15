@@ -2,6 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import baseUrl from "../app/api/baseUrl";
 
 export default function useUser() {
   const { data: session } = useSession();
@@ -19,7 +20,7 @@ export default function useUser() {
       setLoading(true);
       try {
         const response = await axios.get(
-          "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/profile/",
+          `${baseUrl}/users/profile/`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
