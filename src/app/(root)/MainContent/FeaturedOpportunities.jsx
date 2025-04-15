@@ -85,7 +85,7 @@ const FeaturedOpportunities = () => {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -110,7 +110,7 @@ const FeaturedOpportunities = () => {
 
   return (
     <section className="w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-16 bg-slate-100">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -119,7 +119,7 @@ const FeaturedOpportunities = () => {
           className="mb-12"
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Featured Opportunities</h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600">
             Find the best jobs tailored to your skills and preferences
           </p>
         </motion.div>
@@ -127,7 +127,7 @@ const FeaturedOpportunities = () => {
         <div className="relative">
           <Slider {...settings}>
             {jobs.map((job) => (
-              <div key={job.id} className="px-2 focus:outline-none">
+              <div key={job.id} className=" focus:outline-none">
                 <JobCard
                   job={job} 
                   onToggleSave={() => toggleSave(job.id)} 

@@ -35,16 +35,7 @@ const Companies = () => {
       rating: 4.9,
       link: "/company/info/663/",
     },
-    {
-      id: 664,
-      name: "DataSphere",
-      logo: "https://example.com/datasphere.png",
-      industry: "AI & Analytics",
-      description: "Transforming businesses with data intelligence",
-      jobs: 51,
-      rating: 4.7,
-      link: "/company/info/664/",
-    }
+  
   ];
 
   return (
@@ -57,13 +48,13 @@ const Companies = () => {
           viewport={{ once: true }}
           className="mb-10"
         >
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Top Hiring Companies</h2>
-          <p className="text-lg text-gray-600 max-w-2xl">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Top Hiring Companies</h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
             Discover exciting opportunities with industry leaders
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
           {companies.map((company, index) => (
             <motion.div
               key={company.id}
@@ -71,7 +62,7 @@ const Companies = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl border border-gray-200 overflow-hidden max-w-lg"
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
             >
               <a href={company.link} className="block h-full">
                 <div className="p-6 h-full flex flex-col">
@@ -108,7 +99,7 @@ const Companies = () => {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50 group">
+                  <Button variant="outline" className="w-full border-none text-brand hover:bg-gray-50 group">
                     <span>View Jobs</span>
                     <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
@@ -123,10 +114,9 @@ const Companies = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
-          className="mt-16"
+          className="mt-16 text-center"
         >
           <Button className="bg-brand hover:bg-brand/90 px-8 py-4 text-base md:text-lg text-white">
-            <Users className="w-5 h-5 mr-2" />
             Explore All Companies
           </Button>
         </motion.div>
