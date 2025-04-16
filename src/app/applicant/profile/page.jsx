@@ -37,12 +37,12 @@ export default function ProfilePage() {
           axios.get(`${baseUrl}/resume/languages/`, { headers: { 'Authorization': `Bearer ${token}` } }),
           axios.get(`${baseUrl}/resume/contact-info/`, {headers: {'Authorization': `Bearer ${token}`}})
         ]);
-
+        
 
         const details = detailsResponse.data;
         console.log(skillsRes);
         const transformedData = {
-          name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymous',
+          name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',
           job_title: details.job_title,
           location: {
             city: details.state || "Unknown city",
