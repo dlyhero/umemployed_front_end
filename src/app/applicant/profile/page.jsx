@@ -30,20 +30,23 @@ export default function ProfilePage() {
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         
-        const [skillsRes, experiencesRes, educationsRes, languagesRes] = await Promise.all([
+        const [skillsRes, experiencesRes, educationsRes, languagesRes, contactInfo] = await Promise.all([
           axios.get(`${baseUrl}/resume/skills/`, { headers: { 'Authorization': `Bearer ${token}` } }),
           axios.get(`${baseUrl}/resume/work-experiences/`, { headers: { 'Authorization': `Bearer ${token}` } }),
           axios.get(`${baseUrl}/resume/educations/`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          axios.get(`${baseUrl}/resume/languages/`, { headers: { 'Authorization': `Bearer ${token}` } })
+          axios.get(`${baseUrl}/resume/languages/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          axios.get(`${baseUrl}/resume/contact-info/`, {headers: {'Authorization': `Bearer ${token}`}})
         ]);
 
+
         const details = detailsResponse.data;
+        console.log(skillsRes);
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymous',
-          headline: details.job_title || "Professional",
+          job_title: details.job_title,
           location: {
             city: details.state || "Unknown city",
-            country: details.country || "Unknown country",
+            country: contactInfo.data[0].country || "Unknown country",
             remote: false
           },
           connections: 0,
@@ -66,9 +69,12 @@ export default function ProfilePage() {
           },
           profileImage: details.profile_image || "/default-avatar.jpg",
           personalInfo: {
+            country: contactInfo.data[0].country,
             phone: details.phone,
             dateOfBirth: details.date_of_birth,
-            email: session.user?.email || ""
+            email: contactInfo.data[0].email || "",
+            id: contactInfo.data[0].id,
+            user: contactInfo.data[0].user
           }
         };
         setProfileData(transformedData);
@@ -182,7 +188,7 @@ export default function ProfilePage() {
       </AnimatePresence>
 
       {/* Main Content */}
-      {profileData && <Profile user={profileData} isOwner={true} />}
+      {profileData && <Profile initialUser={profileData} isOwner={true} />}
     </div>
   );
 }
