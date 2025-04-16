@@ -14,7 +14,7 @@ import { EducationSection } from './Education';
 import { JobPreferencesSection } from './JobPreferences';
 import { SkillsSection } from './Skills';
 
-export const Profile = ({ user, isOwner = false }) => {
+export const Profile = ({ initialUser, isOwner = false }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   if (isMobile) {
@@ -32,31 +32,31 @@ export const Profile = ({ user, isOwner = false }) => {
           </ScrollArea>
           
           <div className="mt-4">
-            <ProfileHeader user={user} isOwner={isOwner} />
+            <ProfileHeader initialUser={initialUser} isOwner={isOwner} />
           </div>
           
           <div className="space-y-4 mt-4">
             <TabsContent value="about">
-              <AboutSection about={user?.about} isOwner={isOwner} />
+              <AboutSection about={initialUser?.about} isOwner={isOwner} />
             </TabsContent>
             
             <TabsContent value="experience">
-              <ExperienceSection experiences={user?.experiences} isOwner={isOwner} />
+              <ExperienceSection experiences={initialUser?.experiences} isOwner={isOwner} />
             </TabsContent>
             
             <TabsContent value="education">
-              <EducationSection educations={user?.educations} isOwner={isOwner} />
+              <EducationSection educations={initialUser?.educations} isOwner={isOwner} />
             </TabsContent>
             
-            <TabsContent value="skills">
-              <SkillsSection skills={user?.skills} isOwner={isOwner} />
-              <LanguagesSection languages={user.languages} isOwner={isOwner} />
+            <TabsContent value="skills" className={`space-y-2`}>
+              <SkillsSection skills={initialUser?.skills} isOwner={isOwner} />
+              <LanguagesSection languages={initialUser.languages} isOwner={isOwner} />
             </TabsContent>
             
-            <TabsContent value="more">
-              <LocationSection location={user?.location} isOwner={isOwner} />
-              <JobPreferencesSection preferences={user?.jobPreferences} isOwner={isOwner} />
-              <CVSection cv={user?.cv} isOwner={isOwner} />
+            <TabsContent value="more" className={`space-y-2`}>
+              <LocationSection location={initialUser?.location} isOwner={isOwner} />
+              <JobPreferencesSection preferences={initialUser?.jobPreferences} isOwner={isOwner} />
+              <CVSection cv={initialUser?.cv} isOwner={isOwner} />
             </TabsContent>
           </div>
         </Tabs>
@@ -70,19 +70,19 @@ export const Profile = ({ user, isOwner = false }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-2">
-          <ProfileHeader user={user} isOwner={isOwner} />
-          <AboutSection about={user?.about} isOwner={isOwner} />
-          <ExperienceSection experiences={user.experiences} isOwner={isOwner} />
-          <EducationSection educations={user?.educations} isOwner={isOwner} />
+          <ProfileHeader initialUser={initialUser} isOwner={isOwner} />
+          <AboutSection about={initialUser?.about} isOwner={isOwner} />
+          <ExperienceSection experiences={initialUser.experiences} isOwner={isOwner} />
+          <EducationSection educations={initialUser?.educations} isOwner={isOwner} />
         </div>
         
         {/* Right Column */}
         <div className="space-y-2">
-          <SkillsSection skills={user?.skills} isOwner={isOwner} />
-          <LanguagesSection languages={user?.languages} isOwner={isOwner} />
-          <LocationSection location={user?.location} isOwner={isOwner} />
-          <JobPreferencesSection preferences={user?.jobPreferences} isOwner={isOwner} />
-          <CVSection cv={user?.cv} isOwner={isOwner} />
+          <SkillsSection skills={initialUser?.skills} isOwner={isOwner} />
+          <LanguagesSection languages={initialUser?.languages} isOwner={isOwner} />
+          <LocationSection location={initialUser?.location} isOwner={isOwner} />
+          <JobPreferencesSection preferences={initialUser?.jobPreferences} isOwner={isOwner} />
+          <CVSection cv={initialUser?.cv} isOwner={isOwner} />
         </div>
       </div>
     </div>

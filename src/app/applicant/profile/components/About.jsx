@@ -18,7 +18,7 @@ export const AboutSection = ({ about, isOwner, onSave }) => {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 max-h-96 overflow-y-auto overflow-x-hidden">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">About</h2>
         {isOwner && (
