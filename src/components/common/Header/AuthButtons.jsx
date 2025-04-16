@@ -121,7 +121,7 @@ export default function AuthButtons() {
               )}
             </div>
             <span className="hidden sm:block text-sm font-bold text-gray-700 truncate max-w-[120px]">
-              {user.username || username}
+              {user.user?.username}
             </span>
           </Link>
 

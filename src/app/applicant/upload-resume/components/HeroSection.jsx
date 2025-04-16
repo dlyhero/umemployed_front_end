@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 export const HeroSection = () => {
   const { data: session, status } = useSession();
   const user = useUser();
-
   return (
     <motion.section
       initial={{ y: -20 }}
@@ -30,7 +29,7 @@ export const HeroSection = () => {
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-brand to-brand/60 bg-clip-text text-transparent">
           Welcome back,{" "}
           <span className="text-gray-800">
-            {session.user?.name || `${user?.first_name} ${user?.last_name}` }!
+            {`${user?.user?.first_name} ${user.user?.last_name}` }!
           </span>
         </h1>
       </div>

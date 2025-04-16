@@ -35,7 +35,6 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
   const [user, setUser] = useState(initialUser);
   const [jobTitles, setJobTitles] = useState([]);
   const [loadingJobTitles, setLoadingJobTitles] = useState(false);
-  
   // Sync with parent if initialUser changes
   useEffect(() => {
     setUser(initialUser);
