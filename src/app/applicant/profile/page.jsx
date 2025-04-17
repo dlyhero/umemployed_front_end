@@ -40,7 +40,7 @@ export default function ProfilePage() {
         
 
         const details = detailsResponse.data;
-        console.log(skillsRes);
+        console.log(languagesRes);
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',
           job_title: details.job_title,
@@ -51,8 +51,8 @@ export default function ProfilePage() {
           },
           connections: 0,
           about: details.description || "No description provided",
-          experiences: experiencesRes.data || [],
-          educations: educationsRes.data || [],
+          experiences: experiencesRes.data .slice(0, 15) || [],
+          educations: (educationsRes.data || []).slice(0, 20),
           skills: [...new Set([...(details.skills || []), ...(skillsRes.data || [])])].slice(0, 20),
           languages: (languagesRes.data || []).slice(0, 10),
           jobPreferences: {
@@ -92,7 +92,7 @@ export default function ProfilePage() {
   const resetError = () => setError(null);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-white">
+    <div className="min-h-screen flex flex-col justify-center">
       {/* Loading Modal with Animation */}
       <AnimatePresence>
         {(status === "loading" || loading) && (
