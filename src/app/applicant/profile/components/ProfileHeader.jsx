@@ -222,9 +222,9 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
 
 return (
   <>
-    <Card className="overflow-hidden border-0 shadow-sm rounded-lg bg-white">
+    <Card className="overflow-hidden border-0 shadow-sm rounded-lg bg-white pt-0">
       {/* Cover Photo */}
-      <div className="h-48 bg-gray-100 relative group">
+      <div className="h-56 bg-gray-100 relative group">
         {coverImage ? (
           <>
             <img

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { AddItemModal } from './AddItemModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, BriefcaseIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import baseUrl from '@/src/app/api/baseUrl';
 import { useSession } from 'next-auth/react';
-import useUser from '@/src/hooks/useUser';
 
 export const ExperienceSection = ({ experiences, isOwner }) => {
   const { data: session } = useSession();
@@ -21,13 +20,18 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
   const [editingExperience, setEditingExperience] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [showAll, setShowAll] = useState(false);
   const formRef = useRef(null);
-  
+
+  // Constants for limits
+  const MAX_EXPERIENCES = 15;
+  const initialVisibleCount = 3;
+  const visibleExperiences = showAll ? userExperiences : userExperiences.slice(0, initialVisibleCount);
 
   // Format date as YYYY-MM-DD (API format)
   const formatDateForAPI = (year) => {
     if (!year) return null;
-    return `${year}-01-01`; // Using first day of year if only year is provided
+    return `${year}-01-01`;
   };
 
   // Extract year from date string for display
@@ -36,18 +40,26 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
     return dateString.includes('-') ? dateString.split('-')[0] : dateString;
   };
 
-  // Validate experience data before submission
+  // Check if user can add more experiences
+  const canAddMoreExperiences = () => {
+    if (userExperiences.length >= MAX_EXPERIENCES) {
+      toast.error(`Maximum limit reached`, {
+        description: `You can only have up to ${MAX_EXPERIENCES} experiences.`,
+      });
+      return false;
+    }
+    return true;
+  };
+
   const validateExperience = (data) => {
     const errors = {};
     const currentYear = new Date().getFullYear();
     const startYear = parseInt(data.start_date);
     const endYear = data.end_date ? parseInt(data.end_date) : null;
 
-    // Required fields
     if (!data.role?.trim()) errors.role = 'Job title is required';
     if (!data.company_name?.trim()) errors.company_name = 'Company name is required';
     
-    // Start date validation
     if (!data.start_date) {
       errors.start_date = 'Start year is required';
     } else if (isNaN(startYear)) {
@@ -58,7 +70,6 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
       errors.start_date = 'Start year must be after 1900';
     }
 
-    // End date validation
     if (endYear) {
       if (isNaN(endYear)) {
         errors.end_date = 'Invalid year format';
@@ -77,6 +88,7 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
 
   const handleAddExperience = async (newExperience) => {
     if (!validateExperience(newExperience)) return;
+    if (!canAddMoreExperiences()) return;
 
     try {
       setIsLoading(true);
@@ -86,7 +98,6 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
         ...newExperience,
         start_date: formatDateForAPI(newExperience.start_date),
         end_date: newExperience.end_date ? formatDateForAPI(newExperience.end_date) : null,
-        
       };
 
       const { data } = await axios.post(`${baseUrl}/resume/work-experiences/`, payload, {
@@ -103,7 +114,11 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
       console.error('Add error:', error);
       let errorMessage = 'Failed to add experience';
       
-     
+      if (error.response?.data) {
+        errorMessage = typeof error.response.data === 'object'
+          ? Object.values(error.response.data).flat().join(', ')
+          : error.response.data;
+      }
 
       toast.error(errorMessage);
     } finally {
@@ -213,10 +228,19 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Experience</h2>
+        <div>
+        <div className="flex items-center gap-2">
+          <BriefcaseIcon className="text-gray-700 h-4 w-4 " />
+          <h2 className="text-xl font-bold">Experience</h2>
+        </div>
+          <p className="text-sm text-gray-500">
+            {userExperiences.length}/{MAX_EXPERIENCES} experiences added
+          </p>
+        </div>
         {isOwner && (
           <Button
             onClick={() => {
+              if (!canAddMoreExperiences()) return;
               setEditingExperience(null);
               setIsAddOpen(true);
               setValidationErrors({});
@@ -224,7 +248,7 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
             size="sm"
             variant="outline"
             className="text-brand hover:bg-white hover:text-brand"
-            disabled={isLoading}
+            disabled={isLoading || userExperiences.length >= MAX_EXPERIENCES}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Experience
@@ -235,10 +259,15 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
       {userExperiences.length === 0 ? (
         <p className="text-gray-500">No experiences added yet.</p>
       ) : (
-        <div className="space-y-4 max-h-96 overflow-auto">
-          {userExperiences.map((exp) => (
-            <div key={exp.id} className="pb-4 last:border-0 group">
-              <div className="flex justify-between items-start">
+        <div className="space-y-4">
+          {visibleExperiences.map((exp) => (
+            <div key={exp.id} className="flex gap-4 pb-4 last:border-0 group">
+               <div className="flex-shrink-0 mt-1">
+                  <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+                    <BriefcaseIcon className="text-brand h-4 w-4" />
+                  </div>
+                </div>
+              <div className="flex flex-1 justify-between items-start">
                 <div>
                   <h3 className="font-medium">{exp.role}</h3>
                   <p className="text-gray-700">{exp.company_name}</p>
@@ -278,6 +307,29 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
               </div>
             </div>
           ))}
+
+          {userExperiences.length > initialVisibleCount && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAll(!showAll)}
+                className="text-brand hover:text-brand"
+              >
+                {showAll ? (
+                  <>
+                    <ChevronUp className="mr-2 h-4 w-4" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-2 h-4 w-4" />
+                    View All ({userExperiences.length})
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -295,72 +347,84 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
           onSave={handleSave}
           initialData={editingExperience}
           isLoading={isLoading}
+          disabled={userExperiences.length >= MAX_EXPERIENCES && !editingExperience}
         >
-          <form ref={formRef} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Job Title *</Label>
-              <Input
-                id="title"
-                name="title"
-                defaultValue={editingExperience?.role || ''}
-                placeholder="e.g. Software Engineer"
-                required
-              />
-              {validationErrors.role && (
-                <p className="text-sm text-red-500">{validationErrors.role}</p>
-              )}
+          {userExperiences.length >= MAX_EXPERIENCES && !editingExperience ? (
+            <div className="text-center py-4">
+              <p className="text-red-500">
+                You've reached the maximum limit of {MAX_EXPERIENCES} experiences.
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Please delete an existing experience before adding a new one.
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company *</Label>
-              <Input
-                id="company"
-                name="company"
-                defaultValue={editingExperience?.company_name || ''}
-                placeholder="e.g. Tech Corp"
-                required
-              />
-              {validationErrors.company_name && (
-                <p className="text-sm text-red-500">{validationErrors.company_name}</p>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          ) : (
+            <form ref={formRef} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="start_date">Start Year *</Label>
+                <Label htmlFor="title">Job Title *</Label>
                 <Input
-                  id="start_date"
-                  name="start_date"
-                  defaultValue={editingExperience ? getYearFromDate(editingExperience.start_date) : ''}
-                  placeholder="e.g. 2015"
+                  id="title"
+                  name="title"
+                  defaultValue={editingExperience?.role || ''}
+                  placeholder="e.g. Software Engineer"
                   required
                 />
-                {validationErrors.start_date && (
-                  <p className="text-sm text-red-500">{validationErrors.start_date}</p>
+                {validationErrors.role && (
+                  <p className="text-sm text-red-500">{validationErrors.role}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end_date">End Year (or leave blank for present)</Label>
+                <Label htmlFor="company">Company *</Label>
                 <Input
-                  id="end_date"
-                  name="end_date"
-                  defaultValue={editingExperience ? getYearFromDate(editingExperience.end_date) : ''}
-                  placeholder="e.g. 2019"
+                  id="company"
+                  name="company"
+                  defaultValue={editingExperience?.company_name || ''}
+                  placeholder="e.g. Tech Corp"
+                  required
                 />
-                {validationErrors.end_date && (
-                  <p className="text-sm text-red-500">{validationErrors.end_date}</p>
+                {validationErrors.company_name && (
+                  <p className="text-sm text-red-500">{validationErrors.company_name}</p>
                 )}
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                defaultValue={editingExperience?.description || ''}
-                placeholder="Describe your role and achievements"
-                rows={4}
-              />
-            </div>
-          </form>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="start_date">Start Year *</Label>
+                  <Input
+                    id="start_date"
+                    name="start_date"
+                    defaultValue={editingExperience ? getYearFromDate(editingExperience.start_date) : ''}
+                    placeholder="e.g. 2015"
+                    required
+                  />
+                  {validationErrors.start_date && (
+                    <p className="text-sm text-red-500">{validationErrors.start_date}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end_date">End Year (or leave blank for present)</Label>
+                  <Input
+                    id="end_date"
+                    name="end_date"
+                    defaultValue={editingExperience ? getYearFromDate(editingExperience.end_date) : ''}
+                    placeholder="e.g. 2019"
+                  />
+                  {validationErrors.end_date && (
+                    <p className="text-sm text-red-500">{validationErrors.end_date}</p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  defaultValue={editingExperience?.description || ''}
+                  placeholder="Describe your role and achievements"
+                  rows={4}
+                />
+              </div>
+            </form>
+          )}
         </AddItemModal>
       )}
     </Card>
