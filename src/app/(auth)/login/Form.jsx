@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -94,9 +94,7 @@ export default function LoginForm() {
                     Email
                 </label>
                 <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
+                        <Mail className="h-4 w-4  absolute left-3 top-1/2 -translate-y-1/2 h text-gray-400" />
                     <input
                         {...register("email", { 
                             required: "Email is required",
@@ -122,6 +120,7 @@ export default function LoginForm() {
                     Password
                 </label>
                 <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         {...register("password", { 
                             required: "Password is required",
@@ -131,7 +130,7 @@ export default function LoginForm() {
                             }
                         })}
                         type={passwordVisible ? "text" : "password"}
-                        className="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
+                        className="block w-full pr-10 pl-10 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand focus:border-brand"
                         id="password"
                         placeholder="••••••••"
                         autoComplete="current-password"
