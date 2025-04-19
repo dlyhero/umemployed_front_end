@@ -37,7 +37,7 @@ const Resources = () => {
 
   return (
     <section className="py-16 bg-white" aria-label="What's happening">
-      <div className="container max-w-6xl px-6 mx-auto">
+      <div className="container max-w-7xl px-6 mx-auto">
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-gray-900 relative inline-block pl-8">
             <span className="absolute left-0 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-brand rounded-full"></span>
@@ -85,7 +85,7 @@ const Resources = () => {
                   {item.description}
                 </p>
                 
-                <Button variant="link" className="px-0 text-brand hover:no-underline group-hover:underline">
+                <Button variant="link" className="px-0 bg-brand text-white hover:text-white w-full">
                   Read more
                   <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />

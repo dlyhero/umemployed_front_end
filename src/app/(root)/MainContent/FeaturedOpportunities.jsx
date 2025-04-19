@@ -4,7 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { motion } from "framer-motion";
-import JobCard from "../../Jobs/JobCard";
+import JobCard from "../../(Jobs)/JobCard";
 
 // Using shadcn/ui example images
 const companyLogos = [
@@ -30,6 +30,8 @@ const FeaturedOpportunities = () => {
       created_at: "2 days ago",
       is_saved: false,
       is_applied: false,
+      description: "Lead the design system implementation for our flagship product with a focus on accessibility."
+
     },
     {
       id: 2,
@@ -72,6 +74,7 @@ const FeaturedOpportunities = () => {
       created_at: "5 days ago",
       is_saved: false,
       is_applied: false,
+      description: "Lead the design system implementation for our flagship product with a focus on accessibility."
     },
   ]);
 
@@ -94,7 +97,7 @@ const FeaturedOpportunities = () => {
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3,
+          slidesToShow: 2,
           arrows: false,
         },
       },

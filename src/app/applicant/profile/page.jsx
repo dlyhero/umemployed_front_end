@@ -92,7 +92,7 @@ export default function ProfilePage() {
   const resetError = () => setError(null);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center">
+    <div className="min-h-screen flex flex-col justify-center bg-white">
       {/* Loading Modal with Animation */}
       <AnimatePresence>
         {(status === "loading" || loading) && (
