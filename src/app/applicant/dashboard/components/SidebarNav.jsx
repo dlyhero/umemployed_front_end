@@ -23,13 +23,13 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     { 
       icon: <Bookmark className="w-5 h-5" />, 
       label: "Saved Positions",
-      path: "/applicant/saved-jobs",
+      path: "/jobs?tab=saved",
       description: "Your shortlisted job opportunities"
     },
     { 
       icon: <ClipboardList className="w-5 h-5" />, 
       label: "My Applications",
-      path: "/applicant/applications",
+      path: "/jobs?tab=applied",
       description: "Track your job applications"
     },
     { 
