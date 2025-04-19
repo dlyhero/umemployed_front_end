@@ -66,7 +66,7 @@ export const Profile = ({ initialUser, isOwner = false }) => {
 
   return (
     <div className=''>
-        <div className="container  px-6 pb-8 pt-2 max-w-6xl mx-auto">
+        <div className="container  px-6 pb-8 pt-2 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-2">

@@ -31,7 +31,7 @@ const CompaniesSection = () => {
 
   return (
     <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -62,9 +62,8 @@ const CompaniesSection = () => {
                 <h3 className="text-base md:text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600 mb-6 flex-grow">{feature.description}</p>
                 
-                <Button variant="outline" className="w-full border-none text-brand hover:bg-gray-50">
+                <Button variant="outline" className="w-full border-none bg-brand text-white  hover:bg-brand hover:text-white">
                   {feature.cta}
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>
             </motion.div>

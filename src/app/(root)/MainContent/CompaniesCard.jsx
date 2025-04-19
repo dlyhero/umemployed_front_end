@@ -40,7 +40,7 @@ const Companies = () => {
 
   return (
     <section className="py-16 bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -99,9 +99,8 @@ const Companies = () => {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full border-none text-brand hover:bg-gray-50 group">
+                  <Button variant="outline" className="w-full border-none bg-brand text-white  hover:bg-brand hover:text-white">
                     <span>View Jobs</span>
-                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </div>
               </a>
@@ -116,8 +115,9 @@ const Companies = () => {
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <Button className="bg-brand hover:bg-brand/90 px-8 py-4 text-base md:text-lg text-white">
+          <Button className="text-brand px-8 py-4 text-base md:text-lg bg-transparent hover:bg-transparent border-none shadow-none cursor-pointer">
             Explore All Companies
+            <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>
       </div>
