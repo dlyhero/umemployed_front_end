@@ -118,7 +118,7 @@ const JobListing = () => {
 
 
   return (
-    <div className="  bg-gray-50">
+    <div className="  bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile filter toggle */}
         <div className="lg:hidden mb-6">
