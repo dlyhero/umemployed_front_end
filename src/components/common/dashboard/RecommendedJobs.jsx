@@ -1,6 +1,6 @@
 'use client'
 
-import JobCard from "@/src/app/(Jobs)/JobCard"
+import JobCard from "@/src/app/(Jobs)/components/JobCard"
 
 export const RecommendedJobs = ({ jobs, toggleSaveJob }) => (
   <section className="bg-white rounded-xl shadow-sm p-6 mb-6">

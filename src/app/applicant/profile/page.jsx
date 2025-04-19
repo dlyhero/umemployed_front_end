@@ -174,7 +174,7 @@ export default function ProfilePage() {
                   </Button>
                   <Button
                     className="bg-brand text-white hover:bg-brand"
-                    onClick={() => window.location.reload()}
+                    onClick={() => window.location.reload()}                                                                                                                                                      
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -188,7 +188,7 @@ export default function ProfilePage() {
       </AnimatePresence>
 
       {/* Main Content */}
-      {profileData && <Profile initialUser={profileData} isOwner={true} />}
+      {profileData && <Profi                                                                                                                                                                                                                                                                                                                                              le initialUser={profileData} isOwner={true} />}
     </div>
   );
 }

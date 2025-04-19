@@ -1,12 +1,11 @@
 'use client';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { motion } from "framer-motion";
-import JobCard from "../../(Jobs)/JobCard";
+import JobCard from "../../(Jobs)/components/JobCard";
 
-// Using shadcn/ui example images
 const companyLogos = [
   "/examples/company1.png",
   "/examples/company2.png",
@@ -20,68 +19,72 @@ const FeaturedOpportunities = () => {
     {
       id: 1,
       title: "Software Engineer",
-      company: {
-        name: "Tech Corp",
-        logo: companyLogos[0],
-      },
+      company: { name: "Tech Corp", logo: companyLogos[0] },
       job_location_type: "Remote",
       location: "New York",
       salary_range: "80,000 - 100,000",
       created_at: "2 days ago",
-      is_saved: false,
-      is_applied: false,
       description: "Lead the design system implementation for our flagship product with a focus on accessibility."
-
     },
     {
       id: 2,
       title: "Product Designer",
-      company: {
-        name: "Design Co",
-        logo: companyLogos[1],
-      },
+      company: { name: "Design Co", logo: companyLogos[1] },
       job_location_type: "Hybrid",
       location: "San Francisco",
       salary_range: "90,000 - 120,000",
       created_at: "1 week ago",
-      is_saved: false,
-      is_applied: false,
     },
     {
       id: 3,
       title: "Data Scientist",
-      company: {
-        name: "Data Inc",
-        logo: companyLogos[2],
-      },
+      company: { name: "Data Inc", logo: companyLogos[2] },
       job_location_type: "Remote",
       location: "Chicago",
       salary_range: "95,000 - 130,000",
       created_at: "3 days ago",
-      is_saved: false,
-      is_applied: false,
     },
     {
       id: 4,
       title: "Marketing Manager",
-      company: {
-        name: "Market Leaders",
-        logo: companyLogos[3],
-      },
+      company: { name: "Market Leaders", logo: companyLogos[3] },
       job_location_type: "On-site",
       location: "Boston",
       salary_range: "70,000 - 90,000",
       created_at: "5 days ago",
-      is_saved: false,
-      is_applied: false,
-      description: "Lead the design system implementation for our flagship product with a focus on accessibility."
+      description: "Develop and execute marketing campaigns to drive brand awareness."
     },
   ]);
 
-  const toggleSave = (jobId) => {
-    setJobs(jobs.map(job =>
-      job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
-    ));
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+
+  // Load saved/applied jobs from localStorage
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const applied = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
+    setSavedJobs(saved);
+    setAppliedJobs(applied);
+  }, []);
+
+  const toggleSave = (jobId, isSaved) => {
+    setSavedJobs(prev => {
+      const newSavedJobs = isSaved 
+        ? [...prev, jobId] 
+        : prev.filter(id => id !== jobId);
+      localStorage.setItem('savedJobs', JSON.stringify(newSavedJobs));
+      return newSavedJobs;
+    });
+  };
+
+  const handleApply = (jobId) => {
+    if (!appliedJobs.includes(jobId)) {
+      setAppliedJobs(prev => {
+        const newAppliedJobs = [...prev, jobId];
+        localStorage.setItem('appliedJobs', JSON.stringify(newAppliedJobs));
+        return newAppliedJobs;
+      });
+    }
   };
 
   const settings = {
@@ -111,9 +114,16 @@ const FeaturedOpportunities = () => {
     ],
   };
 
+  // Enhance jobs with saved/applied status
+  const enhancedJobs = jobs.map(job => ({
+    ...job,
+    is_saved: savedJobs.includes(job.id),
+    is_applied: appliedJobs.includes(job.id)
+  }));
+
   return (
-    <section className="w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-16 bg-slate-100">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16 bg-slate-100">
+      <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -129,11 +139,12 @@ const FeaturedOpportunities = () => {
 
         <div className="relative">
           <Slider {...settings}>
-            {jobs.map((job) => (
-              <div key={job.id} className=" focus:outline-none">
+            {enhancedJobs.map((job) => (
+              <div key={job.id} className="focus:outline-none px-2">
                 <JobCard
-                  job={job} 
-                  onToggleSave={() => toggleSave(job.id)} 
+                  job={job}
+                  onToggleSave={toggleSave}
+                  onApplyJob={handleApply}
                 />
               </div>
             ))}
