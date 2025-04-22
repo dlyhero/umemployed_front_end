@@ -1,6 +1,5 @@
 export * from './CareerTipCard'
 export * from './CareerTips'
-export * from './RecommendedJobs'
 export * from './SearchInput'
 export * from './StatCard'
 export * from './StatsGrid'

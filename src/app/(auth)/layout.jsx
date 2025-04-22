@@ -16,7 +16,6 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Header />
           {children}
-          <FooterCopyright />
         </AuthProvider>
       </body>
     </html>

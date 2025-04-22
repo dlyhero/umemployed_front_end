@@ -1,91 +1,22 @@
 'use client';
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { motion } from "framer-motion";
-import JobCard from "../../(Jobs)/components/JobCard";
-
-const companyLogos = [
-  "/examples/company1.png",
-  "/examples/company2.png",
-  "/examples/company3.png",
-  "/examples/company4.png",
-  "/examples/company5.png"
-];
+import JobCard from "../../jobs/_components/JobCard";
+import { useJobs } from "@/src/hooks/useJob";
 
 const FeaturedOpportunities = () => {
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: "Software Engineer",
-      company: { name: "Tech Corp", logo: companyLogos[0] },
-      job_location_type: "Remote",
-      location: "New York",
-      salary_range: "80,000 - 100,000",
-      created_at: "2 days ago",
-      description: "Lead the design system implementation for our flagship product with a focus on accessibility."
-    },
-    {
-      id: 2,
-      title: "Product Designer",
-      company: { name: "Design Co", logo: companyLogos[1] },
-      job_location_type: "Hybrid",
-      location: "San Francisco",
-      salary_range: "90,000 - 120,000",
-      created_at: "1 week ago",
-    },
-    {
-      id: 3,
-      title: "Data Scientist",
-      company: { name: "Data Inc", logo: companyLogos[2] },
-      job_location_type: "Remote",
-      location: "Chicago",
-      salary_range: "95,000 - 130,000",
-      created_at: "3 days ago",
-    },
-    {
-      id: 4,
-      title: "Marketing Manager",
-      company: { name: "Market Leaders", logo: companyLogos[3] },
-      job_location_type: "On-site",
-      location: "Boston",
-      salary_range: "70,000 - 90,000",
-      created_at: "5 days ago",
-      description: "Develop and execute marketing campaigns to drive brand awareness."
-    },
-  ]);
+  const { allJobs, toggleSaveJob, saveJobs } = useJobs();
+  const [displayJobs, setDisplayJobs] = useState([]);
 
-  const [savedJobs, setSavedJobs] = useState([]);
-  const [appliedJobs, setAppliedJobs] = useState([]);
-
-  // Load saved/applied jobs from localStorage
+  // Set jobs from allJobs
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-    const applied = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-    setSavedJobs(saved);
-    setAppliedJobs(applied);
-  }, []);
-
-  const toggleSave = (jobId, isSaved) => {
-    setSavedJobs(prev => {
-      const newSavedJobs = isSaved 
-        ? [...prev, jobId] 
-        : prev.filter(id => id !== jobId);
-      localStorage.setItem('savedJobs', JSON.stringify(newSavedJobs));
-      return newSavedJobs;
-    });
-  };
-
-  const handleApply = (jobId) => {
-    if (!appliedJobs.includes(jobId)) {
-      setAppliedJobs(prev => {
-        const newAppliedJobs = [...prev, jobId];
-        localStorage.setItem('appliedJobs', JSON.stringify(newAppliedJobs));
-        return newAppliedJobs;
-      });
+    if (Array.isArray(allJobs)) {
+      setDisplayJobs(allJobs);
     }
-  };
+  }, [allJobs]);
 
   const settings = {
     dots: true,
@@ -114,12 +45,7 @@ const FeaturedOpportunities = () => {
     ],
   };
 
-  // Enhance jobs with saved/applied status
-  const enhancedJobs = jobs.map(job => ({
-    ...job,
-    is_saved: savedJobs.includes(job.id),
-    is_applied: appliedJobs.includes(job.id)
-  }));
+
 
   return (
     <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16 bg-slate-100">
@@ -137,19 +63,25 @@ const FeaturedOpportunities = () => {
           </p>
         </motion.div>
 
-        <div className="relative">
-          <Slider {...settings}>
-            {enhancedJobs.map((job) => (
-              <div key={job.id} className="focus:outline-none px-2">
-                <JobCard
-                  job={job}
-                  onToggleSave={toggleSave}
-                  onApplyJob={handleApply}
-                />
-              </div>
-            ))}
-          </Slider>
-        </div>
+        {displayJobs.length > 0 ? (
+          <div className="relative">
+            <Slider {...settings}>
+              {displayJobs.slice(0, 8).map((job) => (
+                <div key={job.id} className="focus:outline-none px-2">
+                  <JobCard
+                        key={job.id}
+                        job={job}
+                        onToggleSave={() => toggleSaveJob(job.id)}
+                      />
+                </div>
+              ))}
+            </Slider>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No featured opportunities available at this time</p>
+          </div>
+        )}
       </div>
     </section>
   );

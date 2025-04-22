@@ -5,13 +5,13 @@ import { Award, Briefcase, Clock, User } from 'lucide-react'
 import {
   CareerTips,
   JobCard,
-  RecommendedJobs,
   StatsGrid,
 } from '../../../components/common/dashboard'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/outline'
 import { WelcomeSection } from './components/WelcomeSection'
 import { Sidebar } from './components/Sidebar'
 import { MobileMenu } from './components/MobileMenu'
+import { RecommendedJobs } from './components/RecommendedJobs'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -97,7 +97,7 @@ const applicantDashBoard = () => {
               </button></div>
             <WelcomeSection />
             <StatsGrid stats={stats} />
-            <RecommendedJobs  jobs={jobs} toggleSaveJob={toggleSaveJob} />
+            <RecommendedJobs/>
             <CareerTips />
           </main>
         </div>
