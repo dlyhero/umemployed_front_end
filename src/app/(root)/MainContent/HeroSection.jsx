@@ -46,7 +46,6 @@ const HeroSection = ({ session, status }) => {
                 New opportunities waiting
               </span>
             </motion.div>
-            <div className="pb-2 md:hidden"><MobileSearchBar /></div>
 
             <motion.h1 
               variants={itemVariants}

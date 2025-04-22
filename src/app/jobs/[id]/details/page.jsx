@@ -1,0 +1,568 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { Bookmark, BookmarkCheck, ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'sonner';
+import Image from 'next/image';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import baseUrl from '@/src/app/api/baseUrl';
+import SearchBar from '@/src/components/common/SearchBar/MobileSearchBar';
+
+const JobDetailPage = () => {
+  const router = useRouter();
+  const params = useParams();
+  const { data: session } = useSession();
+  const jobId = params?.id;
+  
+  const [job, setJob] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
+  const [similarJobs, setSimilarJobs] = useState([]);
+  const [activeTab, setActiveTab] = useState('details');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!jobId) {
+      toast.error('Invalid job ID');
+      router.push('/jobs');
+      return;
+    }
+
+    const fetchJobData = async () => {
+      try {
+        setIsLoading(true);
+        const api = axios.create({
+          baseURL: baseUrl,
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`
+          }
+        });
+
+        // Check cache first
+        const cachedJob = localStorage.getItem(`job-${jobId}`);
+        if (cachedJob) {
+          const parsed = JSON.parse(cachedJob);
+          setJob(parsed.job);
+          setIsSaved(parsed.isSaved);
+          setIsApplied(parsed.isApplied);
+          setSimilarJobs(parsed.similarJobs || []);
+        }
+
+        // Fetch fresh data in background
+        const [jobRes, savedRes, appliedRes] = await Promise.all([
+          api.get(`/job/jobs/${jobId}/`).catch(() => ({ data: null })),
+          api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
+          api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
+        ]);
+
+
+        if (!jobRes.data) {
+          toast.error('Job not found');
+          router.push('/jobs');
+          return;
+        }
+
+        const formattedJob = {
+          ...jobRes.data,
+          created_at: formatDate(jobRes.data.created_at),
+          description: cleanDescription(jobRes.data.description || ''),
+          responsibilities: jobRes.data.responsibilities 
+            ? cleanDescription(jobRes.data.responsibilities).split('. ').filter(Boolean) 
+            : [],
+          requirements: Array.isArray(jobRes.data.requirements) 
+            ? jobRes.data.requirements 
+            : cleanDescription(jobRes.data.requirements || '').split('. ').filter(Boolean),
+          benefits: jobRes.data.benefits 
+            ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean) 
+            : [],
+          level: jobRes.data.level || '',
+          experience_level: jobRes.data.experience_levels || jobRes.data.level || '',
+          weekly_ranges: jobRes.data.weekly_ranges || '',
+          hire_number: jobRes.data.hire_number || 1
+        };
+
+        const isJobSaved = savedRes.data.some(job => job.id == jobId);
+        const isJobApplied = appliedRes.data.some(job => job.id == jobId);
+
+        // Fetch similar jobs
+        let similar = [];
+        try {
+          const similarRes = await api.get('/job/job-options/');
+          similar = similarRes.data.jobs
+            ?.filter(j => j.id != jobId)
+            ?.slice(0, 3)
+            ?.map(j => ({
+              ...j,
+              created_at: formatDate(j.created_at),
+              description: cleanDescription(j.description || '')
+            })) || [];
+        } catch {
+          similar = [];
+        }
+
+        // Update state
+        setJob(formattedJob);
+        setIsSaved(isJobSaved);
+        setIsApplied(isJobApplied);
+        setSimilarJobs(similar);
+
+        // Cache data
+        localStorage.setItem(
+          `job-${jobId}`,
+          JSON.stringify({
+            job: formattedJob,
+            isSaved: isJobSaved,
+            isApplied: isJobApplied,
+            similarJobs: similar
+          })
+        );
+      } catch (err) {
+        console.error('Error fetching job:', err);
+        toast.error(err.response?.data?.message || 'Failed to load job details');
+        router.push('/jobs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (session) {
+      fetchJobData();
+    }
+  }, [session, jobId, router]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  const cleanDescription = (html) => {
+    if (!html || typeof html !== 'string') return '';
+    return html
+      .replace(/<[^>]*>/g, '')
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const toggleSave = async () => {
+    try {
+      const api = axios.create({
+        baseURL: baseUrl,
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`
+        }
+      });
+
+      // Optimistic update
+      const newSavedState = !isSaved;
+      setIsSaved(newSavedState);
+
+      // Update cache
+      if (job) {
+        const cachedJob = localStorage.getItem(`job-${jobId}`);
+        if (cachedJob) {
+          const parsed = JSON.parse(cachedJob);
+          localStorage.setItem(
+            `job-${jobId}`,
+            JSON.stringify({
+              ...parsed,
+              isSaved: newSavedState
+            })
+          );
+        }
+      }
+
+      // Make API call
+      await api.post(`/job/jobs/${jobId}/save/`);
+      
+      toast.success(newSavedState ? 'Job saved successfully' : 'Job unsaved successfully');
+    } catch (err) {
+      // Revert on error
+      setIsSaved(!isSaved);
+      toast.error(err.response?.data?.message || 'Failed to update saved status');
+    }
+  };
+
+  const toggleSaveJob = async (jobId) => {
+    try {
+      const api = axios.create({
+        baseURL: baseUrl,
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`
+        }
+      });
+
+      const isAlreadySaved = savedJobs.includes(jobId);
+      
+      // Optimistic update
+      setSavedJobs(prev =>
+        isAlreadySaved
+          ? prev.filter(id => id !== jobId)
+          : [...prev, jobId]
+      );
+
+      // Update allJobs state
+      setAllJobs(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? { ...job, is_saved: !isAlreadySaved} 
+            : job
+        )
+      );
+
+      // Update filteredJobs state
+      setFilteredJobs(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? { ...job, is_saved: !isAlreadySaved } 
+            : job
+        )
+      );
+
+      // Make API call
+await api.post(`/job/jobs/${jobId}/save/`);
+
+      toast.success(
+        isAlreadySaved ? 'Job unsaved successfully' : 'Job saved successfully'
+      );
+    } catch (err) {
+      // Revert on error
+      setSavedJobs(prev =>
+        savedJobs.includes(jobId)
+          ? [...prev, jobId]
+          : prev.filter(id => id !== jobId)
+      );
+
+      setAllJobs(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? { ...job, is_saved: savedJobs.includes(jobId) } 
+            : job
+        )
+      );
+
+      setFilteredJobs(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? { ...job, is_saved: savedJobs.includes(jobId) } 
+            : job
+        )
+      );
+
+      toast.error(err.response?.data?.message || 'Plase check your internet connection');
+    }
+  };  
+
+
+  const handleApply = async () => {
+    try {
+      const api = axios.create({
+        baseURL: baseUrl,
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`
+        }
+      });
+
+      await api.post(`/job/jobs/${jobId}/apply/`);
+      setIsApplied(true);
+      
+      // Update cache
+      if (job) {
+        const cachedJob = localStorage.getItem(`job-${jobId}`);
+        if (cachedJob) {
+          const parsed = JSON.parse(cachedJob);
+          localStorage.setItem(
+            `job-${jobId}`,
+            JSON.stringify({
+              ...parsed,
+              isApplied: true
+            })
+          );
+        }
+      }
+      
+      toast.success('Application submitted successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Plase check your internet connection');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white py-8">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Button 
+            variant="ghost" 
+            className="mb-6 gap-1.5 px-0 hover:bg-transparent" 
+            onClick={() => router.push('/jobs')}
+          >
+            <ChevronLeft className="h-5 w-5" />
+            Back to jobs
+          </Button>
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-white py-8">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Button 
+            variant="ghost" 
+            className="mb-6 gap-1.5 px-0 hover:bg-transparent" 
+            onClick={() => router.push('/jobs')}
+          >
+            <ChevronLeft className="h-5 w-5" />
+            Back to jobs
+          </Button>
+          <div className="text-center py-12">
+            <p className="text-gray-500">Job not found</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white pb-8 pt-2">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Button 
+          variant="ghost" 
+          className="md:mb-6 gap-1.5 px-0 hover:bg-transparent" 
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="h-5 w-5" />
+          Back to jobs
+        </Button>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-2/3">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    {job.company?.logo ? (
+                      <div className="w-14 h-14 relative rounded-lg overflow-hidden">
+                        <Image
+                          src={job.company.logo}
+                          alt={job.company.name || 'Company logo'}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 bg-blue-50 rounded-lg flex items-center justify-center text-brand font-bold text-2xl">
+                        {job.company?.name?.charAt(0) || 'C'}
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>
+                      <p className="text-muted-foreground text-sm">
+                        {job.company?.industry || 'Industry not specified'} • {job.company?.size || 'N/A'} employees
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleSave}
+                    aria-label={isSaved ? 'Unsave job' : 'Save job'}
+                  >
+                    {isSaved ? (
+                      <BookmarkCheck className="h-5 w-5 text-brand fill-brand" />
+                    ) : (
+                      <Bookmark className="h-5 w-5 text-gray-400" />
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="border-t border-b py-6 mb-6 space-y-4">
+                  <h1 className="text-2xl md:text-3xl font-bold">
+                    {job.title || 'Job Title'}
+                  </h1>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.job_location_type || 'Location not specified'}</Badge>
+                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.location || 'Remote'}</Badge>
+                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.experience_level || 'Experience not specified'}</Badge>
+                    {job.level && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.level}</Badge>}
+                    {job.weekly_ranges && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.weekly_ranges}</Badge>}
+                    {job.hire_number > 1 && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>Hiring {job.hire_number} people</Badge>}
+                  </div>
+                  <p className="text-xl font-semibold">
+                    ${job.salary_range || 'Salary not specified'}/year
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Posted {job.created_at || 'Date not available'}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <div className="flex border-b mb-6">
+                    <Button 
+                      variant="ghost" 
+                      className={`rounded-none ${activeTab === 'details' ? 'border-b-2 border-brand' : 'text-muted-foreground'}`}
+                      onClick={() => setActiveTab('details')}
+                    >
+                      Details
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className={`rounded-none ${activeTab === 'company' ? 'border-b-2 border-brand' : 'text-muted-foreground'}`}
+                      onClick={() => setActiveTab('company')}
+                    >
+                      Company
+                    </Button>
+                  </div>
+
+                  {activeTab === 'details' ? (
+                    <div className="space-y-6">
+                      <div>
+                        <h2 className="text-xl font-bold mb-4">Job Description</h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {job.description || 'No description available'}
+                        </p>
+                      </div>
+
+                      {job.responsibilities && job.responsibilities.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-bold mb-3">Responsibilities</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            {job.responsibilities.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {Array.isArray(job.requirements) ? (
+                        <div>
+                          <h3 className="text-lg font-bold mb-3">Requirements</h3>
+                            <p className='text-muted-foreground'>No Requirements</p>
+                        </div>
+                      ) : job.requirements && job.requirements.length > 0 ? (
+                        <div>
+                          <h3 className="text-lg font-bold mb-3">Requirements</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            {job.requirements.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {job.benefits && job.benefits.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-bold mb-3">Benefits</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            {job.benefits.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      <div>
+                        <h2 className="text-xl font-bold mb-4">About {job.company?.name || 'the company'}</h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {job.company?.description || 'No company description available'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold mb-3">Company Details</h3>
+                        <div className="grid grid-cols-2 gap-4 text-muted-foreground">
+                          <div>
+                            <p className="font-medium">Industry</p>
+                            <p>{job.company?.industry || 'Not specified'}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">Company Size</p>
+                            <p>{job.company?.employees || 'N/A'} employees</p>
+                          </div>
+                          {job.company?.website && (
+                            <div>
+                              <p className="font-medium">Website</p>
+                              <a 
+                                href={job.company.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-brand hover:underline"
+                              >
+                                {job.company.website}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    className="flex-1 text-white bg-brand hover:bg-brand hover:text-white" 
+                    onClick={handleApply}
+                    disabled={isApplied}
+                  >
+                    {isApplied ? 'Applied' : 'Apply Now'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 border-brand text-brand hover:border-brand hover:text-brand" 
+                    onClick={toggleSave}
+                  >
+                    {isSaved ? 'Saved' : 'Save for Later'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:w-1/3">
+            <Card className="sticky top-6">
+              <CardHeader>
+                <h2 className="text-xl font-bold">Similar Jobs</h2>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {similarJobs.length > 0 ? (
+                  similarJobs.map((similarJob) => (
+                    <div 
+                      key={similarJob.id} 
+                      className="border rounded-lg p-4 cursor-pointer hover:border-brand"
+                      onClick={() => router.push(`/jobs/${similarJob.id}`)}
+                    >
+                      <h3 className="font-semibold">{similarJob.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {similarJob.company?.name || 'Company'} • {similarJob.location || 'Location not specified'}
+                      </p>
+                      <p className="text-sm mt-2 line-clamp-2">
+                        {similarJob.description || 'No description available'}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No similar jobs found</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default JobDetailPage;

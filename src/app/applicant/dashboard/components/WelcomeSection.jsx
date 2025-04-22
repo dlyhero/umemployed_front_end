@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 
 export const WelcomeSection = (session) => {
   const user = useUser();
-  console.log(user.first_name);
 
 
   return (<motion.section
