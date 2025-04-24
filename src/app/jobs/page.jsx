@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { Filters } from './_components/Filters';
 import JobCard from './_components/JobCard';
 import { useJobs } from '@/src/hooks/useJob';
+import { Spinner } from "@/components/ui/Spinner"; // Assuming you have a Spinner component
 
 const JobListing = () => {
   const router = useRouter();
@@ -51,7 +52,7 @@ const JobListing = () => {
       case "applied":
         return jobsToFilter.filter(job => job.is_applied);
       default:
-        return jobsToFilter                                                                                                                ;
+        return jobsToFilter;
     }
   };
 
@@ -116,7 +117,7 @@ const JobListing = () => {
                     onClick={() => handleTabChange("jobs")}
                   >
                     <Briefcase className="w-4 h-4 mr-2" />
-                    Jobs {activeTab === 'jobs' && `(${jobs.length})`}
+                    Jobs {activeTab === 'jobs' && `(${loading ? '' : jobs.length})`}
                   </TabsTrigger>
                   <TabsTrigger
                     value="saved"
@@ -124,7 +125,7 @@ const JobListing = () => {
                     onClick={() => handleTabChange("saved")}
                   >
                     <Bookmark className="w-4 h-4 mr-2" />
-                    Saved ({savedJobs.length})
+                    Saved ({loading && activeTab === 'saved' ? '' : savedJobs.length})
                   </TabsTrigger>
                   <TabsTrigger
                     value="applied"
@@ -132,7 +133,7 @@ const JobListing = () => {
                     onClick={() => handleTabChange("applied")}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Applied ({appliedJobs.length})
+                    Applied ({loading && activeTab === 'applied' ? '' : appliedJobs.length})
                   </TabsTrigger>
                 </TabsList>
               </ScrollArea>
@@ -140,40 +141,46 @@ const JobListing = () => {
               <div className="mt-4">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-lg font-semibold">
-                    {activeTab === "jobs" && `All Jobs (${jobs.length})`}
-                    {activeTab === "saved" && `Saved Jobs (${jobs.length})`}
-                    {activeTab === "applied" && `Applied Jobs (${jobs.length})`}
+                    {activeTab === "jobs" && `All Jobs (${loading ? '' : jobs.length})`}
+                    {activeTab === "saved" && `Saved Jobs (${loading ? '' : jobs.length})`}
+                    {activeTab === "applied" && `Applied Jobs (${loading ? '' : jobs.length})`}
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {jobs.length > 0 ? (
-                    jobs.map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={job}
-                        onToggleSave={() => toggleSaveJob(job.id)}
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center py-8">
-                      <p className="text-gray-500">
-                        {activeTab === "jobs" && "No jobs found matching your filters"}
-                        {activeTab === "saved" && "You haven't saved any jobs yet"}
-                        {activeTab === "applied" && "You haven't applied to any jobs yet"}
-                      </p>
-                      {activeTab === "jobs" && (
-                        <Button 
-                          variant="outline" 
-                          className="mt-4"
-                          onClick={resetFilters}
-                        >
-                          Reset Filters
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
+                {loading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Spinner className="h-8 w-8" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {jobs.length > 0 ? (
+                      jobs.map((job) => (
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onToggleSave={() => toggleSaveJob(job.id)}
+                        />
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-8">
+                        <p className="text-gray-500">
+                          {activeTab === "jobs" && "No jobs found matching your filters"}
+                          {activeTab === "saved" && "You haven't saved any jobs yet"}
+                          {activeTab === "applied" && "You haven't applied to any jobs yet"}
+                        </p>
+                        {activeTab === "jobs" && (
+                          <Button 
+                            variant="outline" 
+                            className="mt-4"
+                            onClick={resetFilters}
+                          >
+                            Reset Filters
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Tabs>
           </div>
