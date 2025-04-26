@@ -2,14 +2,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MoreVertical, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import Link from 'next/link';
 
 export const JobItem = ({ job, companyId }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleViewProposals = () => {
+    router.push(`/companies/${companyId}/jobs/${job.id}/applications`);
+  };
 
   return (
     <motion.div
@@ -20,11 +25,12 @@ export const JobItem = ({ job, companyId }) => {
     >
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1">
-          <Link href={`/companies/${companyId}/jobs/${job.id}/applications`}>
-            <h4 className="text-lg font-semibold text-gray-800 hover:text-blue-500 transition-colors">
-              {job.title || 'Untitled Job'}
-            </h4>
-          </Link>
+          <h4
+            className="text-lg font-semibold text-gray-800 hover:text-blue-500 transition-colors cursor-pointer"
+            onClick={handleViewProposals}
+          >
+            {job.title || 'Untitled Job'}
+          </h4>
           <p className="text-sm text-gray-500 mt-1">
             Posted {job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Unknown'}
           </p>
@@ -61,52 +67,47 @@ export const JobItem = ({ job, companyId }) => {
           </div>
         </div>
         <Button
-          asChild
           variant="outline"
           className="w-full sm:w-auto text-blue-500 border-blue-500 hover:bg-blue-50 flex items-center gap-2 text-sm font-semibold"
+          onClick={handleViewProposals}
         >
-          <Link href={`/companies/${companyId}/jobs/${job.id}/applications`}>
-            View Proposals <ArrowRight size={16} />
-          </Link>
+          View Proposals <ArrowRight size={16} />
         </Button>
       </div>
       {menuOpen && (
         <div className="absolute right-4 top-16 w-48 bg-white border border-gray-100 shadow-lg rounded-md z-20">
           <ul className="py-1 text-sm text-gray-700">
             <li>
-              <Link
-                href={`/companies/${companyId}/jobs/${job.id}/applications`}
-                className="block px-4 py-2 hover:bg-gray-50"
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-50"
+                onClick={handleViewProposals}
               >
                 View Proposals
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                href="#"
-                className="block px-4 py-2 hover:bg-gray-50"
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-50"
                 onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Invite Freelancer
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                href="#"
-                className="block px-4 py-2 hover:bg-gray-50"
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-50"
                 onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Edit Posting
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                href="#"
-                className="block px-4 py-2 hover:bg-gray-50 text-red-600"
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600"
                 onClick={() => toast.error('This feature is not yet implemented.')}
               >
                 Delete Posting
-              </Link>
+              </button>
             </li>
           </ul>
         </div>
