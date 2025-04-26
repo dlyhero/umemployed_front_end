@@ -6,7 +6,6 @@ import Companies from "./MainContent/CompaniesCard";
 import { signIn, useSession } from "next-auth/react";
 import HeroSection from "./MainContent/HeroSection";
 import CompaniesResources from "./MainContent/CompaniesResources";
-import Destination from "./MainContent/Destination";
 import CTA from "./MainContent/CTA";
 
 export default function Home() {
@@ -20,7 +19,6 @@ export default function Home() {
       <Resources />
       <Companies />
       <CompaniesResources />
-      <Destination />
       <CTA />
     </div>
   );

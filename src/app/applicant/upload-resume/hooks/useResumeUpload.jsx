@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import baseUrl from "@/src/app/api/baseUrl";
 
 export const useResumeUpload = (token) => {
   const router = useRouter();
@@ -97,11 +98,11 @@ export const useResumeUpload = (token) => {
             }
           }
         },
-        timeout: 30000
+        timeout: 60000
       };
 
       const response = await axios.post(
-        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/resume/upload-resume/',
+        `${baseUrl}/resume/upload-resume/`,
         formData,
         config
       );
@@ -120,10 +121,9 @@ export const useResumeUpload = (token) => {
           isProcessing: false
         });
 
-        const resumeData = encodeURIComponent(JSON.stringify(response.data?.extracted_text));
 
         
-        setTimeout(() => router.push(`/applicant/update_profile?resume_data=${resumeData}`), 2000);
+        setTimeout(() => router.push(`/applicant/profile`), 2000);
         
         console.groupEnd();
         return { success: true, data: response.data };

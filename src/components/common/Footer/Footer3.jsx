@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 export default function Footer() {
   return (
     <footer className="w-full bg-white  py-10 px-6  text-gray-800">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:px-8">
         
         {/* Branding */}
         <div>
@@ -28,11 +28,7 @@ export default function Footer() {
 
         {/* Newsletter + Socials */}
         <div>
-          <h3 className="text-sm font-semibold mb-2">Stay Updated</h3>
-          <div className="flex items-center gap-2">
-            <Input type="email" placeholder="Your email" className="bg-white dark:bg-gray-800 text-sm" />
-            <Button size="sm" className={`text-brand border border-brand bg-transparent hover:bg-transparent`}>Subscribe</Button>
-          </div>
+         
 
           <div className="flex gap-3 mt-4">
             <Button variant="ghost" size="icon" className="rounded-full" asChild>

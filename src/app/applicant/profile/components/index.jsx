@@ -7,22 +7,22 @@ import { Card } from '@/components/ui/card';
 import { ProfileHeader } from './ProfileHeader';
 import { AboutSection } from './About';
 import { ExperienceSection } from './Experiences';
-import { SkillsSection } from './Skills';
 import { LanguagesSection } from './Languages';
 import { LocationSection } from './Location';
 import { CVSection } from './CV';
 import { EducationSection } from './Education';
 import { JobPreferencesSection } from './JobPreferences';
+import { SkillsSection } from './Skills';
 
-export const Profile = ({ user, isOwner = false }) => {
+export const Profile = ({ initialUser, isOwner = false }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   if (isMobile) {
     return (
-      <div className="container bg-white px-4 py-4">
+      <div className="container mx-auto bg-white px-4 py-4">
         <Tabs defaultValue="about" className="w-full">
           <ScrollArea className="w-full pb-4" orientation="horizontal">
-            <TabsList className="inline-flex w-auto">
+            <TabsList className="flex w-[98%]  mx-auto overflow-auto">
               <TabsTrigger value="about" className="whitespace-nowrap">About</TabsTrigger>
               <TabsTrigger value="experience" className="whitespace-nowrap">Experience</TabsTrigger>
               <TabsTrigger value="education" className="whitespace-nowrap">Education</TabsTrigger>
@@ -32,31 +32,31 @@ export const Profile = ({ user, isOwner = false }) => {
           </ScrollArea>
           
           <div className="mt-4">
-            <ProfileHeader user={user} isOwner={isOwner} />
+            <ProfileHeader initialUser={initialUser} isOwner={isOwner} />
           </div>
           
           <div className="space-y-4 mt-4">
             <TabsContent value="about">
-              <AboutSection about={user.about} isOwner={isOwner} />
+              <AboutSection about={initialUser?.about} isOwner={isOwner} />
             </TabsContent>
             
             <TabsContent value="experience">
-              <ExperienceSection experiences={user.experiences} isOwner={isOwner} />
+              <ExperienceSection experiences={initialUser?.experiences} isOwner={isOwner} />
             </TabsContent>
             
             <TabsContent value="education">
-              <EducationSection educations={user.educations} isOwner={isOwner} />
+              <EducationSection educations={initialUser?.educations} isOwner={isOwner} />
             </TabsContent>
             
-            <TabsContent value="skills">
-              <SkillsSection skills={user.skills} isOwner={isOwner} />
-              <LanguagesSection languages={user.languages} isOwner={isOwner} />
+            <TabsContent value="skills" className={`space-y-2`}>
+              <SkillsSection skills={initialUser?.skills} isOwner={isOwner} />
+              <LanguagesSection languages={initialUser.languages} isOwner={isOwner} />
             </TabsContent>
             
-            <TabsContent value="more">
-              <LocationSection location={user.location} isOwner={isOwner} />
-              <JobPreferencesSection preferences={user.jobPreferences} isOwner={isOwner} />
-              <CVSection cv={user.cv} isOwner={isOwner} />
+            <TabsContent value="more" className={`space-y-2`}>
+              <LocationSection location={initialUser?.location} isOwner={isOwner} />
+              <JobPreferencesSection preferences={initialUser?.jobPreferences} isOwner={isOwner} />
+              <CVSection cv={initialUser?.cv} isOwner={isOwner} />
             </TabsContent>
           </div>
         </Tabs>
@@ -65,24 +65,24 @@ export const Profile = ({ user, isOwner = false }) => {
   }
 
   return (
-    <div className='bg-white'>
-        <div className="container px-4 py-8 max-w-6xl mx-auto">
+    <div className=''>
+        <div className="container  px-6 pb-8 pt-2 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          <ProfileHeader user={user} isOwner={isOwner} />
-          <AboutSection about={user.about} isOwner={isOwner} />
-          <ExperienceSection experiences={user.experiences} isOwner={isOwner} />
-          <EducationSection educations={user.educations} isOwner={isOwner} />
+        <div className="lg:col-span-2 space-y-2">
+          <ProfileHeader initialUser={initialUser} isOwner={isOwner} />
+          <AboutSection about={initialUser?.about} isOwner={isOwner} />
+          <ExperienceSection experiences={initialUser.experiences} isOwner={isOwner} />
+          <EducationSection educations={initialUser?.educations} isOwner={isOwner} />
         </div>
         
         {/* Right Column */}
-        <div className="space-y-6">
-          <SkillsSection skills={user.skills} isOwner={isOwner} />
-          <LanguagesSection languages={user.languages} isOwner={isOwner} />
-          <LocationSection location={user.location} isOwner={isOwner} />
-          <JobPreferencesSection preferences={user.jobPreferences} isOwner={isOwner} />
-          <CVSection cv={user.cv} isOwner={isOwner} />
+        <div className="space-y-2">
+          <SkillsSection skills={initialUser?.skills} isOwner={isOwner} />
+          <LanguagesSection languages={initialUser?.languages} isOwner={isOwner} />
+          <LocationSection location={initialUser?.location} isOwner={isOwner} />
+          <JobPreferencesSection preferences={initialUser?.jobPreferences} isOwner={isOwner} />
+          <CVSection cv={initialUser?.cv} isOwner={isOwner} />
         </div>
       </div>
     </div>

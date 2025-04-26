@@ -23,11 +23,33 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
         }
     };
 
+    const handleView = () => {
+        if (cv?.url) {
+            window.open(cv.url, '_blank');
+        }
+    };
+
+    const handleDownload = () => {
+        if (cv?.url) {
+            const link = document.createElement('a');
+            link.href = cv.url;
+            link.download = cv.name || 'resume';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const handleDelete = () => {
+        if (cv?.name && onDelete) {
+            onDelete(cv.name); // adjust if you're passing an ID instead
+        }
+    };
+
     return (
         <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
-                    <FileText className="text-gray-700 h-5 w-5" />
                     <h2 className="text-xl font-bold text-gray-900">CV/Resume</h2>
                 </div>
 
@@ -49,17 +71,19 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
                     <div className="flex items-center gap-3">
                         <FileText className="text-brand h-10 w-10" />
                         <div>
-                            <h3 className="font-medium text-gray-900">{cv.name}</h3>
-                            <p className="text-gray-500 text-sm">{cv.size} · Uploaded {cv.date}</p>
+                            <h3 className="font-medium text-gray-900  truncate w-50">{cv.name}</h3>
+                            <p className="text-gray-500 text-sm">
+                                {cv.size || 'Unknown size'} · Uploaded {new Date(cv.date).toLocaleDateString()}
+                            </p>
                         </div>
                     </div>
 
                     <div className="flex gap-2 flex-wrap">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={handleView}>
                             <Eye className="h-4 w-4" />
                             <span className="hidden sm:inline">View</span>
                         </Button>
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={handleDownload}>
                             <Download className="h-4 w-4" />
                             <span className="hidden sm:inline">Download</span>
                         </Button>
@@ -67,7 +91,7 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
                             <Button
                                 variant="outline"
                                 className="gap-2 text-red-500 hover:text-red-600"
-                                onClick={() => onDelete(cv.id)}
+                                onClick={handleDelete}
                             >
                                 <Trash2 className="h-4 w-4" />
                                 <span className="hidden sm:inline">Delete</span>
@@ -82,7 +106,9 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
                         {isUploading ? 'Upload your CV' : 'No CV uploaded'}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                        {isUploading ? 'Select your resume file to upload' : 'Upload your resume to showcase to recruiters.'}
+                        {isUploading
+                            ? 'Select your resume file to upload'
+                            : 'Upload your resume to showcase to recruiters.'}
                     </p>
 
                     {isUploading ? (
@@ -97,10 +123,7 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
                                 />
                             </div>
                             <div className="flex gap-2 justify-center">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsUploading(false)}
-                                >
+                                <Button variant="outline" onClick={() => setIsUploading(false)}>
                                     Cancel
                                 </Button>
                                 <Button

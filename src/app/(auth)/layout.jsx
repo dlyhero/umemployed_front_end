@@ -1,5 +1,6 @@
 import "@/src/app/globals.css";
 import AuthProvider from "@/src/components/AuthProvider";
+import FooterCopyright from "@/src/components/common/Footer/FooterCopyright";
 import {Header} from "@/src/components/common/Header";
 
 

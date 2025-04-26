@@ -8,6 +8,7 @@ import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { SuccessModal } from "@/src/components/common/modal/SuccessModal";
+import baseUrl from "../../api/baseUrl";
 
 const signUpSchema = z.object({
   firstname: z.string().min(3, "Name must be at least 3 characters").max(254),
@@ -57,7 +58,7 @@ export function SignUpForm() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/signup/",
+        `${baseUrl}/users/signup/`,
         {
           first_name: data.firstname,
           last_name: data.lastname,

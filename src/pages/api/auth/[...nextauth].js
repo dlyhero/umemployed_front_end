@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
+import baseUrl from "@/src/app/api/baseUrl";
 
 export const authOptions = {
   providers: [
@@ -14,7 +15,7 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           const response = await axios.post(
-            "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
+            `${baseUrl}/users/login/`,
             {
               email: credentials.email,
               password: credentials.password
