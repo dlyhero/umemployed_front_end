@@ -37,7 +37,9 @@ export default function LoginForm() {
                         break;
                     case 'recruiter':
                         if (session?.user?.has_company) {
-                            router.replace('/companies/dashboard');
+                        if (session?.user?.has_company && session?.user?.company_id){
+                            router.replace(`/companies/${session.user.company_id}/dashboard`);
+                        }
                         } else {
                             router.replace('/companies/create');
                         }
