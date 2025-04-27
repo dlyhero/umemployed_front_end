@@ -31,7 +31,7 @@ export default function Loader() {
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Background with blur effect */}
       <motion.div
-        className="absolute inset-0 backdrop-blur-md bg-black/30"
+        className="absolute inset-0 background-brightness-200  bg-black/30"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

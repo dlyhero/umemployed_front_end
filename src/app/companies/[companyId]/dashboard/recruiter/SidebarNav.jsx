@@ -13,7 +13,7 @@ export const SidebarNav = ({ activeTab, setActiveTab, companyId }) => {
     { icon: <Briefcase className="w-5 h-5" />, label: 'Jobs', path: `/companies/${companyId}/jobs/listing` },
     { icon: <FileText className="w-5 h-5" />, label: 'Applications', path: `/companies/${companyId}/applications` },
     { icon: <BarChart2 className="w-5 h-5" />, label: 'Analytics', path: `/companies/${companyId}/analytics` },
-    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/settings` },
+    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/update` },
   ];
 
   return (
