@@ -1,6 +1,7 @@
 'use client';
+
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
@@ -44,15 +45,17 @@ export default function Description() {
   return (
     <>
       <Toaster position="top-right" />
-      <FormContainer
-        step={step}
-        form={form}
-        nextStep={() => form.handleSubmit(handleSubmit)()}
-        prevStep={prevStep}
-        onSubmit={handleSubmit}
-        stepIsValid={stepIsValid}
-        jobOptions={jobOptions}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <FormContainer
+          step={step}
+          form={form}
+          nextStep={() => form.handleSubmit(handleSubmit)()}
+          prevStep={prevStep}
+          onSubmit={handleSubmit}
+          stepIsValid={stepIsValid}
+          jobOptions={jobOptions}
+        />
+      </Suspense>
     </>
   );
 }
