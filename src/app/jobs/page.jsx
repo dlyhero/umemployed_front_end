@@ -1,4 +1,6 @@
 'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
@@ -6,13 +8,12 @@ import { ChevronDown, ChevronUp, Bookmark, Briefcase, CheckCircle } from 'lucide
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
 import { Filters } from './_components/Filters';
 import JobCard from './_components/JobCard';
 import { useJobs } from '@/src/hooks/useJob';
 import { Spinner } from "@/components/ui/Spinner"; // Assuming you have a Spinner component
 
-const JobListing = () => {
+function JobListingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || 'jobs';
@@ -45,7 +46,6 @@ const JobListing = () => {
 
   const getFilteredJobs = () => {
     const jobsToFilter = filteredJobs.length > 0 ? filteredJobs : allJobs;
-    
     switch (activeTab) {
       case "saved":
         return jobsToFilter.filter(job => job.is_saved);
@@ -59,9 +59,9 @@ const JobListing = () => {
   const jobs = getFilteredJobs();
 
   return (
-    <div className="bg-white min-h-screen">                                                                                                                                                                   
+    <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      
+        {/* Mobile Filters Button */}
         <div className="lg:hidden mb-6">
           <Button
             onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
@@ -70,10 +70,12 @@ const JobListing = () => {
           >
             <span>Filters</span>
             {mobileFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+          </Button>
         </div>
 
+        {/* Main content */}
         <div className="flex flex-col lg:flex-row gap-6">
+          {/* Desktop Filters */}
           <motion.div
             className="hidden lg:block w-full lg:w-72 shrink-0"
             initial={{ opacity: 0, x: -20 }}
@@ -87,6 +89,7 @@ const JobListing = () => {
             />
           </motion.div>
 
+          {/* Mobile Filters */}
           <AnimatePresence>
             {mobileFiltersOpen && (
               <motion.div
@@ -107,6 +110,7 @@ const JobListing = () => {
             )}
           </AnimatePresence>
 
+          {/* Job Listings */}
           <div className="flex-1">
             <Tabs value={activeTab} className="w-full">
               <ScrollArea className="w-full pb-4" orientation="horizontal">
@@ -188,6 +192,13 @@ const JobListing = () => {
       </div>
     </div>
   );
-};
+}
 
-export default JobListing;
+// 🛠 Main JobListing Component
+export default function JobListing() {
+  return (
+    <Suspense fallback={<div>Loading Jobs...</div>}>
+      <JobListingContent />
+    </Suspense>
+  );
+}
