@@ -8,20 +8,27 @@ import SearchBar from "../SearchBar/SearchBar";
 import AuthButtons from "./AuthButtons";
 import useScrollTop from "@/src/hooks/useScrollTop";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { useIsMessagesPage } from "@/src/utils/path";
 
 
 
 // 8. Header.js
 export function Header() {
-
+  const isMessagesPage = useIsMessagesPage()
   const scrolled =  useScrollTop();
   const pathname = usePathname();
+  const {data: session} = useSession();
  
   const feedBackPages = ["/verify_email", "/reset_password",];
 
   return (
-    <header className={cn("border-gray-200 bg-white sticky top-0 z-40", scrolled && "border-b shadow-sm")}>
-      <div className="container max-w-7xl mx-auto px-2 py-3 flex items-center justify-between">
+    <header className={cn(
+      "border-gray-200 bg-white z-40",
+      !isMessagesPage && "sticky top-0",
+      scrolled && "border-b shadow-sm"
+    )}>
+      <div className="container  mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
@@ -30,8 +37,8 @@ export function Header() {
        {
         !feedBackPages.includes(pathname) && (
          <>
-          <div className="flex-1 flex justify-center mx-4">
-            {(pathname !== '/signup' &&  pathname !== '/login') && (
+          <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
+            {session && (
               <SearchBar  />
             )}
           </div>
