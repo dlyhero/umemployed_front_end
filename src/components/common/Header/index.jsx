@@ -24,8 +24,7 @@ export function Header() {
 
   return (
     <header className={cn(
-      "border-gray-200 bg-white z-40",
-      !isMessagesPage && "sticky top-0",
+      "border-gray-200 bg-white z-40 sticky lg:relative top-0",
       scrolled && "border-b shadow-sm"
     )}>
       <div className="container  mx-auto px-2 py-3 flex items-center justify-between">
