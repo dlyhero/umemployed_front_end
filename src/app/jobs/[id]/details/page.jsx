@@ -259,38 +259,43 @@ await api.post(`/job/jobs/${jobId}/save/`);
   };  
 
 
-  const handleApply = async () => {
-    try {
-      const api = axios.create({
-        baseURL: baseUrl,
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`
-        }
-      });
-
-      await api.post(`/job/jobs/${jobId}/apply/`);
-      setIsApplied(true);
-      
-      // Update cache
-      if (job) {
-        const cachedJob = localStorage.getItem(`job-${jobId}`);
-        if (cachedJob) {
-          const parsed = JSON.parse(cachedJob);
-          localStorage.setItem(
-            `job-${jobId}`,
-            JSON.stringify({
-              ...parsed,
-              isApplied: true
-            })
-          );
-        }
+ // In the JobDetailPage component, update the handleApply function:
+const handleApply = async () => {
+  try {
+    const api = axios.create({
+      baseURL: baseUrl,
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`
       }
-      
-      toast.success('Application submitted successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Plase check your internet connection');
+    });
+
+    // Navigate to assessment page first
+    router.push(`/jobs/${jobId}/assessment`);
+
+    // Then submit the application (you might want to do this after successful assessment)
+    await api.post(`/job/jobs/${jobId}/apply/`);
+    setIsApplied(true);
+    
+    // Update cache
+    if (job) {
+      const cachedJob = localStorage.getItem(`job-${jobId}`);
+      if (cachedJob) {
+        const parsed = JSON.parse(cachedJob);
+        localStorage.setItem(
+          `job-${jobId}`,
+          JSON.stringify({
+            ...parsed,
+            isApplied: true
+          })
+        );
+      }
     }
-  };
+    
+    toast.success('Application submitted successfully');
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Please check your internet connection');
+  }
+};
 
   if (isLoading) {
     return (
