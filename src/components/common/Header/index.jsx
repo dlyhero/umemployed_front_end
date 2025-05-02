@@ -27,7 +27,7 @@ export function Header() {
       "border-gray-200 bg-white z-40 sticky lg:relative top-0",
       scrolled && "border-b shadow-sm"
     )}>
-      <div className="container  mx-auto px-2 py-3 flex items-center justify-between">
+      <div className="max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
