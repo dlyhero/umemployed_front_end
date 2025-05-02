@@ -21,7 +21,7 @@ export function Header() {
 
   return (
     <header className={cn("border-gray-200 bg-white sticky top-0 z-40", scrolled && "border-b shadow-sm")}>
-      <div className="container max-w-7xl mx-auto px-2 py-3 flex items-center justify-between">
+      <div className="container max-w-6xl mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
