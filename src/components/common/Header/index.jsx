@@ -23,11 +23,13 @@ export function Header() {
   const feedBackPages = ["/verify_email", "/reset_password",];
 
   return (
-    <header className={cn(
+    <header
+     className={
+      cn(
       "border-gray-200 bg-white z-40 sticky lg:relative top-0",
       scrolled && "border-b shadow-sm"
     )}>
-      <div className="max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
+      <div className="lg:container max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }

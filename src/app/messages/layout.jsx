@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
       >  
         <AuthProvider>
           <Header />
-          <div className="flex-1 flex">{children}
+          <div className="flex-1 flex  h-screen overflow-hidden">{children}
 
           </div>
           <Toaster
