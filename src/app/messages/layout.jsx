@@ -8,7 +8,7 @@ import { Toaster } from "react-hot-toast";
 
 
 export const metadata = {
-  title: "home",
+  title: "Messages",
 };
 
 export default function RootLayout({ children }) {
