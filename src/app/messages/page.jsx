@@ -382,104 +382,74 @@ export default function MessageApp() {
     </DropdownMenu>
   )
 
-  // Edit message modal
+  // WhatsApp-style Edit Message Modal
   const EditMessageModal = () => (
-    <Dialog open={!!editingMessageId} onOpenChange={(open) => !open && cancelEditing()}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Edit Message</DialogTitle>
-        </DialogHeader>
+    <div className={`fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 ${editingMessageId ? 'block' : 'hidden'}`}>
+      <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="p-4 border-b">
+          <h3 className="text-lg font-medium text-gray-900">Edit message</h3>
+        </div>
         
-        <Tabs defaultValue="text" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="text">Text</TabsTrigger>
-            <TabsTrigger value="attachment">Attachment</TabsTrigger>
-            <TabsTrigger value="stickers">Stickers</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="text">
-            <div className="mt-4 relative">
-              <Input
-                value={editedMessageText}
-                onChange={(e) => setEditedMessageText(e.target.value)}
-                placeholder="Edit your message..."
-              />
+        <div className="p-4">
+          <div className="relative">
+            <Input
+              value={editedMessageText}
+              onChange={(e) => setEditedMessageText(e.target.value)}
+              placeholder="Edit your message..."
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              autoFocus
+            />
+            <div className="absolute right-2 top-2 flex space-x-1">
               <button 
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="absolute right-2 top-2 p-1 rounded-full hover:bg-gray-100"
+                className="p-1 rounded-full hover:bg-gray-100"
               >
                 <Smile size={20} className="text-gray-400" />
               </button>
-              {showEmojiPicker && (
-                <div className="absolute right-0 bottom-12 z-10">
-                  <EmojiPicker onEmojiClick={onEditEmojiClick} width={300} height={350} />
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="attachment">
-            <div className="mt-4 space-y-4">
-              {editAttachment ? (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center">
-                    <Paperclip size={16} className="mr-2" />
-                    <span className="text-sm">{editAttachment.name}</span>
-                  </div>
-                  <button 
-                    onClick={removeEditAttachment}
-                    className="text-red-500 p-1 rounded-full hover:bg-red-50"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                  <label className="cursor-pointer">
-                    <input 
-                      type="file" 
-                      ref={editFileInputRef}
-                      className="hidden" 
-                      onChange={handleEditFileChange}
-                    />
-                    <div 
-                      className="flex flex-col items-center justify-center space-y-2"
-                      onClick={() => editFileInputRef.current.click()}
-                    >
-                      <Paperclip size={24} className="text-gray-400" />
-                      <p className="text-sm text-gray-500">Click to upload attachment</p>
-                    </div>
-                  </label>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="stickers">
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {['😀', '😂', '❤️', '👍', '🎉', '🤔', '😎', '👋'].map((sticker) => (
-                <button
-                  key={sticker}
-                  className={`text-2xl p-2 rounded-lg ${selectedSticker === sticker ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-                  onClick={() => setSelectedSticker(sticker)}
+              {editAttachment && (
+                <button 
+                  onClick={removeEditAttachment}
+                  className="p-1 rounded-full hover:bg-gray-100"
                 >
-                  {sticker}
+                  <X size={20} className="text-gray-400" />
                 </button>
-              ))}
+              )}
             </div>
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={cancelEditing}>
-            Cancel
-          </Button>
-          <Button onClick={saveEditedMessage}>
-            Save Changes
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            
+            {showEmojiPicker && (
+              <div className="absolute right-0 bottom-12 z-10">
+                <EmojiPicker onEmojiClick={onEditEmojiClick} width={300} height={350} />
+              </div>
+            )}
+          </div>
+          
+          {editAttachment && (
+            <div className="mt-3 p-3 border rounded-lg flex items-center justify-between">
+              <div className="flex items-center">
+                <Paperclip size={16} className="mr-2" />
+                <span className="text-sm truncate">{editAttachment.name}</span>
+              </div>
+            </div>
+          )}
+          
+          <div className="mt-3 flex justify-end space-x-2">
+            <button 
+              onClick={cancelEditing}
+              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={saveEditedMessage}
+              className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg disabled:opacity-50"
+              disabled={!editedMessageText.trim() && !editAttachment}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 
   return (
@@ -862,7 +832,7 @@ export default function MessageApp() {
       <div className="max-w-7xl mx-auto w-full border-t">
       </div>
 
-      {/* Edit Message Modal */}
+      {/* WhatsApp-style Edit Message Modal */}
       <EditMessageModal />
     </div>
   )
