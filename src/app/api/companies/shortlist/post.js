@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export async function POST(req) {
   const { companyId, jobId, candidate_id } = await req.json();
   const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
@@ -11,35 +13,27 @@ export async function POST(req) {
   }
 
   try {
-    const response = await fetch(
+    const response = await axios.post(
       `${baseUrl}/api/company/company/${companyId}/job/${jobId}/shortlist`,
+      { candidate_id },
       {
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ candidate_id }),
       }
     );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return new Response(JSON.stringify({ message: data.message || 'Failed to shortlist candidate' }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(response.data), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Shortlist POST error:', error);
-    return new Response(JSON.stringify({ message: 'Internal server error' }), {
-      status: 500,
+    console.error('Shortlist POST error:', error.response?.data || error.message);
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || 'Failed to shortlist candidate';
+    return new Response(JSON.stringify({ message }), {
+      status,
       headers: { 'Content-Type': 'application/json' },
     });
   }

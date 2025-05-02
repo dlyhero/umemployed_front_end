@@ -28,7 +28,6 @@ const ShortlistComponent = () => {
 
   const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
-  // Handle tab change with navigation
   const handleTabChange = (tab) => {
     if (tab === 'candidates') {
       router.push(`/companies/${companyId}/jobs/${jobId}/applications`);
@@ -37,6 +36,14 @@ const ShortlistComponent = () => {
     } else {
       setActiveTab(tab);
     }
+  };
+
+  const handleEndorse = (candidateId) => {
+    toast.info(`Endorsement for candidate ${candidateId} is not yet implemented.`);
+  };
+
+  const handleSchedule = (candidateId) => {
+    toast.info(`Scheduling interview for candidate ${candidateId} is not yet implemented.`);
   };
 
   // Fetch shortlisted candidates
@@ -54,21 +61,26 @@ const ShortlistComponent = () => {
 
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/companies/shortlist?companyId=${companyId}&jobId=${jobId}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.accessToken}`,
-            },
-          }
-        );
-
-        const data = await response.json();
+        const apiUrl = `${baseUrl}/api/company/company/${companyId}/job/${jobId}/shortlisted/`;
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`,
+          },
+        });
 
         if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch shortlisted candidates');
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = { message: `Server error: ${response.statusText || 'Unknown error'}` };
+          }
+          throw new Error(`Failed to fetch shortlisted candidates: ${response.status} - ${errorData.message || 'Unknown error'}`);
         }
+
+        const data = await response.json();
+        console.log('Shortlist API Response:', data);
 
         const shortlistedArray = Array.isArray(data) ? data : data.results || [];
 
@@ -106,6 +118,7 @@ const ShortlistComponent = () => {
                 matchingPercentage: app.matching_percentage || 85,
                 quizScore: app.quiz_score || 90,
                 status: 'shortlisted',
+                isShortlisted: true,
                 profile: {
                   firstName: userProfile.contact_info?.name?.split(' ')[0] || 'Unknown',
                   lastName: userProfile.contact_info?.name?.split(' ').slice(1).join(' ') || '',
@@ -131,7 +144,7 @@ const ShortlistComponent = () => {
                 },
               };
             } catch (err) {
-              console.warn(`Error fetching profile for user ID ${app.candidate_id}: ${err.message}`);
+              console.warn(`Error processing profile for user ID ${app.candidate_id}: ${err.message}`);
               return null;
             }
           })
@@ -147,7 +160,7 @@ const ShortlistComponent = () => {
         }
       } catch (err) {
         console.error('Fetch shortlist error:', err);
-        setError(err.message);
+        setError(err.message || 'Unable to load shortlisted candidates due to a server error.');
         toast.error(err.message || 'Failed to load shortlisted candidates.');
       } finally {
         setLoading(false);
@@ -229,36 +242,6 @@ const ShortlistComponent = () => {
             <div className="hidden md:block mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1>
             </div>
-            <CandidateTabs
-              activeTab={activeTab}
-              setActiveTab={handleTabChange}
-              companyId={companyId}
-              jobId={jobId}
-            >
-              <TabsContent value="shortlist">
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold border-b-4 border-brand-500 w-fit">
-                    Shortlisted Candidates
-                  </h2>
-                  {shortlisted.length > 0 ? (
-                    shortlisted.map((app) => (
-                      <CandidateCard
-                        key={app.id}
-                        candidate={app}
-                        type="job"
-                        handleViewDetails={handleViewDetails}
-                        activeTab={activeTab}
-                        isShortlisted
-                      />
-                    ))
-                  ) : (
-                    <div className="flex justify-center items-center h-[200px]">
-                      <p className="text-gray-500">No shortlisted candidates.</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </CandidateTabs>
             {loading ? (
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-brand-500 mx-auto" />
@@ -266,7 +249,42 @@ const ShortlistComponent = () => {
               </div>
             ) : error ? (
               <div className="text-center py-8 text-red-600">{error}</div>
-            ) : null}
+            ) : (
+              <section className="w-full">
+                <CandidateTabs
+                  activeTab={activeTab}
+                  setActiveTab={handleTabChange}
+                  companyId={companyId}
+                  jobId={jobId}
+                >
+                  <TabsContent value="shortlist">
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold border-b-4 border-brand-500 w-fit">
+                        Shortlisted Candidates
+                      </h2>
+                      {shortlisted.length > 0 ? (
+                        shortlisted.map((app) => (
+                          <CandidateCard
+                            key={app.id}
+                            candidate={app}
+                            type="job"
+                            handleViewDetails={handleViewDetails}
+                            handleEndorse={handleEndorse}
+                            handleSchedule={handleSchedule}
+                            activeTab={activeTab}
+                            isShortlisted={true}
+                          />
+                        ))
+                      ) : (
+                        <div className="flex justify-center items-center h-[200px]">
+                          <p className="text-gray-500">No shortlisted candidates.</p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </CandidateTabs>
+              </section>
+            )}
           </main>
         </div>
       </div>
