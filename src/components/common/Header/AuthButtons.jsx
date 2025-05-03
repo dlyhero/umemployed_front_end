@@ -2,7 +2,7 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, User } from "lucide-react";
+import { LogOut, LogIn, User, Bell } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "../Spinner";
@@ -93,7 +93,10 @@ export default function AuthButtons() {
       {status === "authenticated" ? (
         <>
          {session.user.role === 'job_seeker' && <Link href="/applicant/upload-resume" className="text-gray-700 text-sm font-medium hidden md:block">Resume</Link> }
-
+          <Link href="/notifications" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                    <Bell className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium hidden lg:block">Notifications</span>
+                  </Link>
           <Link
             href={getNavigationPath()}
             className="flex items-center gap-2"
@@ -115,7 +118,7 @@ export default function AuthButtons() {
                     onLoadingComplete={() => setImageLoading(false)}
                     onError={() => setImageLoading(false)}
                   />
-                </>
+                </>                                                                                                           
               ) : (
                 <User className="w-5 h-5 text-gray-500 absolute inset-0 m-auto" />
               )}
@@ -123,12 +126,12 @@ export default function AuthButtons() {
             <span className="hidden sm:block text-sm font-bold text-gray-700 truncate max-w-[120px]">
               {user.user?.username}
             </span>
-          </Link>
+          </Link>               
 
 
-          <Button
+          <Button                         
             variant={"outline"}
-            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand'}
+            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand hidden lg:block"  '}
             size="sm"
             onClick={handleSignOut}
             disabled={signingOut}
