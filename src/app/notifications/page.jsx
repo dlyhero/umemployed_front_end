@@ -1,5 +1,7 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
+import { useSession } from "next-auth/react"
 import {
   Bell,
   BellOff,
@@ -24,81 +26,79 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import baseUrl from "../api/baseUrl"
+
+// Base URL for API endpoints
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState([
-    {
-      id: "1",
-      type: "connection",
-      user: {
-        name: "Sarah Johnson",
-        avatar: "",
-        position: "Product Designer at TechCorp",
-      },
-      time: "2h ago",
-      read: false,
-    },
-    {
-      id: "2",
-      type: "reaction",
-      user: {
-        name: "Michael Chen",
-        avatar: "/avatar-2.jpg",
-        position: "Senior Developer",
-      },
-      post: "I just published an article about React performance optimization",
-      reaction: "liked",
-      time: "4h ago",
-      read: false,
-    },
-    {
-      id: "3",
-      type: "message",
-      user: {
-        name: "Career Support Team",
-        avatar: "/support-avatar.png",
-        position: "Career Advisor",
-      },
-      preview: "We can help with your resume and portfolio review...",
-      time: "1d ago",
-      read: true,
-    },
-    {
-      id: "4",
-      type: "job",
-      company: {
-        name: "Tech Innovations Inc.",
-        avatar: "/company-avatar.png",
-      },
-      position: "Frontend Developer",
-      time: "2d ago",
-      read: true,
-    },
-    {
-      id: "5",
-      type: "mention",
-      user: {
-        name: "Alex Rodriguez",
-        avatar: "",
-        position: "Engineering Manager",
-      },
-      post: "Looking for frontend developers to join our team",
-      time: "3d ago",
-      read: true,
-    },
-  ])
-
+  const { data: session } = useSession()
+  const [notifications, setNotifications] = useState([])
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ))
+  // Axios config with authorization headers
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })))
+  // Fetch notifications on component mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setIsLoading(true)
+        const response = await axios.get(`${baseUrl}/notifications/notifications/`, axiosConfig)
+        setNotifications(response.data)
+      } catch (error) {
+        console.error("Error fetching notifications:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (session?.accessToken) {
+      fetchNotifications()
+    }
+  }, [session?.accessToken])
+
+  const markAsRead = async (id) => {
+    try {
+      await axios.post(
+        `${baseUrl}/notifications/notifications/${id}/read/`,
+        {},
+        axiosConfig
+      )
+      
+      setNotifications(notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      ))
+    } catch (error) {
+      console.error("Error marking notification as read:", error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      // This assumes your API has a bulk read endpoint
+      // If not, you would need to loop through unread notifications
+      await Promise.all(
+        notifications
+          .filter(n => !n.read)
+          .map(n => 
+            axios.post(
+              `${baseUrl}/notifications/notifications/${n.id}/read/`,
+              {},
+              axiosConfig
+            )
+          )
+      )
+      
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error)
+    }
   }
 
   const filteredNotifications = notifications.filter(notification => {
@@ -141,6 +141,7 @@ export default function NotificationsPage() {
             size="sm" 
             onClick={markAllAsRead}
             className="text-xs sm:text-sm px-2 sm:px-3"
+            disabled={notifications.filter(n => !n.read).length === 0}
           >
             Mark all as read
           </Button>
@@ -222,7 +223,9 @@ export default function NotificationsPage() {
       <div className="grid gap-3">
         {filteredNotifications.length === 0 ? (
           <div className="text-center py-8 sm:py-10">
-            <p className="text-gray-500 text-sm sm:text-base">No notifications found</p>
+            <p className="text-gray-500 text-sm sm:text-base">
+              {activeTab === "unread" ? "No unread notifications" : "No notifications found"}
+            </p>
           </div>    
         ) : (
           filteredNotifications.map((notification) => (
@@ -336,7 +339,7 @@ export default function NotificationsPage() {
                     <div className="mt-2 sm:mt-3 flex gap-2">
                       <Button 
                         size="sm" 
-                        className="bg-brand hover:bg-brand/80 text-xs text-white     sm:text-sm px-2 sm:px-3"
+                        className="bg-brand hover:bg-brand/80 text-xs text-white sm:text-sm px-2 sm:px-3"
                       >
                         {notification.type === "connection" ? "Accept" : "View job"}
                       </Button>
