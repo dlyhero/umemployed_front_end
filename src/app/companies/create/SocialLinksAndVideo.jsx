@@ -1,20 +1,10 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Link as LinkIcon, Video, Upload } from 'lucide-react';
-import Image from 'next/image';
+import { Link as LinkIcon, Video } from 'lucide-react';
 
-const SocialLinksAndVideo = ({
-  formData,
-  handleChange,
-  handleFileChange,
-  logoFile,
-  coverPhotoFile,
-  logoPreview,
-  coverPhotoPreview,
-}) => {
+const SocialLinksAndVideo = ({ formData, handleChange }) => {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -26,88 +16,41 @@ const SocialLinksAndVideo = ({
         Social Links & Media
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ... LinkedIn and Video Introduction inputs remain unchanged ... */}
-        
-        <div className="md:col-span-2">
-          <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
-            Company Logo
+        <div>
+          <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 mb-1">
+            LinkedIn Profile
           </label>
-          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
+          <div className="relative">
+            <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
-              id="logo"
-              name="logo"
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              onChange={handleFileChange}
-              className="hidden"
+              id="linkedin"
+              name="linkedin"
+              type="url"
+              value={formData.linkedin}
+              onChange={handleChange}
+              placeholder="https://linkedin.com/company/example"
+              maxLength={200}
+              className="pl-10"
             />
-            <Button
-              asChild
-              variant="brand"
-              size="sm"
-              className="rounded-full w-full sm:w-auto"
-            >
-              <label htmlFor="logo" className="cursor-pointer flex items-center justify-center">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Logo
-              </label>
-            </Button>
-            <span className="text-gray-600 text-sm">
-              {logoFile ? logoFile.name : 'No file chosen'}
-            </span>
           </div>
-          {logoPreview && (
-            <div className="mt-2">
-              <Image
-                src={logoPreview}
-                alt="Logo preview"
-                width={100}
-                height={100}
-                className="object-contain rounded"
-              />
-            </div>
-          )}
         </div>
-
-        <div className="md:col-span-2">
-          <label htmlFor="cover_photo" className="block text-sm font-medium text-gray-700 mb-1">
-            Cover Photo
+        <div>
+          <label htmlFor="video_introduction" className="block text-sm font-medium text-gray-700 mb-1">
+            Video Introduction
           </label>
-          <div className="flex items-center flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="relative">
+            <Video className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
-              id="cover_photo"
-              name="cover_photo"
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              onChange={handleFileChange}
-              className="hidden"
+              id="video_introduction"
+              name="video_introduction"
+              type="url"
+              value={formData.video_introduction}
+              onChange={handleChange}
+              placeholder="https://youtube.com/watch?v=example"
+              maxLength={200}
+              className="pl-10"
             />
-            <Button
-              asChild
-              variant="brand"
-              size="sm"
-              className="rounded-full w-full sm:w-auto"
-            >
-              <label htmlFor="cover_photo" className="cursor-pointer flex items-center justify-center">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Cover Photo
-              </label>
-            </Button>
-            <span className="text-gray-600 text-sm">
-              {coverPhotoFile ? coverPhotoFile.name : 'No file chosen'}
-            </span>
           </div>
-          {coverPhotoPreview && (
-            <div className="mt-2">
-              <Image
-                src={coverPhotoPreview}
-                alt="Cover photo preview"
-                width={200}
-                height={100}
-                className="object-cover rounded"
-              />
-            </div>
-          )}
         </div>
       </div>
     </motion.section>
