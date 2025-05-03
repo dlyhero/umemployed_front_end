@@ -48,23 +48,6 @@ const CompanyDescription = ({ formData, handleChange }) => {
           />
         </div>
       </div>
-      <div>
-        <label htmlFor="job_openings" className="block text-sm font-medium text-gray-700 mb-1">
-          Job Openings
-        </label>
-        <div className="relative">
-          <FileText className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
-          <textarea
-            id="job_openings"
-            name="job_openings"
-            value={formData.job_openings}
-            onChange={handleChange}
-            placeholder="List job openings (e.g., Software Engineer, Marketing Manager)"
-            className="w-full pl-10 p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows={4}
-          />
-        </div>
-      </div>
     </motion.section>
   );
 };
