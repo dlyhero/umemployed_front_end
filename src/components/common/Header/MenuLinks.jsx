@@ -26,18 +26,21 @@ export function MenuLinks() {
     setLoading(true);
     router.push("/companies/related-users");
   };
-
-  if (role === "recruiter") {
-    return (
-      <div className="flex flex-col gap-2 mb-6">
-        <Link href="/notifications" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+  
+  const CommonLinks = () => <>
+  <Link href="/notifications" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
           <Bell className="w-5 h-5 text-gray-600" />
           <span className="font-medium">Notifications</span>
         </Link>
         <Link href="/messages" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
           <MessageSquare className="w-5 h-5 text-gray-600" />
           <span className="font-medium">Messages</span>
-        </Link>
+        </Link></>
+
+  if (role === "recruiter") {
+    return (
+      <div className="flex flex-col gap-2 mb-6">
+        <CommonLinks />
         <Link href="/settings" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
           <Settings className="w-5 h-5 text-gray-600" />
           <span className="font-medium">Settings</span>
@@ -63,6 +66,7 @@ export function MenuLinks() {
 
   return (
     <div className="flex flex-col gap-2 mb-6">
+      <CommonLinks />
       <Link href="/companies" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
         <Building2 className="w-5 h-5 text-gray-600" />
         <span className="font-medium">Companies</span>

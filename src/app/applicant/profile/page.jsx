@@ -40,7 +40,6 @@ export default function ProfilePage() {
         
 
         const details = detailsResponse.data;
-        console.log(contactInfo);
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',
           job_title: details.job_title,
