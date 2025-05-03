@@ -97,13 +97,11 @@ export default function AuthButtons() {
             <Link 
               href="/applicant/upload-resume" 
               className={`flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm text-gray-700 group ${
-                isResumeActive ? 'border-b-2 border-brand rounded-none' : ''
+                isResumeActive ? 'rounded-none' : ''
               }`}
             >
-              <FaFile className={`w-4 h-4 group-hover:text-brand transition-colors hidden lg:block ${
-                isResumeActive ? 'text-brand' : 'text-gray-600'
-              }`} />
-              <span className={`font-medium  group-hover:text-brand transition-colors ${
+              
+              <span className={`font-medium  group-hover:text-brand transition-colors font-semibold ${
                 isResumeActive ? 'text-brand' : ''
               }`}>Resume</span>
             </Link>
@@ -112,35 +110,20 @@ export default function AuthButtons() {
           <Link 
             href="/notifications" 
             className={`hidden lg:flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm group  ${
-              isNotificationsActive ? 'border-b-2 border-brand rounded-none' : ''
+              isNotificationsActive ? 'rounded-none' : ''
             }`}
           >
-            <FaBell className={`w-4 h-4 group-hover:text-brand transition-colors ${
+            <Bell className={`w-4 h-4 group-hover:text-brand transition-colors ${
               isNotificationsActive ? 'text-brand' : 'text-gray-600'
             }`} />
-            <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
-              isNotificationsActive ? 'text-brand' : ''
-            }`}>Notifications</span>
+         
           </Link>
           
-          <Link 
-            href="/messages" 
-            className={`hidden lg:flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm group ${
-              isMessagesActive ? 'border-b-2 border-brand rounded-none' : ''
-            }`}
-          >
-            <MessageSquareIcon className={`w-4 h-4 group-hover:text-brand group-hover:fill-brand transition-colors ${
-              isMessagesActive ? 'text-brand fill-brand' : 'text-gray-600 fill-gray-600'
-            }`} />
-            <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
-              isMessagesActive ? 'text-brand' : ''
-            }`}>Messages</span>
-          </Link>
           
           <Link
             href={getNavigationPath()}
             className={`flex items-center gap-2 group ${
-              isProfileActive ? 'border-b-2 border-brand rounded-none' : ''
+              isProfileActive ? 'rounded-none' : ''
             }`}
           >
             <div className="relative w-10 h-10 rounded-full border border-gray-200 group">
