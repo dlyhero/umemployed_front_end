@@ -2,12 +2,13 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, User, Bell, MessageSquare, FileLock2Icon, File } from "lucide-react";
+import { LogOut, LogIn, User, Bell, MessageSquare, FileLock2Icon, File, MessageCircleHeart, MessageSquareMore, MessageSquareIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Spinner from "../Spinner";
 import useUser from "@/src/hooks/useUser";
+import { FaBell, FaComment, FaCommentDots, FaFile } from "react-icons/fa";
 
 export default function AuthButtons() {
   const pathname = usePathname();
@@ -99,8 +100,8 @@ export default function AuthButtons() {
                 isResumeActive ? 'border-b-2 border-brand rounded-none' : ''
               }`}
             >
-              <File className={`w-4 h-4 group-hover:text-brand transition-colors hidden lg:block ${
-                isResumeActive ? 'text-brand' : ''
+              <FaFile className={`w-4 h-4 group-hover:text-brand transition-colors hidden lg:block ${
+                isResumeActive ? 'text-brand' : 'text-gray-600'
               }`} />
               <span className={`font-medium  group-hover:text-brand transition-colors ${
                 isResumeActive ? 'text-brand' : ''
@@ -114,8 +115,8 @@ export default function AuthButtons() {
               isNotificationsActive ? 'border-b-2 border-brand rounded-none' : ''
             }`}
           >
-            <Bell className={`w-4 h-4 group-hover:text-brand transition-colors ${
-              isNotificationsActive ? 'text-brand' : 'text-gray-700'
+            <FaBell className={`w-4 h-4 group-hover:text-brand transition-colors ${
+              isNotificationsActive ? 'text-brand' : 'text-gray-600'
             }`} />
             <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
               isNotificationsActive ? 'text-brand' : ''
@@ -128,8 +129,8 @@ export default function AuthButtons() {
               isMessagesActive ? 'border-b-2 border-brand rounded-none' : ''
             }`}
           >
-            <MessageSquare className={`w-4 h-4 group-hover:text-brand transition-colors ${
-              isMessagesActive ? 'text-brand' : 'text-gray-700'
+            <MessageSquareIcon className={`w-4 h-4 group-hover:text-brand group-hover:fill-brand transition-colors ${
+              isMessagesActive ? 'text-brand fill-brand' : 'text-gray-600 fill-gray-600'
             }`} />
             <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
               isMessagesActive ? 'text-brand' : ''
@@ -146,7 +147,7 @@ export default function AuthButtons() {
               {session.user?.image ? (
                 <>
                   {imageLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col p-0 items-center justify-center">
                       <Spinner size="sm" />
                     </div>
                   )}

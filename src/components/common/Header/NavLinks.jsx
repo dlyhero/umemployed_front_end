@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, Briefcase } from "lucide-react";
+import { FaBriefcase } from "react-icons/fa";
 
 export function NavLinks() {
   const pathname = usePathname();
@@ -17,8 +18,8 @@ export function NavLinks() {
           isCompaniesActive ? 'border-b-2 border-brand rounded-none' : ''
         }`}
       >
-        <Building2 className={`w-4 h-4 group-hover:text-brand transition-colors ${
-          isCompaniesActive ? 'text-brand' : 'text-gray-600'
+        <Building2 className={`w-4 h-4 group-hover:text-brand group-hover:fill-brand transition-colors ${
+          isCompaniesActive ? 'text-brand fill-brand' : 'text-gray-600 fill-gray-600'
         }`} />
         <span className={`text-sm font-medium group-hover:text-brand transition-colors ${
           isCompaniesActive ? 'text-brand' : ''
@@ -32,8 +33,8 @@ export function NavLinks() {
           isJobsActive ? 'border-b-2 border-brand rounded-none' : ''
         }`}
       >
-        <Briefcase className={`w-4 h-4 group-hover:text-brand transition-colors ${
-          isJobsActive ? 'text-brand' : 'text-gray-600'
+        <Briefcase className={`w-4 h-4 group-hover:text-brand group-hover:fill-brand transition-colors ${
+          isJobsActive ? 'text-brand fill-brand' : 'text-gray-600 fill-gray-600'
         }`} />
         <span className={`text-sm font-medium group-hover:text-brand transition-colors text-nowrap ${
           isJobsActive ? 'text-brand' : ''

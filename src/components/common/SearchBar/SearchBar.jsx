@@ -155,7 +155,7 @@ const SearchBar = () => {
   return (
     <div className="flex flex-1">
       {/* Desktop Search */}
-      <div className="relative hidden md:block flex-1 max-w-xl mx-auto ">
+      <div className="relative hidden md:block flex-1 max-w-xl mx-auto">
         <form onSubmit={handleSearchSubmit} className="relative w-full ">
           <div className="flex items-center gap-2">
             <div className="relative flex-1 w-full ">
