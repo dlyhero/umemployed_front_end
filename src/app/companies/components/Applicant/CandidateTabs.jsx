@@ -5,13 +5,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-4xl grid-cols-3 bg-1e90ff-100 rounded-lg p-1">
+      <TabsList className="grid w-full max-w-4xl grid-cols-3 bg-gray-100 rounded-lg p-1 mb-6">
         <TabsTrigger
           value="candidates"
           className={`px-4 py-2 rounded-md font-medium transition-colors ${
             activeTab === 'candidates'
-              ? 'bg-[#1e90ff] text-blue'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              ? 'bg-[#1e90ff] text-white'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Candidates
@@ -21,7 +21,7 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
           className={`px-4 py-2 rounded-md font-medium transition-colors ${
             activeTab === 'shortlist'
               ? 'bg-[#1e90ff] text-white'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Shortlist
@@ -31,7 +31,7 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
           className={`px-4 py-2 rounded-md font-medium transition-colors ${
             activeTab === 'archived'
               ? 'bg-[#1e90ff] text-white'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Archived

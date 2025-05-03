@@ -52,21 +52,21 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="flex-1 border-blue-500 text-blue-500"
+                    className="flex-1 border-brand text-brand cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <MessageSquare className="w-4 h-4 mr-1" />
                     Message
                   </Button>
                   <Button
-                    className="flex-1 bg-yellow-500 text-white"
+                    className="flex-1 bg-yellow-500 text-white cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <Star className="w-4 h-4 mr-1" />
                     Endorse
                   </Button>
                   <Button
-                    className="flex-1 bg-purple-500 text-white"
+                    className="flex-1 bg-blue-500 text-white cursor-pointer"
                     onClick={() => handleSchedule(candidate.user_id)}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
@@ -75,7 +75,10 @@ const CandidateCard = ({
                 </>
               ) : (
                 <>
-                  <Button variant="outline" className="flex-1 border-blue-500 text-blue-500">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-blue-500 text-blue-500 cursor-pointer"
+                  >
                     Message
                   </Button>
                   {isShortlisted ? (
@@ -87,14 +90,14 @@ const CandidateCard = ({
                     </Button>
                   ) : (
                     <Button
-                      className="flex-1 bg-green-500 text-white"
+                      className="flex-1 bg-green-500 text-white cursor-pointer"
                       onClick={() => handleShortlist(candidate.user_id)}
                     >
                       Shortlist
                     </Button>
                   )}
                   <Button
-                    className="flex-1 bg-blue-500 text-white"
+                    className="flex-1 bg-blue-500 text-white cursor-pointer"
                     onClick={() => handleViewDetails(candidate)}
                   >
                     View Details
@@ -113,21 +116,21 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="border-blue-500 text-blue-500"
+                    className="border-blue-500 text-blue-500 cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <MessageSquare className="w-4 h-4 mr-1" />
                     Message
                   </Button>
                   <Button
-                    className="bg-yellow-500 text-white"
+                    className="bg-yellow-500 text-white cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <Star className="w-4 h-4 mr-1" />
                     Endorse
                   </Button>
                   <Button
-                    className="bg-purple-500 text-white"
+                    className="bg-purple-500 text-white cursor-pointer"
                     onClick={() => handleSchedule(candidate.user_id)}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
@@ -136,7 +139,10 @@ const CandidateCard = ({
                 </>
               ) : (
                 <>
-                  <Button variant="outline" className="border-blue-500 text-blue-500">
+                  <Button
+                    variant="outline"
+                    className="border-blue-500 text-blue-500 cursor-pointer"
+                  >
                     Message
                   </Button>
                   {isShortlisted ? (
@@ -148,14 +154,14 @@ const CandidateCard = ({
                     </Button>
                   ) : (
                     <Button
-                      className="bg-green-500 text-white"
+                      className="bg-green-500 text-white cursor-pointer"
                       onClick={() => handleShortlist(candidate.user_id)}
                     >
                       Shortlist
                     </Button>
                   )}
                   <Button
-                    className="bg-blue-500 text-white"
+                    className="bg-blue-500 text-white cursor-pointer"
                     onClick={() => handleViewDetails(candidate)}
                   >
                     View Details
