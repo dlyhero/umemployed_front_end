@@ -340,8 +340,8 @@ return (
 
             <div className="mt-2 sm:mt-12 lg:mt-12 space-y-2">
               <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-              {user.job_title?.name && (
-                <p className="text-gray-700 font-medium">{user.job_title.name}</p>
+              {user.personalInfo?.jobTitle && (
+                <p className="text-gray-700 font-medium">{user.personalInfo?.jobTitle}</p>
               )}
               <p className="text-gray-500 text-sm">
                 {user.location?.city && `${user.location.city}, `}
@@ -436,9 +436,9 @@ return (
               <SelectTrigger>
                 <SelectValue placeholder={loadingJobTitles ? "Loading..." : "Select a job title"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={`max-h-90 overflow-y-auto"`}>
                 {jobTitles.map((job) => (
-                  <SelectItem className={`max-h-90 overflow-y-auto"`} key={job.id} value={job.id}>
+                  <SelectItem  key={job.id} value={job.id}>
                     {job.name}
                   </SelectItem>
                 ))}
