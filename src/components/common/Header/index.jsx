@@ -30,7 +30,7 @@ export function Header() {
       scrolled && "border-b shadow-sm",
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
-      <div className="max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
+      <div className="lg:container md:max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
