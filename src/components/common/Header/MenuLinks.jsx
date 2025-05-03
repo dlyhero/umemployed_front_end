@@ -67,7 +67,7 @@ export function MenuLinks() {
   return (
     <div className="flex flex-col gap-2 mb-6">
       <CommonLinks />
-      <Link href="/companies" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+      <Link href="/companies/listing" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
         <Building2 className="w-5 h-5 text-gray-600" />
         <span className="font-medium">Companies</span>
       </Link>
