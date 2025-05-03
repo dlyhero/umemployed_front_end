@@ -10,20 +10,35 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
-import SearchBar from '@/src/components/common/SearchBar/MobileSearchBar';
 
 const JobDetailPage = () => {
   const router = useRouter();
   const params = useParams();
   const { data: session } = useSession();
   const jobId = params?.id;
-  
+
   const [job, setJob] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
-  const [isApplied, setIsApplied] = useState(false);
   const [similarJobs, setSimilarJobs] = useState([]);
   const [activeTab, setActiveTab] = useState('details');
   const [isLoading, setIsLoading] = useState(true);
+  const [showRetakeModal, setShowRetakeModal] = useState(false);
+  const [retakeReason, setRetakeReason] = useState('');
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  useEffect(() => {
+    // Check if mobile view on component mount
+    const checkIfMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   useEffect(() => {
     if (!jobId) {
@@ -48,7 +63,6 @@ const JobDetailPage = () => {
           const parsed = JSON.parse(cachedJob);
           setJob(parsed.job);
           setIsSaved(parsed.isSaved);
-          setIsApplied(parsed.isApplied);
           setSimilarJobs(parsed.similarJobs || []);
         }
 
@@ -58,7 +72,6 @@ const JobDetailPage = () => {
           api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
           api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
         ]);
-
 
         if (!jobRes.data) {
           toast.error('Job not found');
@@ -70,14 +83,14 @@ const JobDetailPage = () => {
           ...jobRes.data,
           created_at: formatDate(jobRes.data.created_at),
           description: cleanDescription(jobRes.data.description || ''),
-          responsibilities: jobRes.data.responsibilities 
-            ? cleanDescription(jobRes.data.responsibilities).split('. ').filter(Boolean) 
+          responsibilities: jobRes.data.responsibilities
+            ? cleanDescription(jobRes.data.responsibilities).split('. ').filter(Boolean)
             : [],
-          requirements: Array.isArray(jobRes.data.requirements) 
-            ? jobRes.data.requirements 
+          requirements: Array.isArray(jobRes.data.requirements)
+            ? jobRes.data.requirements
             : cleanDescription(jobRes.data.requirements || '').split('. ').filter(Boolean),
-          benefits: jobRes.data.benefits 
-            ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean) 
+          benefits: jobRes.data.benefits
+            ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean)
             : [],
           level: jobRes.data.level || '',
           experience_level: jobRes.data.experience_levels || jobRes.data.level || '',
@@ -107,7 +120,6 @@ const JobDetailPage = () => {
         // Update state
         setJob(formattedJob);
         setIsSaved(isJobSaved);
-        setIsApplied(isJobApplied);
         setSimilarJobs(similar);
 
         // Cache data
@@ -116,7 +128,6 @@ const JobDetailPage = () => {
           JSON.stringify({
             job: formattedJob,
             isSaved: isJobSaved,
-            isApplied: isJobApplied,
             similarJobs: similar
           })
         );
@@ -179,7 +190,7 @@ const JobDetailPage = () => {
 
       // Make API call
       await api.post(`/job/jobs/${jobId}/save/`);
-      
+
       toast.success(newSavedState ? 'Job saved successfully' : 'Job unsaved successfully');
     } catch (err) {
       // Revert on error
@@ -188,7 +199,15 @@ const JobDetailPage = () => {
     }
   };
 
-  const toggleSaveJob = async (jobId) => {
+  const handleApply = async () => {
+    router.push(`/jobs/${jobId}/assessment`);
+  };
+
+  const handleRetakeRequest = () => {
+    setShowRetakeModal(true);
+  };
+
+  const submitRetakeRequest = async () => {
     try {
       const api = axios.create({
         baseURL: baseUrl,
@@ -197,113 +216,85 @@ const JobDetailPage = () => {
         }
       });
 
-      const isAlreadySaved = savedJobs.includes(jobId);
-      
-      // Optimistic update
-      setSavedJobs(prev =>
-        isAlreadySaved
-          ? prev.filter(id => id !== jobId)
-          : [...prev, jobId]
-      );
-
-      // Update allJobs state
-      setAllJobs(prev => 
-        prev.map(job => 
-          job.id === jobId 
-            ? { ...job, is_saved: !isAlreadySaved} 
-            : job
-        )
-      );
-
-      // Update filteredJobs state
-      setFilteredJobs(prev => 
-        prev.map(job => 
-          job.id === jobId 
-            ? { ...job, is_saved: !isAlreadySaved } 
-            : job
-        )
-      );
-
-      // Make API call
-await api.post(`/job/jobs/${jobId}/save/`);
+      await api.post(`/job/${jobId}/report-test/`, {
+        reason: retakeReason
+      });
 
       toast.success(
-        isAlreadySaved ? 'Job unsaved successfully' : 'Job saved successfully'
+        <div className="space-y-1">
+          <p className="font-medium">Retake request submitted successfully</p>
+          <p className="text-sm">We'll review your request and get back to you shortly.</p>
+        </div>
       );
+      setShowRetakeModal(false);
+      setRetakeReason('');
     } catch (err) {
-      // Revert on error
-      setSavedJobs(prev =>
-        savedJobs.includes(jobId)
-          ? [...prev, jobId]
-          : prev.filter(id => id !== jobId)
-      );
-
-      setAllJobs(prev => 
-        prev.map(job => 
-          job.id === jobId 
-            ? { ...job, is_saved: savedJobs.includes(jobId) } 
-            : job
-        )
-      );
-
-      setFilteredJobs(prev => 
-        prev.map(job => 
-          job.id === jobId 
-            ? { ...job, is_saved: savedJobs.includes(jobId) } 
-            : job
-        )
-      );
-
-      toast.error(err.response?.data?.message || 'Plase check your internet connection');
+      toast.error(err.response?.data?.message || 'Failed to submit retake request');
     }
-  };  
+  };
 
+  const RetakeRequestForm = ({ onClose }) => {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
+        <p className="text-muted-foreground">
+          Please explain why you need to retake this assessment. We'll review your request and get back to you.
+        </p>
+        
+        <textarea
+          className="w-full border rounded-lg p-4 min-h-[200px]"
+          value={retakeReason}
+          onChange={(e) => setRetakeReason(e.target.value)}
+          placeholder="Enter your reasons here..."
+        />
+        
+        <div className="flex gap-4">
+          <Button 
+          className="bordwr-brand text-brand hover:text-brand flex-1"
+            variant="outline" 
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button 
+            className="flex-1 bg-brand hover:bg-brand/80 text-white"
+            onClick={submitRetakeRequest}
+            disabled={!retakeReason.trim()}
+          >
+            Submit Request
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
- // In the JobDetailPage component, update the handleApply function:
-const handleApply = async () => {
-  try {
-    const api = axios.create({
-      baseURL: baseUrl,
-      headers: {
-        Authorization: `Bearer ${session?.accessToken}`
-      }
-    });
-
-    // Navigate to assessment page first
-    router.push(`/jobs/${jobId}/assessment`);
-
-    // Then submit the application (you might want to do this after successful assessment)
-    await api.post(`/job/jobs/${jobId}/apply/`);
-    setIsApplied(true);
-    
-    // Update cache
-    if (job) {
-      const cachedJob = localStorage.getItem(`job-${jobId}`);
-      if (cachedJob) {
-        const parsed = JSON.parse(cachedJob);
-        localStorage.setItem(
-          `job-${jobId}`,
-          JSON.stringify({
-            ...parsed,
-            isApplied: true
-          })
-        );
-      }
-    }
-    
-    toast.success('Application submitted successfully');
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Please check your internet connection');
-  }
-};
+  const MobileRetakePage = () => {
+    return (
+      <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
+        <div className="container mx-auto">
+          <Button
+            variant="ghost"
+            className="mb-4 gap-1.5 px-0 hover:bg-transparent"
+            onClick={() => setShowRetakeModal(false)}
+          >
+            <ChevronLeft className="h-5 w-5" />
+            Back to job
+          </Button>
+          <div className="max-w-md mx-auto">
+            <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white py-8">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Button 
-            variant="ghost" 
-            className="mb-6 gap-1.5 px-0 hover:bg-transparent" 
+          <Button
+            variant="ghost"
+            className="mb-6 gap-1.5 px-0 hover:bg-transparent"
             onClick={() => router.push('/jobs')}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -322,9 +313,9 @@ const handleApply = async () => {
     return (
       <div className="min-h-screen bg-white py-8">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Button 
-            variant="ghost" 
-            className="mb-6 gap-1.5 px-0 hover:bg-transparent" 
+          <Button
+            variant="ghost"
+            className="mb-6 gap-1.5 px-0 hover:bg-transparent"
             onClick={() => router.push('/jobs')}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -340,15 +331,20 @@ const handleApply = async () => {
 
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
+      {showRetakeModal && (
+        isMobileView ? <MobileRetakePage /> : <RetakeModal />
+      )}
+
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Button 
-          variant="ghost" 
-          className="md:mb-6 gap-1.5 px-0 hover:bg-transparent" 
-          onClick={() => router.back()}
+        <Button
+          variant="ghost"
+          className="md:mb-6 gap-1.5 px-0 hover:bg-transparent"
+          onClick={() => router.push(`/jobs`)}
         >
           <ChevronLeft className="h-5 w-5" />
           Back to jobs
         </Button>
+
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-2/3">
             <Card>
@@ -414,15 +410,15 @@ const handleApply = async () => {
 
                 <div className="mb-8">
                   <div className="flex border-b mb-6">
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className={`rounded-none ${activeTab === 'details' ? 'border-b-2 border-brand' : 'text-muted-foreground'}`}
                       onClick={() => setActiveTab('details')}
                     >
                       Details
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className={`rounded-none ${activeTab === 'company' ? 'border-b-2 border-brand' : 'text-muted-foreground'}`}
                       onClick={() => setActiveTab('company')}
                     >
@@ -453,7 +449,7 @@ const handleApply = async () => {
                       {Array.isArray(job.requirements) ? (
                         <div>
                           <h3 className="text-lg font-bold mb-3">Requirements</h3>
-                            <p className='text-muted-foreground'>No Requirements</p>
+                          <p className='text-muted-foreground'>No Requirements</p>
                         </div>
                       ) : job.requirements && job.requirements.length > 0 ? (
                         <div>
@@ -500,9 +496,9 @@ const handleApply = async () => {
                           {job.company?.website && (
                             <div>
                               <p className="font-medium">Website</p>
-                              <a 
-                                href={job.company.website} 
-                                target="_blank" 
+                              <a
+                                href={job.company.website}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-brand hover:underline"
                               >
@@ -517,16 +513,24 @@ const handleApply = async () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button 
-                    className="flex-1 text-white bg-brand hover:bg-brand hover:text-white" 
-                    onClick={handleApply}
-                    disabled={isApplied}
-                  >
-                    {isApplied ? 'Applied' : 'Apply Now'}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 border-brand text-brand hover:border-brand hover:text-brand" 
+                  {job.has_started ? (
+                    <Button
+                      className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
+                      onClick={handleRetakeRequest}
+                    >
+                      Request Retake
+                    </Button>
+                  ) : job.is_applied ? null : (
+                    <Button
+                      className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
+                      onClick={handleApply}
+                    >
+                      Apply
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-brand text-brand hover:border-brand hover:text-brand"
                     onClick={toggleSave}
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
@@ -544,8 +548,8 @@ const handleApply = async () => {
               <CardContent className="space-y-4">
                 {similarJobs.length > 0 ? (
                   similarJobs.map((similarJob) => (
-                    <div 
-                      key={similarJob.id} 
+                    <div
+                      key={similarJob.id}
                       className="border rounded-lg p-4 cursor-pointer hover:border-brand"
                       onClick={() => router.push(`/jobs/${similarJob.id}`)}
                     >

@@ -26,8 +26,9 @@ export function Header() {
     <header
      className={
       cn(
-      "border-gray-200 bg-white z-40 sticky lg:relative top-0",
-      scrolled && "border-b shadow-sm"
+      "border-gray-200 bg-white z-40  top-0",
+      scrolled && "border-b shadow-sm",
+      pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
       <div className="lg:container max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center gap-8">
