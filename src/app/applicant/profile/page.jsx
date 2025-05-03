@@ -40,7 +40,6 @@ export default function ProfilePage() {
         
 
         const details = detailsResponse.data;
-        console.log(languagesRes);
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',
           job_title: details.job_title,
@@ -74,7 +73,8 @@ export default function ProfilePage() {
             dateOfBirth: details.date_of_birth,
             email: contactInfo.data[0].email || "",
             id: contactInfo.data[0].id,
-            user: contactInfo.data[0].user
+            user: contactInfo.data[0].user,
+            jobTitle: contactInfo.data[0].job_title_name
           }
         };
         setProfileData(transformedData);

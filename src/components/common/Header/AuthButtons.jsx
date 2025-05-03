@@ -1,14 +1,17 @@
-"use client";
+'use client';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, User } from "lucide-react";
+import { LogOut, LogIn, User, Bell, MessageSquare, FileLock2Icon, File, MessageCircleHeart, MessageSquareMore, MessageSquareIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Spinner from "../Spinner";
 import useUser from "@/src/hooks/useUser";
+import { FaBell, FaComment, FaCommentDots, FaFile } from "react-icons/fa";
 
 export default function AuthButtons() {
+  const pathname = usePathname();
   const { data: session, status, update } = useSession();
   const user = useUser();
   const [userEmail, setUserEmail] = useState("");
@@ -24,7 +27,6 @@ export default function AuthButtons() {
     const loadSession = async () => {
       try {
         if (status === "authenticated") {
-          // Add null checks for session
           if (!session?.user?.email) {
             const updated = await update();
             if (updated?.user?.email) {
@@ -33,8 +35,6 @@ export default function AuthButtons() {
           } else {
             setUserEmail(session.user.email);
           }
-
-          
         }
       } finally {
         setIsLoading(false);
@@ -67,19 +67,21 @@ export default function AuthButtons() {
     return "/";
   };
 
-  // Hybrid loading render
+  // Check active links
+  const isResumeActive = pathname.startsWith("/applicant/upload-resume");
+  const isNotificationsActive = pathname.startsWith("/notifications");
+  const isMessagesActive = pathname.startsWith("/messages");
+  const isProfileActive = pathname === getNavigationPath();
+
   if (showSkeleton) {
     return (
       <div className="flex items-center gap-4">
-        {/* Skeleton for avatar area */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
           <div className="hidden sm:block">
             <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
           </div>
         </div>
-
-        {/* Spinner for button area */}
         <div className="w-20 h-9 flex items-center justify-center">
           <Spinner size="sm" />
         </div>
@@ -87,22 +89,65 @@ export default function AuthButtons() {
     );
   }
 
-
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-10">
       {status === "authenticated" ? (
         <>
-         {session.user.role === 'job_seeker' && <Link href="/applicant/upload-resume" className="text-gray-700 text-sm font-medium hidden md:block">Resume</Link> }
-
+          {session.user.role === 'job_seeker' && (
+            <Link 
+              href="/applicant/upload-resume" 
+              className={`flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm text-gray-700 group ${
+                isResumeActive ? 'border-b-2 border-brand rounded-none' : ''
+              }`}
+            >
+              <FaFile className={`w-4 h-4 group-hover:text-brand transition-colors hidden lg:block ${
+                isResumeActive ? 'text-brand' : 'text-gray-600'
+              }`} />
+              <span className={`font-medium  group-hover:text-brand transition-colors ${
+                isResumeActive ? 'text-brand' : ''
+              }`}>Resume</span>
+            </Link>
+          )}
+          
+          <Link 
+            href="/notifications" 
+            className={`hidden lg:flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm group  ${
+              isNotificationsActive ? 'border-b-2 border-brand rounded-none' : ''
+            }`}
+          >
+            <FaBell className={`w-4 h-4 group-hover:text-brand transition-colors ${
+              isNotificationsActive ? 'text-brand' : 'text-gray-600'
+            }`} />
+            <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
+              isNotificationsActive ? 'text-brand' : ''
+            }`}>Notifications</span>
+          </Link>
+          
+          <Link 
+            href="/messages" 
+            className={`hidden lg:flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm group ${
+              isMessagesActive ? 'border-b-2 border-brand rounded-none' : ''
+            }`}
+          >
+            <MessageSquareIcon className={`w-4 h-4 group-hover:text-brand group-hover:fill-brand transition-colors ${
+              isMessagesActive ? 'text-brand fill-brand' : 'text-gray-600 fill-gray-600'
+            }`} />
+            <span className={`font-medium hidden lg:block group-hover:text-brand transition-colors ${
+              isMessagesActive ? 'text-brand' : ''
+            }`}>Messages</span>
+          </Link>
+          
           <Link
             href={getNavigationPath()}
-            className="flex items-center gap-2"
+            className={`flex items-center gap-2 group ${
+              isProfileActive ? 'border-b-2 border-brand rounded-none' : ''
+            }`}
           >
-            <div className="relative w-10 h-10 rounded-full border border-gray-200">
+            <div className="relative w-10 h-10 rounded-full border border-gray-200 group">
               {session.user?.image ? (
                 <>
                   {imageLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col p-0 items-center justify-center">
                       <Spinner size="sm" />
                     </div>
                   )}
@@ -111,24 +156,27 @@ export default function AuthButtons() {
                     alt="Profile"
                     width={40}
                     height={40}
-                    className={`object-cover ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                    className={`object-cover ${imageLoading ? 'opacity-0' : 'opacity-100'} group-hover:text-brand transition-colors`}
                     onLoadingComplete={() => setImageLoading(false)}
                     onError={() => setImageLoading(false)}
                   />
                 </>
               ) : (
-                <User className="w-5 h-5 text-gray-500 absolute inset-0 m-auto" />
+                <User className={`w-5 h-5 absolute inset-0 m-auto ${
+                  isProfileActive ? 'text-brand' : 'text-gray-500'
+                }`} />
               )}
             </div>
-            <span className="hidden sm:block text-sm font-bold text-gray-700 truncate max-w-[120px]">
+            <span className={`hidden sm:block text-sm font-bold truncate max-w-[120px] group-hover:text-brand transition-colors ${
+              isProfileActive ? 'text-brand' : 'text-gray-700'
+            }`}>
               {user.user?.username}
             </span>
           </Link>
 
-
           <Button
             variant={"outline"}
-            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand'}
+            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand hidden lg:block"'}
             size="sm"
             onClick={handleSignOut}
             disabled={signingOut}

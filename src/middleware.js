@@ -27,7 +27,7 @@ export async function middleware(request) {
   }
 
   // 3. Auth-only routes (for logged-out users)
-  const authOnlyRoutes = ['/login', '/signup', '/verify-email', '/forgot-password']
+  const authOnlyRoutes = ['/login', '/signup', '/verify-email', '/forgotPassword']
   if (authOnlyRoutes.includes(path)) {
     if (token) {
       // Logged-in users trying to access auth pages get redirected
