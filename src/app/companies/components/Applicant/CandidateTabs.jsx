@@ -5,12 +5,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 bg-gray-100 rounded-lg p-1">
+      <TabsList className="grid w-4xl grid-cols-3 bg-1e90ff-100 rounded-lg p-1">
         <TabsTrigger
           value="candidates"
           className={`px-4 py-2 rounded-md font-medium transition-colors ${
             activeTab === 'candidates'
-              ? 'bg-[#1e90ff] text-white'
+              ? 'bg-[#1e90ff] text-blue'
               : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
           }`}
         >
