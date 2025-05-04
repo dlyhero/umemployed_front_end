@@ -26,7 +26,7 @@ export function Header() {
     <header
      className={
       cn(
-      "border-gray-200 bg-gray-50 z-40  top-0",
+      "border-gray-200bg-white z-40  top-0",
       scrolled && "border-b shadow-sm",
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>

@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
 import { useDropzone } from 'react-dropzone'
-import { FileText, UploadCloud, AlertCircle, Loader2, History, GraduationCap } from 'lucide-react'
+import { FileText, UploadCloud, AlertCircle, Loader2, History, GraduationCap, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
@@ -118,6 +118,12 @@ const ResumeAdvisorPage = () => {
         setShowHistory(false)
     }
 
+    const getScoreColor = (score) => {
+        if (score >= 80) return 'text-green-500';
+        if (score >= 60) return 'text-yellow-500';
+        return 'text-red-500';
+    }
+
     return (
         <div className="">
             <div className="max-w-5xl mx-auto p-6">
@@ -137,7 +143,6 @@ const ResumeAdvisorPage = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setShowHistory(!showHistory)}
-
                                 >
                                     <History className="w-4 h-4 mr-2" />
                                     {showHistory ? 'Hide History' : 'View History'}
@@ -166,6 +171,14 @@ const ResumeAdvisorPage = () => {
                                                         <p className="font-medium">{new Date(item.created_at).toLocaleDateString()}</p>
                                                         <p className="text-sm text-gray-600">{item.file_name}</p>
                                                     </div>
+                                                    {item.overall_score && (
+                                                        <Badge 
+                                                            variant="outline" 
+                                                            className={`${getScoreColor(item.overall_score)} border-current`}
+                                                        >
+                                                            {item.overall_score}%
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -216,7 +229,15 @@ const ResumeAdvisorPage = () => {
                                     </Alert>
                                 )}
 
-                                
+                                {isLoading && (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm text-gray-600">
+                                            <span>Analyzing your resume...</span>
+                                            <span>{progress}%</span>
+                                        </div>
+                                        <Progress value={progress} className="h-2" />
+                                    </div>
+                                )}
 
                                 <div className="flex justify-end">
                                     <Button
@@ -245,17 +266,55 @@ const ResumeAdvisorPage = () => {
                                     Upload Another File
                                 </Button>
 
-                                <Alert className="bg-gray-50">
-                                    <AlertTitle className="">Analysis Complete</AlertTitle>
-                                    <AlertDescription className="">
-                                        Here are our recommendations to improve your resume
-                                    </AlertDescription>
+                                <Alert className="bg-blue-50 border-blue-200">
+                                    <div className="flex justify-between items-center w-full">
+                                        <div>
+                                            <AlertTitle className="text-blue-800">Analysis Complete</AlertTitle>
+                                            <AlertDescription className="text-blue-700">
+                                                Here are our recommendations to improve your resume
+                                            </AlertDescription>
+                                        </div>
+                                        {analysis.overall_score && (
+                                            <div className="flex items-center gap-2">
+                                                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                                                <span className={`text-xl font-bold ${getScoreColor(analysis.overall_score)}`}>
+                                                    {analysis.overall_score}%
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </Alert>
+
+                                {analysis.criteria_scores && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {Object.entries(analysis.criteria_scores).map(([criteria, score]) => (
+                                            <Card key={criteria} className="border-0 shadow-sm">
+                                                <CardHeader className="pb-2">
+                                                    <CardTitle className="text-sm font-medium capitalize">
+                                                        {criteria.replace(/_/g, ' ')}
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="flex items-center gap-3">
+                                                        <Progress 
+                                                            value={score} 
+                                                            className="h-2 flex-1" 
+                                                            indicatorClassName={`${getScoreColor(score).replace('text-', 'bg-')}`}
+                                                        />
+                                                        <span className={`text-sm font-medium ${getScoreColor(score)}`}>
+                                                            {score}%
+                                                        </span>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div className="space-y-4">
                                     <h3 className="font-medium text-gray-900">Suggested Improvements</h3>
                                     <div className="space-y-3">
-                                        {Object.entries(analysis.improvement_suggestions).map(([area, suggestion]) => (
+                                        {analysis.improvement_suggestions && Object.entries(analysis.improvement_suggestions).map(([area, suggestion]) => (
                                             <div key={area} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                                                 <div className="mt-0.5">
                                                     <FileText className="w-4 h-4 text-brand" />
@@ -282,7 +341,7 @@ const ResumeAdvisorPage = () => {
                                 </div>
 
                                 <div className="flex justify-end">
-                                    <Button className={`bg-brand text-white hover:bg-brand/90  mt-4`}>
+                                    <Button className={`bg-brand text-white hover:bg-brand/90 mt-4`}>
                                         Save Recommendations
                                     </Button>
                                 </div>
