@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -33,6 +33,7 @@ const AssessmentFlow = () => {
   const [isDesktop, setIsDesktop] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [skillIdMap, setSkillIdMap] = useState({});
+  const [timerInterval, setTimerInterval] = useState(null);
 
   // Check if desktop
   useEffect(() => {
@@ -99,9 +100,17 @@ const AssessmentFlow = () => {
         });
       }, 1000);
       
+      setTimerInterval(timer);
       return () => clearInterval(timer);
     }
   }, [step, submitted, assessment]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerInterval) clearInterval(timerInterval);
+    };
+  }, [timerInterval]);
 
   // Desktop camera setup
   useEffect(() => {
@@ -164,8 +173,8 @@ const AssessmentFlow = () => {
   const formatAnswersForSubmission = () => {
     return allQuestions.map(question => ({
       question_id: question.id,
-      answer: answers[question.id] || null, // Allow null for unanswered questions
-      skill_id: question.skill_id || null // Make sure this matches your backend expectations
+      answer: answers[question.id] || null,
+      skill_id: question.skill_id || null
     }));
   };
 
@@ -175,7 +184,6 @@ const AssessmentFlow = () => {
         responses: formatAnswersForSubmission()
       };
 
-
       await axios.post(`${baseUrl}/job/${jobId}/questions/`, submissionData, {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`
@@ -184,12 +192,25 @@ const AssessmentFlow = () => {
       
       setSubmitted(true);
       setStep('results');
+      if (timerInterval) clearInterval(timerInterval);
       toast.success('Assessment submitted successfully!');
     } catch (err) {
       console.error('Submission error:', err);
       toast.error('Failed to submit assessment');
     }
-  };;
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestion < totalQuestions - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   if (isLoading) {
     return (
@@ -229,7 +250,7 @@ const AssessmentFlow = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Floating desktop camera */}
       {isDesktop && showCamera && step === 'assessment' && (
-        <div className="fixed bottom-6 right-6 w-64 h-48 rounded-lg overflow-hidden  border border-gray-200 z-50 bg-black">
+        <div className="fixed bottom-6 right-6 w-64 h-48 rounded-lg overflow-hidden border border-gray-200 z-50 bg-black">
           <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-black/70 text-white px-2 py-1 rounded text-xs">
             <Video className="w-3 h-3" />
             <span>Recording</span>
@@ -318,7 +339,7 @@ const AssessmentFlow = () => {
         {/* Assessment Step */}
         {step === 'assessment' && (
           <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 bg-white rounded-xl                                                 ">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 bg-white rounded-xl shadow-sm">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{assessment.job_title}</h1>
                 <p className="text-gray-500 mt-1">
@@ -337,7 +358,7 @@ const AssessmentFlow = () => {
                 <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-50 border border-gray-200">
                   <Clock className="text-brand h-5 w-5" />
                   <span className="font-medium text-gray-700">
-                    {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                    {formatTime(timeLeft)}
                   </span>
                 </div>
               </div>
@@ -347,7 +368,7 @@ const AssessmentFlow = () => {
               {/* Questions sidebar - desktop */}
               {isDesktop && (
                 <div className="lg:col-span-1">
-                  <Card className="sticky top-8 overflow-hidden border-0                                                ">
+                  <Card className="sticky top-8 overflow-hidden border-0 shadow-sm">
                     <CardHeader className="p-6 pb-4 border-b">
                       <CardTitle className="text-lg">Questions</CardTitle>
                     </CardHeader>
@@ -378,7 +399,7 @@ const AssessmentFlow = () => {
 
               {/* Main question content */}
               <div className="lg:col-span-3">
-                <Card className="border-0                                                 ">
+                <Card className="border-0 shadow-sm">
                   <CardContent className="p-8 space-y-8">
                     <div className="space-y-4">
                       <Badge className="bg-brand/10 text-brand px-3 py-1 rounded-full">
@@ -426,16 +447,18 @@ const AssessmentFlow = () => {
                       disabled={currentQuestion === 0}
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3"
                     >
+                      <ChevronLeft className="h-5 w-5 mr-2" />
                       Previous
                     </Button>
                     
                     <div className="flex gap-3">
                       {currentQuestion < totalQuestions - 1 ? (
                         <Button
-                          onClick={() => setCurrentQuestion(p => p + 1)}
+                          onClick={handleNextQuestion}
                           className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3"
                         >
-                          Skip
+                          Next
+                          <ChevronRight className="h-5 w-5 ml-2" />
                         </Button>
                       ) : null}
                       
@@ -456,7 +479,7 @@ const AssessmentFlow = () => {
         {/* Results Step */}
         {step === 'results' && (
           <div className="flex justify-center">
-            <Card className="max-w-3xl w-full border-0 ">
+            <Card className="max-w-3xl w-full border-0 shadow-sm">
               <CardHeader className="text-center space-y-4">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
                   <CheckCircle className="h-8 w-8 text-green-500" />
