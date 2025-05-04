@@ -34,14 +34,14 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     },
     { 
       icon: <FileText className="w-5 h-5" />, 
-      label: "Resume Builder",
-      path: "/applicant/resume",
+      label: "Resume Advisor",
+      path: "/applicant/resume-advisor",
       description: "Create and optimize your resume"
     },
     { 
       icon: <BarChart2 className="w-5 h-5" />, 
-      label: "Career Insights",
-      path: "/applicant/analytics",
+      label: "Perfect Job Title",
+      path: "/applicant/perfect-job",
       description: "Your job search statistics"
     },
     { 
