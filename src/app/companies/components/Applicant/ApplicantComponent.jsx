@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import ApplicationHeader from './ApplicationHeader';
 import ApplicationFetch from './ApplicationFetch';
 import ApplicationList from './ApplicationList';
 import CandidateModal from './CandidateModal';
 import InterviewModal from './InterviewModal';
+import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba'; // Corrected to named import
 
 const ApplicantComponent = ({ type = 'job' }) => {
   const { companyId, jobId } = useParams();
@@ -127,7 +129,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
       transition={{ duration: 0.6 }}
       className="min-h-screen bg-gray-50 py-8"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 overflow-ellipsis">
         <ApplicationHeader
           companyId={companyId}
           activeTab={activeTab}

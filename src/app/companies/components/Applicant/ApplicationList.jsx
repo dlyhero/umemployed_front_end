@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react'; // Ensure Loader2 is imported
 import CandidateCard from './CandidateCard';
 import CandidateTabs from './CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';

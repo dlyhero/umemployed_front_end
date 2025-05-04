@@ -27,11 +27,11 @@ const CandidateCard = ({
                   alt={`${candidate.profile.firstName} ${candidate.profile.lastName}`}
                   className="w-16 h-16 rounded-full border-2 border-white"
                 />
-                <span
+                {/* <span
                   className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
                     type === 'job' && activeTab !== 'candidates' ? 'bg-gray-400' : 'bg-green-400'
                   }`}
-                ></span>
+                ></span> */}
               </div>
               <div className="flex-1 flex flex-col gap-1">
                 <span className="text-lg font-semibold">
@@ -130,7 +130,7 @@ const CandidateCard = ({
                     Endorse
                   </Button>
                   <Button
-                    className="bg-purple-500 text-white cursor-pointer"
+                    className="bg-blue-500 text-white cursor-pointer"
                     onClick={() => handleSchedule(candidate.user_id)}
                   >
                     <Calendar className="w-4 h-4 mr-1" />

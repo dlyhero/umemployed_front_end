@@ -13,7 +13,7 @@ import InterviewModal from '../Applicant/InterviewModal';
 import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
-import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
+import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba'; // Corrected to named import
 import ShortlistFetch from './ShortlistFetch';
 
 const ShortlistComponent = () => {
@@ -97,7 +97,7 @@ const ShortlistComponent = () => {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <header className="flex justify-between items-center md:hidden mb-6">
-          {/* <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1> */}
+          <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1>
           <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"

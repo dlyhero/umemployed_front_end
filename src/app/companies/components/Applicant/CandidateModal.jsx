@@ -135,13 +135,13 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
                 <X className="w-4 h-4 mr-2" />
                 Decline
               </Button>
-              <Button className="w-full sm:w-auto bg-brand-600 text-white hover:bg-brand-700">
+              <Button className="w-full sm:w-auto bg-blue-500 text-white hover:bg-brand-700">
                 <Check className="w-4 h-4 mr-2" />
                 Hire
               </Button>
             </div>
           )}
-          <Button className="w-full sm:w-auto bg-brand-600 text-white hover:bg-brand-700" onClick={onClose}>
+          <Button className="w-full sm:w-auto bg-brand text-white hover:bg-brand-700" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>
