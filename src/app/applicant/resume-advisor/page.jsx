@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
 import { useDropzone } from 'react-dropzone'
-import { FileText, UploadCloud, AlertCircle, Loader2, History } from 'lucide-react'
+import { FileText, UploadCloud, AlertCircle, Loader2, History, GraduationCap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
