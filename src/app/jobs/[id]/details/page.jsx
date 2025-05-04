@@ -26,6 +26,74 @@ const JobDetailPage = () => {
   const [retakeReason, setRetakeReason] = useState('');
   const [isMobileView, setIsMobileView] = useState(false);
 
+  // RetakeModal component definition
+  const RetakeModal = () => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
+        </div>
+      </div>
+    );
+  };
+
+  // RetakeRequestForm component definition
+  const RetakeRequestForm = ({ onClose }) => {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
+        <p className="text-muted-foreground">
+          Please explain why you need to retake this assessment. We'll review your request and get back to you.
+        </p>
+        
+        <textarea
+          className="w-full border rounded-lg p-4 min-h-[200px]"
+          value={retakeReason}
+          onChange={(e) => setRetakeReason(e.target.value)}
+          placeholder="Enter your reasons here..."
+        />
+        
+        <div className="flex gap-4">
+          <Button 
+            className="border-brand text-brand hover:text-brand flex-1"
+            variant="outline" 
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button 
+            className="flex-1 bg-brand hover:bg-brand/80 text-white"
+            onClick={submitRetakeRequest}
+            disabled={!retakeReason.trim()}
+          >
+            Submit Request
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  // MobileRetakePage component definition
+  const MobileRetakePage = () => {
+    return (
+      <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
+        <div className="container mx-auto">
+          <Button
+            variant="ghost"
+            className="mb-4 gap-1.5 px-0 hover:bg-transparent"
+            onClick={() => setShowRetakeModal(false)}
+          >
+            <ChevronLeft className="h-5 w-5" />
+            Back to job
+          </Button>
+          <div className="max-w-md mx-auto">
+            <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     // Check if mobile view on component mount
     const checkIfMobile = () => {
@@ -231,61 +299,6 @@ const JobDetailPage = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit retake request');
     }
-  };
-
-  const RetakeRequestForm = ({ onClose }) => {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
-        <p className="text-muted-foreground">
-          Please explain why you need to retake this assessment. We'll review your request and get back to you.
-        </p>
-        
-        <textarea
-          className="w-full border rounded-lg p-4 min-h-[200px]"
-          value={retakeReason}
-          onChange={(e) => setRetakeReason(e.target.value)}
-          placeholder="Enter your reasons here..."
-        />
-        
-        <div className="flex gap-4">
-          <Button 
-          className="bordwr-brand text-brand hover:text-brand flex-1"
-            variant="outline" 
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button 
-            className="flex-1 bg-brand hover:bg-brand/80 text-white"
-            onClick={submitRetakeRequest}
-            disabled={!retakeReason.trim()}
-          >
-            Submit Request
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const MobileRetakePage = () => {
-    return (
-      <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
-        <div className="container mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-1.5 px-0 hover:bg-transparent"
-            onClick={() => setShowRetakeModal(false)}
-          >
-            <ChevronLeft className="h-5 w-5" />
-            Back to job
-          </Button>
-          <div className="max-w-md mx-auto">
-            <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
-          </div>
-        </div>
-      </div>
-    );
   };
 
   if (isLoading) {
