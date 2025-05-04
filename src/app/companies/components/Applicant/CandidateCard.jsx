@@ -1,12 +1,20 @@
-// src/app/companies/components/Applicant/CandidateCard.jsx
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Archive, Bookmark, MessageSquare, Eye, Star, Calendar } from 'lucide-react';
+import { Archive, Bookmark, MessageSquare, Star, Calendar } from 'lucide-react';
 
-const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, activeTab, isShortlisted = false }) => {
+const CandidateCard = ({
+  candidate,
+  type,
+  handleViewDetails,
+  handleShortlist,
+  handleEndorse,
+  handleSchedule,
+  activeTab,
+  isShortlisted = false,
+}) => {
   return (
     <Card className="hover:bg-gray-50 transition-colors border">
       <CardContent className="p-4">
@@ -19,11 +27,11 @@ const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, ac
                   alt={`${candidate.profile.firstName} ${candidate.profile.lastName}`}
                   className="w-16 h-16 rounded-full border-2 border-white"
                 />
-                <span
+                {/* <span
                   className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
                     type === 'job' && activeTab !== 'candidates' ? 'bg-gray-400' : 'bg-green-400'
                   }`}
-                ></span>
+                ></span> */}
               </div>
               <div className="flex-1 flex flex-col gap-1">
                 <span className="text-lg font-semibold">
@@ -40,34 +48,62 @@ const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, ac
               <Button variant="outline" size="icon" className="bg-gray-100">
                 <Bookmark className="w-5 h-5" />
               </Button>
-              <Button variant="outline" className="flex-1 border-blue-500 text-blue-500">
-                Message
-              </Button>
-              {!isShortlisted ? (
-                <Button
-                  className="flex-1 bg-green-500 text-white"
-                  onClick={() => handleShortlist(candidate.user_id)}
-                >
-                  Shortlist
-                </Button>
+              {activeTab === 'shortlist' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-brand text-brand cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Message
+                  </Button>
+                  <Button
+                    className="flex-1 bg-yellow-500 text-white cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
+                  >
+                    <Star className="w-4 h-4 mr-1" />
+                    Endorse
+                  </Button>
+                  <Button
+                    className="flex-1 bg-blue-500 text-white cursor-pointer"
+                    onClick={() => handleSchedule(candidate.user_id)}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Schedule Interview
+                  </Button>
+                </>
               ) : (
                 <>
-                  <Button className="flex-1 bg-yellow-500 text-white">
-                    <Star className="w-4 h-4 mr-1" />
-                    Endorsement
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-blue-500 text-blue-500 cursor-pointer"
+                  >
+                    Message
                   </Button>
-                  <Button className="flex-1 bg-purple-500 text-white">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Schedule
+                  {isShortlisted ? (
+                    <Button
+                      className="flex-1 bg-gray-400 text-white cursor-not-allowed"
+                      disabled
+                    >
+                      Shortlisted
+                    </Button>
+                  ) : (
+                    <Button
+                      className="flex-1 bg-green-500 text-white cursor-pointer"
+                      onClick={() => handleShortlist(candidate.user_id)}
+                    >
+                      Shortlist
+                    </Button>
+                  )}
+                  <Button
+                    className="flex-1 bg-blue-500 text-white cursor-pointer"
+                    onClick={() => handleViewDetails(candidate)}
+                  >
+                    View Details
                   </Button>
                 </>
               )}
-              <Button
-                className="flex-1 bg-blue-500 text-white"
-                onClick={() => handleViewDetails(candidate)}
-              >
-                View Details
-              </Button>
             </div>
             <div className="hidden md:flex items-start space-x-2">
               <Button variant="outline" size="icon" className="bg-gray-100">
@@ -76,34 +112,62 @@ const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, ac
               <Button variant="outline" size="icon" className="bg-gray-100">
                 <Bookmark className="w-5 h-5" />
               </Button>
-              <Button variant="outline" className="border-blue-500 text-blue-500">
-                Message
-              </Button>
-              {!isShortlisted ? (
-                <Button
-                  className="bg-green-500 text-white"
-                  onClick={() => handleShortlist(candidate.user_id)}
-                >
-                  Shortlist
-                </Button>
+              {activeTab === 'shortlist' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    className="border-blue-500 text-blue-500 cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Message
+                  </Button>
+                  <Button
+                    className="bg-yellow-500 text-white cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
+                  >
+                    <Star className="w-4 h-4 mr-1" />
+                    Endorse
+                  </Button>
+                  <Button
+                    className="bg-blue-500 text-white cursor-pointer"
+                    onClick={() => handleSchedule(candidate.user_id)}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Schedule Interview
+                  </Button>
+                </>
               ) : (
                 <>
-                  <Button className="bg-yellow-500 text-white">
-                    <Star className="w-4 h-4 mr-1" />
-                    Endorsement
+                  <Button
+                    variant="outline"
+                    className="border-blue-500 text-blue-500 cursor-pointer"
+                  >
+                    Message
                   </Button>
-                  <Button className="bg-purple-500 text-white">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Schedule
+                  {isShortlisted ? (
+                    <Button
+                      className="bg-gray-400 text-white cursor-not-allowed"
+                      disabled
+                    >
+                      Shortlisted
+                    </Button>
+                  ) : (
+                    <Button
+                      className="bg-green-500 text-white cursor-pointer"
+                      onClick={() => handleShortlist(candidate.user_id)}
+                    >
+                      Shortlist
+                    </Button>
+                  )}
+                  <Button
+                    className="bg-blue-500 text-white cursor-pointer"
+                    onClick={() => handleViewDetails(candidate)}
+                  >
+                    View Details
                   </Button>
                 </>
               )}
-              <Button
-                className="bg-blue-500 text-white"
-                onClick={() => handleViewDetails(candidate)}
-              >
-                View Details
-              </Button>
             </div>
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:w-[80%]">
@@ -130,7 +194,7 @@ const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, ac
               <div className="text-base font-semibold">About Candidate:</div>
               <div className="text-gray-700 line-clamp-2">{candidate.profile.coverLetter}</div>
             </div>
-            <div className="space-y-4 w-full">
+            <div className="space-y-4 w-4xl">
               <div className="text-base font-semibold">Qualifications:</div>
               <div className="flex flex-wrap gap-2">
                 {candidate.profile.skills.slice(0, 3).map((skill, index) => (

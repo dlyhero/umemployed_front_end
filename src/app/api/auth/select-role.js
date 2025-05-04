@@ -13,14 +13,11 @@ export const ACCOUNT_TYPES = {
     label: 'Recruiter',
     description: 'Hire the best talent for your team',
     icon: Briefcase,
-    redirectPath: '/recruiter/company/create'
+    redirectPath: '/companies/create'
   }
 };
 
 export const selectAccountType = async (accountType, token) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-
   try {
     const response = await fetch(
       "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/choose-account-type/",
@@ -31,11 +28,8 @@ export const selectAccountType = async (accountType, token) => {
           "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ account_type: accountType }),
-        signal: controller.signal,
       }
     );
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -54,9 +48,6 @@ export const selectAccountType = async (accountType, token) => {
 
     return await response.json();
   } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error("Request timed out. Please check your connection.");
-    }
     throw error;
   }
 };

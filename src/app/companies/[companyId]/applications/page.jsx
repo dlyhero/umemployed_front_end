@@ -80,7 +80,7 @@ export default function CompanyApplications() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <header className="flex justify-between items-center md:hidden mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Company Jobs</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Select a Job to View the applications</h1>
           <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"

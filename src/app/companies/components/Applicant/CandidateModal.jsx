@@ -28,13 +28,13 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto bg-white rounded-lg shadow-2xl">
+      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto bg-white rounded-lg shadow-2xl px-4 sm:px-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-800">Candidate Details</DialogTitle>
         </DialogHeader>
         <div className="mt-6 space-y-8">
           {/* Candidate Info */}
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
             <img
               src={profileImage}
               alt={`${firstName} ${lastName}`}
@@ -53,7 +53,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
           <div>
             <a
               href={resumeLink}
-              className="text-blue-600 underline flex items-center gap-2 hover:text-blue-800"
+              className="text-brand-600 underline flex items-center gap-2 hover:text-brand-800"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -71,13 +71,13 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
           {/* Skills */}
           <div>
             <h3 className="font-semibold text-lg text-gray-800 flex items-center gap-2">
-              <Check className="w-5 h-5 text-green-500" />
+              <Check className="w-5 h-5 text-brand-500" />
               Skills & Qualifications:
             </h3>
             <div className="flex flex-wrap gap-2 mt-3">
               {Array.isArray(skills) && skills.length > 0 ? (
                 skills.map((skill, index) => (
-                  <Badge key={index} className="bg-blue-100 text-blue-600 font-medium">
+                  <Badge key={index} className="bg-brand-100 text-brand-600 font-medium">
                     {skill}
                   </Badge>
                 ))
@@ -135,13 +135,13 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
                 <X className="w-4 h-4 mr-2" />
                 Decline
               </Button>
-              <Button className="w-full sm:w-auto bg-green-600 text-white hover:bg-green-700">
+              <Button className="w-full sm:w-auto bg-blue-500 text-white hover:bg-brand-700">
                 <Check className="w-4 h-4 mr-2" />
                 Hire
               </Button>
             </div>
           )}
-          <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700" onClick={onClose}>
+          <Button className="w-full sm:w-auto bg-brand text-white hover:bg-brand-700" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>
