@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
             >
                 <AuthProvider>
                     <Header />
-                    <div className="w-full bg-white"> 
+                    <div className="w-full"> 
                         <div className="flex-1 flex  h-screen overflow-hidden max-w-6xl mx-auto">{children}
                     </div>
                     </div>

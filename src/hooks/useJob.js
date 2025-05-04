@@ -79,7 +79,6 @@
           description: job.description.replace(/<[^>]*>/g, '')
         }));
 
-        console.log("jobs",jobsResponse);
 
         setAllJobs(formattedJobs);
         setFilteredJobs(formattedJobs);

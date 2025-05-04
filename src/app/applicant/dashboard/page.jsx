@@ -77,7 +77,7 @@ const applicantDashBoard = () => {
   
 
   return (
-    <div className="h-fit pb-2 bg-gray-50 border border-red-400">
+    <div className="h-fit pb-2 ">
       <MobileMenu mobileMenuOpen={mobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
 
 
