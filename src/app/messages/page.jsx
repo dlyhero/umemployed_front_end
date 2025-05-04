@@ -30,12 +30,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import EmojiPicker from "emoji-picker-react"
 import baseUrl from "../api/baseUrl"
 import useUser from "@/src/hooks/useUser"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "@/components/ui/sonner"
 
 export default function MessageApp() {
   const { data: session } = useSession()
   const user = useUser()
-  const { toast } = useToast()
   // State for conversations and active chat
   const [conversations, setConversations] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
