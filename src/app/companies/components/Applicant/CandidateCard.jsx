@@ -194,7 +194,7 @@ const CandidateCard = ({
               <div className="text-base font-semibold">About Candidate:</div>
               <div className="text-gray-700 line-clamp-2">{candidate.profile.coverLetter}</div>
             </div>
-            <div className="space-y-4 w-full">
+            <div className="space-y-4 w-4xl">
               <div className="text-base font-semibold">Qualifications:</div>
               <div className="flex flex-wrap gap-2">
                 {candidate.profile.skills.slice(0, 3).map((skill, index) => (
