@@ -18,6 +18,9 @@ import {
   Smile,
   Paperclip,
   AlertCircle,
+  Users,
+  UserPlus,
+  UserMinus,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,10 +30,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import EmojiPicker from "emoji-picker-react"
 import baseUrl from "../api/baseUrl"
 import useUser from "@/src/hooks/useUser"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function MessageApp() {
   const { data: session } = useSession()
   const user = useUser()
+  const { toast } = useToast()
   // State for conversations and active chat
   const [conversations, setConversations] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
@@ -45,6 +50,10 @@ export default function MessageApp() {
   const [editAttachment, setEditAttachment] = useState(null)
   const [selectedSticker, setSelectedSticker] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedMessages, setSelectedMessages] = useState([])
+  const [showParticipants, setShowParticipants] = useState(false)
+  const [participants, setParticipants] = useState([])
+  const [newParticipantId, setNewParticipantId] = useState("")
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
   const editFileInputRef = useRef(null)
@@ -58,6 +67,7 @@ export default function MessageApp() {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
+    withCredentials: true
   }
 
   // Fetch conversations on component mount
@@ -78,6 +88,11 @@ export default function MessageApp() {
         }
       } catch (error) {
         console.error("Error fetching conversations:", error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch conversations",
+          variant: "destructive",
+        })
       } finally {
         setIsLoading(false)
       }
@@ -97,12 +112,35 @@ export default function MessageApp() {
           updateConversation(activeChatId, { messages: response.data })
         } catch (error) {
           console.error("Error fetching messages:", error)
+          toast({
+            title: "Error",
+            description: "Failed to fetch messages",
+            variant: "destructive",
+          })
         }
       }
 
       fetchMessages()
     }
   }, [activeChatId, session?.accessToken])
+
+  // Fetch participants when active chat changes
+  useEffect(() => {
+    if (activeChatId) {
+      const fetchParticipants = async () => {
+        try {
+          const response = await axios.get(
+            `${baseUrl}/messages/conversations/${activeChatId}/participants/`,
+            axiosConfig
+          )
+          setParticipants(response.data)
+        } catch (error) {
+          console.error("Error fetching participants:", error)
+        }
+      }
+      fetchParticipants()
+    }
+  }, [activeChatId])
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -158,6 +196,11 @@ export default function MessageApp() {
       setReplyingTo(null)
     } catch (error) {
       console.error("Error sending message:", error)
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      })
     }
   }
 
@@ -177,15 +220,8 @@ export default function MessageApp() {
   }
 
   // Start a new conversation
-  const startNewConversation = async () => {
+  const startNewConversation = async (participantId) => {
     try {
-      // Make sure we have a valid user ID
-      if (!user?.user?.user_id) {
-        console.error("User ID is missing")
-        return
-      }
-
-      // Ensure headers are properly set with the exact same format as the server expects
       const headers = {
         Authorization: `Bearer ${session?.accessToken}`,
         "Content-Type": "application/json",
@@ -194,7 +230,7 @@ export default function MessageApp() {
 
       const response = await axios.post(
         `${baseUrl}/messages/conversations/start/`,
-        { participant_id: user.user.user_id },
+        { participant_id: participantId },
         { headers },
       )
 
@@ -205,15 +241,25 @@ export default function MessageApp() {
       if (window.innerWidth < 768) {
         setShowSidebar(false)
       }
+
+      toast({
+        title: "Success",
+        description: "Conversation started",
+      })
     } catch (error) {
       console.error("Error starting conversation:", error)
+      toast({
+        title: "Error",
+        description: "Failed to start conversation",
+        variant: "destructive",
+      })
     }
   }
 
   // Delete a conversation
   const deleteChat = async (chatId) => {
     try {
-      await axios.delete(`${baseUrl}/messages/conversations/${chatId}/delete/`, { headers: axiosConfig.headers })
+      await axios.delete(`${baseUrl}/messages/conversations/${chatId}/delete/`, axiosConfig)
 
       setConversations((prev) => prev.filter((chat) => chat.id !== chatId))
 
@@ -225,8 +271,18 @@ export default function MessageApp() {
       if (window.innerWidth < 768 && conversations.length <= 1) {
         setShowSidebar(false)
       }
+
+      toast({
+        title: "Success",
+        description: "Conversation deleted",
+      })
     } catch (error) {
       console.error("Error deleting conversation:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete conversation",
+        variant: "destructive",
+      })
     }
   }
 
@@ -257,7 +313,7 @@ export default function MessageApp() {
   // Message actions
   const deleteMessage = async (messageId) => {
     try {
-      await axios.delete(`${baseUrl}/messages/conversations/${activeChatId}/messages/${messageId}/`, axiosConfig)
+      await axios.delete(`${baseUrl}/messages/conversations/${activeChatId}/messages/${messageId}/delete/`, axiosConfig)
       updateConversation(activeChatId, {
         messages: activeChat.messages.filter((msg) => msg.id !== messageId),
         lastMessage:
@@ -266,8 +322,17 @@ export default function MessageApp() {
             : "No messages",
         time: "Just now",
       })
+      toast({
+        title: "Success",
+        description: "Message deleted",
+      })
     } catch (error) {
       console.error("Error deleting message:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete message",
+        variant: "destructive",
+      })
     }
   }
 
@@ -290,7 +355,7 @@ export default function MessageApp() {
 
     try {
       const response = await axios.put(
-        `${baseUrl}/messages/conversations/${activeChatId}/messages/${editingMessageId}/`,
+        `${baseUrl}/messages/messages/${editingMessageId}/update/`,
         {
           text: editedMessageText,
           sticker: selectedSticker,
@@ -316,8 +381,17 @@ export default function MessageApp() {
       })
 
       cancelEditing()
+      toast({
+        title: "Success",
+        description: "Message updated",
+      })
     } catch (error) {
       console.error("Error updating message:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update message",
+        variant: "destructive",
+      })
     }
   }
 
@@ -341,8 +415,17 @@ export default function MessageApp() {
           return chat
         }),
       )
+      toast({
+        title: "Success",
+        description: `Conversation ${activeChat?.isMuted ? "unmuted" : "muted"}`,
+      })
     } catch (error) {
       console.error("Error toggling mute:", error)
+      toast({
+        title: "Error",
+        description: "Failed to toggle mute",
+        variant: "destructive",
+      })
     }
   }
 
@@ -357,13 +440,110 @@ export default function MessageApp() {
           return chat
         }),
       )
+      toast({
+        title: "Success",
+        description: `Conversation ${activeChat?.isPinned ? "unpinned" : "pinned"}`,
+      })
     } catch (error) {
       console.error("Error toggling pin:", error)
+      toast({
+        title: "Error",
+        description: "Failed to toggle pin",
+        variant: "destructive",
+      })
     }
   }
 
   const reportChat = (chatId) => {
     alert(`Reported chat ${chatId}`)
+  }
+
+  // Bulk message operations
+  const toggleMessageSelection = (messageId) => {
+    setSelectedMessages((prev) =>
+      prev.includes(messageId)
+        ? prev.filter((id) => id !== messageId)
+        : [...prev, messageId]
+    )
+  }
+
+  const bulkDeleteMessages = async () => {
+    if (selectedMessages.length === 0) return
+
+    try {
+      await axios.post(
+        `${baseUrl}/messages/conversations/${activeChatId}/bulk-delete/`,
+        { message_ids: selectedMessages },
+        axiosConfig
+      )
+
+      updateConversation(activeChatId, {
+        messages: activeChat.messages.filter((msg) => !selectedMessages.includes(msg.id)),
+      })
+
+      setSelectedMessages([])
+      toast({
+        title: "Success",
+        description: "Messages deleted",
+      })
+    } catch (error) {
+      console.error("Error deleting messages:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete messages",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Participant management
+  const addParticipant = async () => {
+    if (!newParticipantId.trim()) return
+
+    try {
+      const response = await axios.post(
+        `${baseUrl}/messages/conversations/${activeChatId}/add-participant/`,
+        { user_id: newParticipantId },
+        axiosConfig
+      )
+
+      setParticipants((prev) => [...prev, response.data])
+      setNewParticipantId("")
+      toast({
+        title: "Success",
+        description: "Participant added",
+      })
+    } catch (error) {
+      console.error("Error adding participant:", error)
+      toast({
+        title: "Error",
+        description: "Failed to add participant",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const removeParticipant = async (userId) => {
+    try {
+      await axios.post(
+        `${baseUrl}/messages/conversations/${activeChatId}/remove-participant/`,
+        { user_id: userId },
+        axiosConfig
+      )
+
+      setParticipants((prev) => prev.filter((p) => p.id !== userId))
+      toast({
+        title: "Success",
+        description: "Participant removed",
+      })
+    } catch (error) {
+      console.error("Error removing participant:", error)
+      toast({
+        title: "Error",
+        description: "Failed to remove participant",
+        variant: "destructive",
+      })
+    }
   }
 
   // File handling
@@ -536,6 +716,59 @@ export default function MessageApp() {
     </div>
   )
 
+  // Participants Modal
+  const ParticipantsModal = () => (
+    <div
+      className={`fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 ${showParticipants ? "block" : "hidden"}`}
+    >
+      <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h3 className="text-lg font-medium text-gray-900">Participants</h3>
+          <button onClick={() => setShowParticipants(false)} className="p-1 rounded-full hover:bg-gray-100">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-4">
+          <div className="flex mb-4">
+            <Input
+              value={newParticipantId}
+              onChange={(e) => setNewParticipantId(e.target.value)}
+              placeholder="Enter user ID"
+              className="flex-1 mr-2"
+            />
+            <Button onClick={addParticipant} className="bg-brand hover:bg-brand/80">
+              <UserPlus size={16} className="mr-1" />
+              Add
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            {participants.map((participant) => (
+              <div key={participant.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center">
+                  <Avatar className="h-8 w-8 mr-2">
+                    <AvatarImage src={participant.avatar} />
+                    <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span>{participant.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeParticipant(participant.id)}
+                  className="text-red-500 hover:bg-red-50"
+                >
+                  <UserMinus size={16} />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
   // On mobile, show empty state if no conversations
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
   const shouldShowEmptyState = isMobile && conversations.length === 0
@@ -684,6 +917,10 @@ export default function MessageApp() {
               handleFileChange={handleFileChange}
               MessageActions={MessageActions}
               addReaction={addReaction}
+              selectedMessages={selectedMessages}
+              toggleMessageSelection={toggleMessageSelection}
+              bulkDeleteMessages={bulkDeleteMessages}
+              setShowParticipants={setShowParticipants}
             />
           ) : (
             <NoConversationSelectedView startNewConversation={startNewConversation} />
@@ -695,6 +932,9 @@ export default function MessageApp() {
 
       {/* WhatsApp-style Edit Message Modal */}
       <EditMessageModal />
+
+      {/* Participants Modal */}
+      <ParticipantsModal />
     </div>
   )
 }
@@ -764,6 +1004,10 @@ function ActiveChatView({
   handleFileChange,
   MessageActions,
   addReaction,
+  selectedMessages,
+  toggleMessageSelection,
+  bulkDeleteMessages,
+  setShowParticipants,
 }) {
   return (
     <>
@@ -789,6 +1033,10 @@ function ActiveChatView({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => setShowParticipants(true)}>
+              <Users size={16} className="mr-2" />
+              Participants
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => togglePin(activeChatId)}>
               <Pin size={16} className="mr-2" />
               {activeChat.isPinned ? "Unpin chat" : "Pin chat"}
@@ -818,13 +1066,42 @@ function ActiveChatView({
         </DropdownMenu>
       </div>
 
+      {/* Bulk actions bar */}
+      {selectedMessages.length > 0 && (
+        <div className="p-2 border-b bg-gray-50 flex justify-between items-center">
+          <span className="text-sm">{selectedMessages.length} selected</span>
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-500 hover:bg-red-50"
+              onClick={bulkDeleteMessages}
+            >
+              <Trash size={16} className="mr-1" />
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleMessageSelection([])}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5f5]">
         <div className="space-y-4 max-w-3xl mx-auto">
           {activeChat.messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sent ? "justify-end" : "justify-start"}`}>
+            <div
+              key={msg.id}
+              className={`flex ${msg.sent ? "justify-end" : "justify-start"} ${selectedMessages.includes(msg.id) ? "bg-blue-50 rounded-lg" : ""}`}
+              onClick={() => selectedMessages.length > 0 && toggleMessageSelection(msg.id)}
+            >
               <div
-                className={`max-w-xs md:max-w-md rounded-2xl px-4 py-3 relative group ${msg.sent ? "bg-brand text-white rounded-br-none" : "bg-white border rounded-bl-none shadow-sm"}`}
+                className={`max-w-xs md:max-w-md rounded-2xl px-4 py-3 relative group ${msg.sent ? "bg-brand text-white rounded-br-none" : "bg-white border rounded-bl-none shadow-sm"} ${selectedMessages.includes(msg.id) ? "ring-2 ring-blue-500" : ""}`}
               >
                 {/* Reply indicator */}
                 {msg.replyTo && (
