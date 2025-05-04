@@ -216,15 +216,7 @@ const ResumeAdvisorPage = () => {
                                     </Alert>
                                 )}
 
-                                {isLoading && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm text-gray-600">
-                                            <span>Analyzing your resume...</span>
-                                            <span>{progress}%</span>
-                                        </div>
-                                        <Progress value={progress} className="h-2" />
-                                    </div>
-                                )}
+                                
 
                                 <div className="flex justify-end">
                                     <Button
@@ -253,9 +245,9 @@ const ResumeAdvisorPage = () => {
                                     Upload Another File
                                 </Button>
 
-                                <Alert className="bg-blue-50 border-blue-200">
-                                    <AlertTitle className="text-brand">Analysis Complete</AlertTitle>
-                                    <AlertDescription className="text-brand/90">
+                                <Alert className="bg-gray-50">
+                                    <AlertTitle className="">Analysis Complete</AlertTitle>
+                                    <AlertDescription className="">
                                         Here are our recommendations to improve your resume
                                     </AlertDescription>
                                 </Alert>
