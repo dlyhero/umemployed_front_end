@@ -27,11 +27,6 @@ const CandidateCard = ({
                   alt={`${candidate.profile.firstName} ${candidate.profile.lastName}`}
                   className="w-16 h-16 rounded-full border-2 border-white"
                 />
-                {/* <span
-                  className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
-                    type === 'job' && activeTab !== 'candidates' ? 'bg-gray-400' : 'bg-green-400'
-                  }`}
-                ></span> */}
               </div>
               <div className="flex-1 flex flex-col gap-1">
                 <span className="text-lg font-semibold">
@@ -41,7 +36,7 @@ const CandidateCard = ({
                 <div className="text-gray-600 line-clamp-2">{candidate.profile.jobTitle}</div>
               </div>
             </div>
-            <div className="flex md:hidden items-start space-x-2">
+            <div className="flex md:hidden flex-nowrap items-start gap-2">
               <Button variant="outline" size="icon" className="bg-gray-100">
                 <Archive className="w-5 h-5" />
               </Button>
@@ -52,7 +47,7 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="flex-1 border-brand text-brand cursor-pointer"
+                    className="flex-1 border-brand/50 text-brand/50 cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <MessageSquare className="w-4 h-4 mr-1" />
@@ -66,7 +61,7 @@ const CandidateCard = ({
                     Endorse
                   </Button>
                   <Button
-                    className="flex-1 bg-blue-500 text-white cursor-pointer"
+                    className="flex-1 bg-brand/50 text-white cursor-pointer"
                     onClick={() => handleSchedule(candidate.user_id)}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
@@ -77,8 +72,10 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="flex-1 border-blue-500 text-blue-500 cursor-pointer"
+                    className="flex-1 border-brand/50 text-brand/50 cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
                   >
+                    <MessageSquare className="w-4 h-4 mr-1" />
                     Message
                   </Button>
                   {isShortlisted ? (
@@ -97,7 +94,7 @@ const CandidateCard = ({
                     </Button>
                   )}
                   <Button
-                    className="flex-1 bg-blue-500 text-white cursor-pointer"
+                    className="flex-1 bg-brand/50 text-white cursor-pointer"
                     onClick={() => handleViewDetails(candidate)}
                   >
                     View Details
@@ -105,7 +102,7 @@ const CandidateCard = ({
                 </>
               )}
             </div>
-            <div className="hidden md:flex items-start space-x-2">
+            <div className="hidden md:flex items-start flex-wrap gap-2">
               <Button variant="outline" size="icon" className="bg-gray-100">
                 <Archive className="w-5 h-5" />
               </Button>
@@ -116,7 +113,7 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="border-blue-500 text-blue-500 cursor-pointer"
+                    className="border-brand/50 text-brand/50 cursor-pointer"
                     onClick={() => handleEndorse(candidate.user_id)}
                   >
                     <MessageSquare className="w-4 h-4 mr-1" />
@@ -130,7 +127,7 @@ const CandidateCard = ({
                     Endorse
                   </Button>
                   <Button
-                    className="bg-blue-500 text-white cursor-pointer"
+                    className="bg-brand/50 text-white cursor-pointer"
                     onClick={() => handleSchedule(candidate.user_id)}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
@@ -141,8 +138,10 @@ const CandidateCard = ({
                 <>
                   <Button
                     variant="outline"
-                    className="border-blue-500 text-blue-500 cursor-pointer"
+                    className="border-brand/50 text-brand/50 cursor-pointer"
+                    onClick={() => handleEndorse(candidate.user_id)}
                   >
+                    <MessageSquare className="w-4 h-4 mr-1" />
                     Message
                   </Button>
                   {isShortlisted ? (
@@ -161,7 +160,7 @@ const CandidateCard = ({
                     </Button>
                   )}
                   <Button
-                    className="bg-blue-500 text-white cursor-pointer"
+                    className="bg-brand/50 text-white cursor-pointer"
                     onClick={() => handleViewDetails(candidate)}
                   >
                     View Details
@@ -194,11 +193,11 @@ const CandidateCard = ({
               <div className="text-base font-semibold">About Candidate:</div>
               <div className="text-gray-700 line-clamp-2">{candidate.profile.coverLetter}</div>
             </div>
-            <div className="space-y-4 w-4xl">
+            <div className="space-y-4 w-full max-w-[300px] overflow-x-auto">
               <div className="text-base font-semibold">Qualifications:</div>
               <div className="flex flex-wrap gap-2">
                 {candidate.profile.skills.slice(0, 3).map((skill, index) => (
-                  <Badge key={index} className="bg-blue-100 text-blue-500">
+                  <Badge key={index} className="bg-brand/20 text-brand/50">
                     {skill}
                   </Badge>
                 ))}

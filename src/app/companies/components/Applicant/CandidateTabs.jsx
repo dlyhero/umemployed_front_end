@@ -5,12 +5,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid  max-w-4xl grid-cols-3 bg-brand rounded-lg p-1 mb-6">
+      <TabsList className="flex max-w-4xl rounded-lg p-1 mb-6 shadow-sm">
         <TabsTrigger
           value="candidates"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'candidates'
-              ? 'bg-[#1e90ff] text-white'
+              ? 'bg-brand/50 text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
@@ -18,9 +18,9 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
         </TabsTrigger>
         <TabsTrigger
           value="shortlist"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'shortlist'
-              ? 'bg-[#1e90ff] text-white'
+              ? 'bg-brand/50 text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
@@ -28,9 +28,9 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
         </TabsTrigger>
         <TabsTrigger
           value="archived"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'archived'
-              ? 'bg-[#1e90ff] text-white'
+              ? 'bg-brand/50 text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >

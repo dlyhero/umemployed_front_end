@@ -1,3 +1,4 @@
+// src/app/companies/components/Applicant/CandidateModal.jsx
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -6,12 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, X, Check, Mail } from 'lucide-react';
 
 const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
-  // Early return if candidate is null or undefined
   if (!candidate || !candidate.profile) {
     return null;
   }
 
-  // Destructure candidate.profile with defaults
   const {
     firstName = 'Unknown',
     lastName = '',
@@ -28,122 +27,85 @@ const CandidateModal = ({ isOpen, onClose, candidate, type }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto bg-white rounded-lg shadow-2xl px-4 sm:px-6">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-800">Candidate Details</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-gray-800">Candidate Details</DialogTitle>
         </DialogHeader>
-        <div className="mt-6 space-y-8">
-          {/* Candidate Info */}
-          <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="mt-6 space-y-6">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
             <img
               src={profileImage}
               alt={`${firstName} ${lastName}`}
-              className="w-24 h-24 rounded-full border-4 border-gray-100 shadow-sm"
+              className="w-20 h-20 rounded-full border-2 border-gray-100"
             />
-            <div>
-              <span className="text-xl font-semibold text-gray-800">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">
                 {firstName} {lastName}
-              </span>
-              <div className="text-gray-500 text-sm">{location}</div>
-              <div className="text-gray-600 text-sm font-medium">{jobTitle}</div>
+              </h2>
+              <p className="text-gray-600 text-sm">{jobTitle}</p>
+              <p className="text-gray-500 text-sm">{location}</p>
             </div>
           </div>
 
-          {/* Resume Link */}
-          <div>
-            <a
-              href={resumeLink}
-              className="text-brand-600 underline flex items-center gap-2 hover:text-brand-800"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Eye className="w-5 h-5" />
-              View Resume
-            </a>
-          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium text-gray-800 mb-2">About</h3>
+              <p className="text-gray-700 text-sm whitespace-pre-line">{coverLetter}</p>
+            </div>
 
-          {/* Cover Letter */}
-          <div>
-            <h3 className="font-semibold text-lg text-gray-800">Candidate Heading:</h3>
-            <p className="text-gray-700 text-sm mt-2 leading-relaxed">{coverLetter}</p>
-          </div>
-
-          {/* Skills */}
-          <div>
-            <h3 className="font-semibold text-lg text-gray-800 flex items-center gap-2">
-              <Check className="w-5 h-5 text-brand-500" />
-              Skills & Qualifications:
-            </h3>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {Array.isArray(skills) && skills.length > 0 ? (
-                skills.map((skill, index) => (
-                  <Badge key={index} className="bg-brand-100 text-brand-600 font-medium">
+            <div>
+              <h3 className="font-medium text-gray-800 mb-2">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill, index) => (
+                  <Badge key={index} variant="outline" className="bg-brand/10 text-brand">
                     {skill}
                   </Badge>
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm">No skills listed.</p>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Contacts */}
-          <div>
-            <h3 className="font-semibold text-lg text-gray-800">Contacts:</h3>
-            <div className="mt-2 text-gray-700 text-sm">
-              <p>Email: {contacts.email}</p>
-              <p>Phone: {contacts.phone}</p>
+            <div>
+              <h3 className="font-medium text-gray-800 mb-2">Experience</h3>
+              <div className="space-y-2">
+                {experiences.map((exp, index) => (
+                  <div key={index} className="text-sm">
+                    <p className="font-medium">{exp.title}</p>
+                    <p className="text-gray-500">{exp.duration}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Experiences */}
-          <div>
-            <h3 className="font-semibold text-lg text-gray-800">Experiences:</h3>
-            <div className="mt-2 text-gray-700 text-sm">
-              {Array.isArray(experiences) && experiences.length > 0 ? (
-                experiences.map((exp, index) => (
-                  <p key={index} className="mb-1">
-                    {exp.title} - {exp.duration}
-                  </p>
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm">No experiences listed.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Languages */}
-          <div>
-            <h3 className="font-semibold text-lg text-gray-800">Languages:</h3>
-            <div className="mt-2 text-gray-700 text-sm">
-              {Array.isArray(languages) && languages.length > 0 ? (
-                languages.join(', ')
-              ) : (
-                'No languages listed.'
-              )}
+            <div>
+              <h3 className="font-medium text-gray-800 mb-2">Contact</h3>
+              <div className="text-sm space-y-1">
+                <p>Email: {contacts.email}</p>
+                <p>Phone: {contacts.phone}</p>
+              </div>
             </div>
           </div>
         </div>
-        <DialogFooter className="mt-8 flex flex-col sm:flex-row gap-3">
-          {type === 'job' && (
-            <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto hover:bg-gray-100">
-                <Mail className="w-4 h-4 mr-2" />
-                Message
+        <DialogFooter className="mt-6">
+          <div className="flex flex-wrap gap-3 w-full">
+            <Button variant="outline" className="flex-1" onClick={onClose}>
+              Close
+            </Button>
+            <a
+              href={resumeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button variant="outline" className="w-full">
+                <Eye className="w-4 h-4 mr-2" />
+                View Resume
               </Button>
-              <Button variant="outline" className="w-full sm:w-auto text-red-500 border-red-500 hover:bg-red-50">
-                <X className="w-4 h-4 mr-2" />
-                Decline
-              </Button>
-              <Button className="w-full sm:w-auto bg-blue-500 text-white hover:bg-brand-700">
-                <Check className="w-4 h-4 mr-2" />
-                Hire
-              </Button>
-            </div>
-          )}
-          <Button className="w-full sm:w-auto bg-brand text-white hover:bg-brand-700" onClick={onClose}>
-            Close
-          </Button>
+            </a>
+            <Button className="flex-1 bg-brand hover:bg-brand/90">
+              <Mail className="w-4 h-4 mr-2" />
+              Message
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

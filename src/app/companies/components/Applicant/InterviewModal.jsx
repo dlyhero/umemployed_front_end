@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessToken }) => {
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewTime, setInterviewTime] = useState('');
+  const [timezone, setTimezone] = useState('UTC');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,8 +24,8 @@ const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessTo
       return;
     }
 
-    if (!interviewDate || !interviewTime) {
-      toast.error('Please provide both date and time for the interview.');
+    if (!interviewDate || !interviewTime || !timezone) {
+      toast.error('Please provide date, time, and timezone for the interview.');
       return;
     }
 
@@ -32,8 +34,9 @@ const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessTo
       candidate_id: candidate?.user_id,
       job_id: jobId,
       company_id: companyId,
-      interview_date: interviewDate,
-      interview_time: interviewTime,
+      date: interviewDate,
+      time: interviewTime,
+      timezone,
       notes,
     };
 
@@ -69,7 +72,7 @@ const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessTo
 
       const result = await response.json();
       console.log('Interview creation success:', result);
-      toast.success('Interview scheduled successfully!');
+      toast.success(`Interview scheduled successfully for ${candidate?.profile?.firstName} ${candidate?.profile?.lastName}!`);
       onClose();
     } catch (err) {
       console.error('Schedule interview error:', err);
@@ -107,6 +110,21 @@ const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessTo
               required
               className="border-brand focus:ring-brand"
             />
+          </div>
+          <div>
+            <Label htmlFor="timezone">Timezone</Label>
+            <Select value={timezone} onValueChange={setTimezone} required>
+              <SelectTrigger className="border-brand focus:ring-brand">
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="UTC">UTC</SelectItem>
+                <SelectItem value="America/New_York">America/New_York</SelectItem>
+                <SelectItem value="America/Los_Angeles">America/Los_Angeles</SelectItem>
+                <SelectItem value="Europe/London">Europe/London</SelectItem>
+                <SelectItem value="Asia/Tokyo">Asia/Tokyo</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="notes">Notes (Optional)</Label>
