@@ -1,28 +1,27 @@
 import "@/src/app/globals.css";
 import AuthProvider from "@/src/components/AuthProvider";
-import Footer3 from "@/src/components/common/Footer/Footer3";
+import Footer from "@/src/components/common/Footer/Footer";
 import {Header} from "@/src/components/common/Header";
-import { useSession } from "next-auth/react";
 import { Toaster } from "sonner";
 
 
-
 export const metadata = {
-  title: `Profile `,
+  title: "perfect job title",
 };
 
 
 
-export default function ProfileLayout({ children }) {
+export default function PerfectJobLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={` antialiased text-[15px]`}
+        className={` antialiased text-[15px] bg-white`}
       >  
         <AuthProvider>
           <Header />
-          {children}
-          <Footer3 />
+          <div className="min-h-screen bg-gray-100 flex flex-col">{children}
+          <div className="items-end"><Footer /></div>
+          </div>
           <Toaster position="top-center" richColors/>
         </AuthProvider>
       </body>
