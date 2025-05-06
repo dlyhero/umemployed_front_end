@@ -11,7 +11,7 @@ import ApplicationFetch from './ApplicationFetch';
 import ApplicationList from './ApplicationList';
 import CandidateModal from './CandidateModal';
 import InterviewModal from './InterviewModal';
-import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba'; // Corrected to named import
+import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
 
 const ApplicantComponent = ({ type = 'job' }) => {
   const { companyId, jobId } = useParams();
@@ -109,7 +109,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand/50" />
       </div>
     );
   }
@@ -129,7 +129,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
       transition={{ duration: 0.6 }}
       className="min-h-screen bg-gray-50 py-8"
     >
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 overflow-ellipsis">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-auto">
         <ApplicationHeader
           companyId={companyId}
           activeTab={activeTab}

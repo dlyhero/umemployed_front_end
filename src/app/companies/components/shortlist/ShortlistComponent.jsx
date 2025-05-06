@@ -13,7 +13,7 @@ import InterviewModal from '../Applicant/InterviewModal';
 import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
-import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba'; // Corrected to named import
+import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
 import ShortlistFetch from './ShortlistFetch';
 
 const ShortlistComponent = () => {
@@ -75,7 +75,7 @@ const ShortlistComponent = () => {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand/50" />
       </div>
     );
   }
@@ -95,9 +95,9 @@ const ShortlistComponent = () => {
       transition={{ duration: 0.6 }}
       className="min-h-screen bg-gray-50 py-8"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-auto">
         <header className="flex justify-between items-center md:hidden mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1>
+          {/* <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1> */}
           <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
@@ -136,7 +136,7 @@ const ShortlistComponent = () => {
             />
             {loading ? (
               <div className="text-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-500 mx-auto" />
+                <Loader2 className="w-8 h-8 animate-spin text-brand/50 mx-auto" />
                 <p className="text-gray-600 mt-2">Loading shortlisted candidates...</p>
               </div>
             ) : error ? (
@@ -151,7 +151,7 @@ const ShortlistComponent = () => {
                 >
                   <TabsContent value="shortlist">
                     <div className="space-y-4">
-                      <h2 className="text-xl font-semibold border-b-4 border-brand-500 w-fit">
+                      <h2 className="text-xl font-semibold border-b-4 border-brand/50 w-fit">
                         Shortlisted Candidates
                       </h2>
                       {shortlisted.length > 0 ? (
