@@ -3,8 +3,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../jobs/components/FormContainer';
 import { useJobForm } from '../../../hooks/useJobForm';
+import { Suspense } from 'react';
 
-export default function JobPostingPage() {
+function JobPostingContent() {
   const router = useRouter();
   const { companyId } = useParams();
   const { step, form, onSubmit: handleSubmit, stepIsValid, nextStep, prevStep, jobOptions, extractedSkills } = useJobForm('basicinformation');
@@ -44,5 +45,19 @@ export default function JobPostingPage() {
         extractedSkills={extractedSkills}
       />
     </>
+  );
+}
+
+export default function JobPostingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+        </div>
+      }
+    >
+      <JobPostingContent />
+    </Suspense>
   );
 }
