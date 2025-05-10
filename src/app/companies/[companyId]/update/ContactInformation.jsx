@@ -1,4 +1,5 @@
-// src/components/ContactInformation.jsx
+'use client';
+
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
@@ -9,18 +10,16 @@ const ContactInformation = ({ formData, handleChange }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="space-y-6"
+      className="space-y-4"
     >
-      <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-blue-500 pb-2">
-        Contact Information
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <h2 className="text-lg font-semibold text-gray-800">Contact Information</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="contact_email" className="block text-sm font-medium text-gray-700 mb-1">
             Contact Email
           </label>
           <div className="relative">
-            <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="email"
               id="contact_email"
@@ -28,7 +27,7 @@ const ContactInformation = ({ formData, handleChange }) => {
               value={formData.contact_email}
               onChange={handleChange}
               placeholder="e.g., contact@umemployed.com"
-              className="pl-10"
+              className="pl-10 h-9 text-sm border-gray-300 rounded-md focus:ring-[#1e90ff] focus:border-[#1e90ff]"
             />
           </div>
         </div>
@@ -37,7 +36,7 @@ const ContactInformation = ({ formData, handleChange }) => {
             Contact Phone
           </label>
           <div className="relative">
-            <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="tel"
               id="contact_phone"
@@ -45,7 +44,7 @@ const ContactInformation = ({ formData, handleChange }) => {
               value={formData.contact_phone}
               onChange={handleChange}
               placeholder="e.g., +1 123-456-7890"
-              className="pl-10"
+              className="pl-10 h-9 text-sm border-gray-300 rounded-md focus:ring-[#1e90ff] focus:border-[#1e90ff]"
             />
           </div>
         </div>
