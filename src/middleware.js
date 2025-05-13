@@ -15,7 +15,7 @@ export async function middleware(request) {
   console.log('Middleware - Token role:', token?.role); // Debug log
 
   // 1. Always allow verify-email route
-  if (path === '/verify-email') {
+  if (path === '/verifyemail') {
     return NextResponse.next()
   }
 
