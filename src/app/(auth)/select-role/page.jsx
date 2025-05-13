@@ -13,13 +13,9 @@ export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/select-role");
-    }
-  }, [status, router]);
+  const user = useSession();
+  console.log(user);
+    
 
   const handleAccountTypeSelect = async (accountType) => {
     if (status !== "authenticated" || loading) return;
@@ -36,20 +32,16 @@ export default function SelectRolePage() {
       
       setSuccess("Account type selected successfully!");
       
-      // Find the selected account type config
-      const accountConfig = Object.values(ACCOUNT_TYPES).find(
-        type => type.value === accountType
-      );
-      
-      // Redirect after success message is shown
-      setTimeout(() => {
-        router.push(accountConfig.redirectPath);
-      }, 1500);
+      // Immediate redirect without delay
+      if (accountType === ACCOUNT_TYPES.RECRUITER.value) {
+      } else {
+        router.push("/applicant/upload-resume");
+      }
 
     } catch (err) {
       setError(err.message);
       if (err.message.includes("expired") || err.message.includes("required")) {
-        router.push("/login?callbackUrl=/select-role");
+        
       }
     } finally {
       setLoading(false);
@@ -118,34 +110,32 @@ export default function SelectRolePage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.values(ACCOUNT_TYPES).map((type, index) => {
-            const Icon = type.icon;
-            return (
-              <motion.button
-                key={type.value}
-                variants={cardVariants}
-                custom={index}
-                initial="hidden"
-                animate="visible"
-                whileTap={!loading ? "tap" : {}}
-                onClick={() => handleAccountTypeSelect(type.value)}
-                disabled={loading}
-                className={`p-6 bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all ${
-                  loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
-                }`}
-              >
-                <div className="mb-4 p-3 bg-blue-50 rounded-full">
-                  <Icon className="h-6 w-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">
-                  {type.label}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {type.description}
-                </p>
-              </motion.button>
-            );
-          })}
+          {Object.values(ACCOUNT_TYPES).map((type, index) => (
+            <motion.button
+              key={type.value}
+              variants={cardVariants}
+              custom={index}
+              initial="hidden"
+              animate="visible"
+              whileHover={!loading ? "hover" : {}}
+              whileTap={!loading ? "tap" : {}}
+              onClick={() => handleAccountTypeSelect(type.value)}
+              disabled={loading}
+              className={`p-6 bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all ${
+                loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
+              }`}
+            >
+              <div className="mb-4 p-3 bg-blue-50 rounded-full">
+                <type.icon className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">
+                {type.label}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {type.description}
+              </p>
+            </motion.button>
+          ))}
         </div>
       </motion.div>
     </div>

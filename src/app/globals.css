@@ -134,10 +134,20 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* styles/globals.css */
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/Quicksand-Light.woff2') format('woff2'),
+       url('/Quicksand-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
 
 body {
-  background-color: #F3F2EF;
+  font-family: 'Quicksand', sans-serif;
+  background-color: white
 }
+
 
 @layer base {
   * {

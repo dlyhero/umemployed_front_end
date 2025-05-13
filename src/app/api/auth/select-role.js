@@ -1,19 +1,18 @@
 import { Briefcase, User } from 'lucide-react';
+import baseUrl from '../baseUrl';
 
 export const ACCOUNT_TYPES = {
-  APPLICANT: {
-    value: 'applicant',
+  JOB_SEEKER: {
+    value: 'job_seeker',
     label: 'Job Seeker',
     description: 'Find and apply to your dream job',
-    icon: User,
-    redirectPath: '/upload'
+    icon: User
   },
   RECRUITER: {
     value: 'recruiter',
     label: 'Recruiter',
     description: 'Hire the best talent for your team',
-    icon: Briefcase,
-    redirectPath: '/recruiter/company/create'
+    icon: Briefcase
   }
 };
 
@@ -22,15 +21,23 @@ export const selectAccountType = async (accountType, token) => {
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
+    // Validate account type
+    if (accountType !== 'recruiter' && accountType !== 'job_seeker') {
+      throw new Error('Invalid account type specified');
+    }
+
+    // Remove any accidental whitespace
+    const trimmedAccountType = accountType.trim();
+    
     const response = await fetch(
-      "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/choose-account-type/",
+      `${baseUrl}/users/choose-account-type/`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ account_type: accountType }),
+        body: JSON.stringify({ account_type: trimmedAccountType }),
         signal: controller.signal,
       }
     );
@@ -39,8 +46,9 @@ export const selectAccountType = async (accountType, token) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      let errorMessage = "Failed to select account type";
+      console.error('API Error:', errorData);
       
+      let errorMessage = "Failed to select account type";
       if (response.status === 400) {
         errorMessage = errorData.message || 
                       errorData.account_type?.[0] || 
@@ -52,8 +60,17 @@ export const selectAccountType = async (accountType, token) => {
       throw new Error(errorMessage);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('API Response:', data);
+    
+    // Validate response matches expected format
+    if (!data.message || !data.state) {
+      throw new Error('Server responded with unexpected format');
+    }
+    
+    return data;
   } catch (error) {
+    console.error('Error in selectAccountType:', error);
     if (error.name === "AbortError") {
       throw new Error("Request timed out. Please check your connection.");
     }

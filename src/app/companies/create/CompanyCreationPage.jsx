@@ -38,13 +38,14 @@ const CompanyCreationPage = () => {
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+   const user = useSession();
+    console.log(user);
+      
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
   useEffect(() => {
     if (status === 'authenticated') {
-      if (session?.user?.role !== 'recruiter') {
-        router.push('/select-role');
-      } else if (session?.user?.has_company) {
+     if (session?.user?.has_company) {
         router.push(`/companies/${session.user.companyId}/dashboard`);
       }
     } else if (status === 'unauthenticated') {

@@ -26,12 +26,12 @@ export function Header() {
     <header
      className={
       cn(
-      "border-gray-200 bg-white z-40  top-0",
-      scrolled && "border-b shadow-sm",
+      "border-gray-200  backdrop-blur-sm z-40  top-0 ",
+      scrolled && "",
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
       <div className="lg:container md:max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center  gap-8">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
         </div>
