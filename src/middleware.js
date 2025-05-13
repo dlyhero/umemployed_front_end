@@ -28,7 +28,7 @@ export async function middleware(request) {
   }
 
   // 3. Public routes (available to everyone)
-  const publicRoutes = ['/', '/auth/error', '/job/listing', '/companies/listing']
+  const publicRoutes = ['/', '/auth/error', '/jobs', '/companies/listing']
   if (publicRoutes.includes(path)) {
     return NextResponse.next()
   }
@@ -72,7 +72,7 @@ export async function middleware(request) {
     
     if (path.startsWith('/applicant') || 
         path === '/companies/listing' || 
-        path === '/job/listing' ||
+        path === '/jobs' ||
         path === '/upload-resume') {
       return NextResponse.next({ headers: noCacheHeaders })
     }
@@ -93,7 +93,7 @@ export async function middleware(request) {
     }
     
     if (path.startsWith('/companies') || 
-        path === '/job/listing' ||
+        path === '/jobs' ||
         path === '/companies/create') {
       return NextResponse.next({ headers: noCacheHeaders })
     }

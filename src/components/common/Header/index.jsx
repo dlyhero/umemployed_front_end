@@ -31,7 +31,7 @@ export function Header() {
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
       <div className="lg:container md:max-w-8xl mx-auto px-2 py-3 flex items-center justify-between">
-        <div className="flex items-center  gap-8">
+        <div className="flex items-center  gap-2">
           <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
         </div>
