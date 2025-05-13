@@ -19,7 +19,7 @@ export default function PerfectJobLayout({ children }) {
       >  
         <AuthProvider>
           <Header />
-          <div className="min-h-screen bg-gray-100 flex flex-col">{children}
+          <div className="min-h-screen  flex flex-col">{children}
           <div className="items-end"><Footer /></div>
           </div>
           <Toaster position="top-center" richColors/>
