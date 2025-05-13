@@ -23,7 +23,20 @@ export async function GET(req) {
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Shortlist GET parse error:', e, 'Raw response:', text);
+      return new Response(
+        JSON.stringify({ message: 'Server returned non-JSON response (possible error page)' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     if (!response.ok) {
       return new Response(JSON.stringify({ message: data.message || 'Failed to fetch shortlisted candidates' }), {

@@ -5,33 +5,33 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 bg-gray-100 rounded-lg p-1">
+      <TabsList className="flex max-w-4xl rounded-lg p-1 mb-6 shadow-sm">
         <TabsTrigger
           value="candidates"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'candidates'
-              ? 'bg-[#1e90ff] text-white'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              ? 'bg-brand/50 text-white shadow-md'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Candidates
         </TabsTrigger>
         <TabsTrigger
           value="shortlist"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'shortlist'
-              ? 'bg-[#1e90ff] text-white'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              ? 'bg-brand/50 text-white shadow-md'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Shortlist
         </TabsTrigger>
         <TabsTrigger
           value="archived"
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'archived'
-              ? 'bg-[#1e90ff] text-white'
-              : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+              ? 'bg-brand/50 text-white shadow-md'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
           Archived
