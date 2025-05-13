@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export function Logo() {
   return (
-    <Link href="/" className="flex items-center ">
-      <span className="bg-brand px-2 py-1 text-white text-xl font-bold rounded-lg">uE</span>
+    <Link href="/" className="text-brand text-xl sm:text-3xl md:text-4xl  font-bold rounded-lg mb-5">
+      uE
     </Link>
   );
 }
