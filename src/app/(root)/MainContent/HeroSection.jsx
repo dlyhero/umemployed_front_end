@@ -51,7 +51,7 @@ const HeroSection = ({ session, status }) => {
               variants={itemVariants}
               className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
             >
-              Unlock Your <span className="text-brand text-4xl">Dream Job</span> <br/>
+              Unlock Your <span className="text-brand ">Dream Job</span> <br/>
               The Future Starts Now!
             </motion.h1>
 
