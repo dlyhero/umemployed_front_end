@@ -1,15 +1,16 @@
-@import "tailwindcss";
-@import 'tw-animate-css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme{
+@theme {
   --color-brand: #1e90ff;
   --color-darkHover: #2a004a;
-  --color-darkTheme: #11001F;
+  --color-darkTheme: #11001f;
   --shadow-black: 4px 4px 0 #1e90ff;
-
 }
 
 /* Add this to your global CSS file if the issue persists */
@@ -136,28 +137,108 @@
 
 /* styles/globals.css */
 @font-face {
-  font-family: 'Quicksand';
-  src: url('/Quicksand-Regular.woff2') format('woff2'),
-       url('/Quicksand-Regular.woff') format('woff');
+  font-family: "Quicksand";
+  src: url("/Quicksand-Regular.woff2") format("woff2"), url("/Quicksand-Regular.woff") format("woff");
   font-weight: 400;
   font-style: normal;
 }
 
 body {
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-weight: 400;
-  background-color: white
-
+  background-color: white;
 }
 
+/* Responsive font sizing - reduce font size on small screens */
+@media (max-width: 640px) {
+  html {
+    font-size: 13px; /* Base font size for small screens */
+  }
 
+  p,
+  span,
+  div,
+  li,
+  input,
+  textarea,
+  button {
+    font-size: 0.85rem; /* Further reduce for specific elements */
+  }
 
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .text-xs {
+    font-size: 0.65rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.75rem !important;
+  }
+
+  .text-base {
+    font-size: 0.85rem !important;
+  }
+
+  .text-lg {
+    font-size: 1rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.1rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* For very small screens, reduce even further */
+@media (max-width: 375px) {
+  html {
+    font-size: 10px;
+  }
+
+  .text-xs {
+    font-size: 0.6rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.7rem !important;
+  }
+}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply  text-foreground;
+    @apply bg-background text-foreground;
   }
+}
+
+/* Brand colors */
+.bg-brand-600 {
+  background-color: #0070f3;
+}
+
+.bg-brand-100 {
+  background-color: #e0eefe;
+}
+
+.hover\:bg-brand-700:hover {
+  background-color: #0057c6;
+}
+
+.text-brand-600 {
+  color: #0070f3;
 }
