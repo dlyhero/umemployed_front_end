@@ -131,17 +131,17 @@ const HeroSection = ({ session, status }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative lg:ml-12"
+            className="relative  "
           >
-            <div className="relative rounded-xl overflow-hidden  border border-gray-100">
+            <div className="relative rounded-xl overflow-hidden ">
               {/* Your original image with parallax effect */}
-              <motion.img
-                src="/images/cta.avif"
-                alt="Professionals networking"
-                className="w-full h-96 object-cover"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
+            
+              <img 
+              className="bg-cover w-[2000px]" 
+              src="/Group 6 (3).png" alt="" 
+            
               />
+              
 
               {/* Floating job card overlay */}
               <motion.div
