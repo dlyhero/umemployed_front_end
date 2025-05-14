@@ -47,66 +47,66 @@ const HeroSection = ({ session, status }) => {
               </span>
             </motion.div>
 
-            <motion.h1 
+            <motion.h1
               variants={itemVariants}
               className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
             >
-              Unlock Your <span className="text-brand Herotitle">Dream Job</span> <br/>
+              Unlock Your <span className="text-brand Herotitle">Dream Job</span> <br />
               The Future Starts Now!
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               variants={itemVariants}
               className="text-lg md:text-xl text-gray-600"
             >
-              Browse thousands of job listings and seize the opportunity<br />
+              Browse thousands of job listings <br className="lg:hidden"/> and seize the opportunity<br />
               to advance your career with our platform.
             </motion.p>
 
-            <motion.div 
-  variants={itemVariants}
-  className="flex flex-col sm:flex-row gap-4 pt-2"
->
-  {status === "loading" ? (
-    <>
-      <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
-      <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
-    </>
-  ) : session ? ( // Simple session check - no need for status check
-    <>
-      <Button asChild className="h-12 px-6 bg-brand hover:bg-brand/90 text-white">
-        <Link href="/jobs">
-          Browse Jobs
-          <Search className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
-      <Button variant="outline" className="h-12 px-6 border-brand text-brand hover:bg-brand/5" asChild>
-        <Link href="/profile">
-          Get Started
-          <Briefcase className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
-    </>
-  ) : (
-    <>
-      <Button asChild className="h-12 px-6 bg-brand hover:bg-brand/90 text-white">
-        <Link href="/signup">
-          Sign Up Now
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
-      <Button 
-        variant="outline" 
-        className="h-12 px-6 border-brand text-brand hover:bg-brand/5" 
-        onClick={() => signIn()}
-      >
-        Log In
-      </Button>
-    </>
-  )}
-</motion.div>
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row gap-4 pt-2"
+            >
+              {status === "loading" ? (
+                <>
+                  <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
+                </>
+              ) : session ? ( // Simple session check - no need for status check
+                <>
+                  <Button asChild className="h-12 px-6 bg-brand hover:bg-brand/90 text-white">
+                    <Link href="/jobs">
+                      Browse Jobs
+                      <Search className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-12 px-6 border-brand text-brand hover:bg-brand/5" asChild>
+                    <Link href="/profile">
+                      Get Started
+                      <Briefcase className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild className="h-12 px-6 bg-brand hover:bg-brand/90 text-white">
+                    <Link href="/signup">
+                      Sign Up Now
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-12 px-6 border-brand text-brand hover:bg-brand/5"
+                    onClick={() => signIn()}
+                  >
+                    Log In
+                  </Button>
+                </>
+              )}
+            </motion.div>
 
-            <motion.div 
+            <motion.div
               variants={itemVariants}
               className="flex items-center gap-4 pt-6"
             >
@@ -135,16 +135,16 @@ const HeroSection = ({ session, status }) => {
           >
             <div className="relative rounded-xl overflow-hidden  border border-gray-100">
               {/* Your original image with parallax effect */}
-              <motion.img 
-                src="/images/cta.avif" 
-                alt="Professionals networking" 
+              <motion.img
+                src="/images/cta.avif"
+                alt="Professionals networking"
                 className="w-full h-96 object-cover"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               />
-              
+
               {/* Floating job card overlay */}
-              <motion.div 
+              <motion.div
                 className="absolute bottom-6 left-6 bg-white p-4 rounded-lg shadow-md max-w-xs"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
