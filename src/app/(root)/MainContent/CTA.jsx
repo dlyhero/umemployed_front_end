@@ -24,7 +24,7 @@ const CTA = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
               >
-                Take the next step in your <span className="text-brand">career journey</span>
+                Take the next step in your <span className="text-brand ctAtitle">career journey</span>
               </motion.h2>
               
               <motion.p
