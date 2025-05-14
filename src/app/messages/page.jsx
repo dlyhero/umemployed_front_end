@@ -30,7 +30,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import EmojiPicker from "emoji-picker-react"
 import baseUrl from "../api/baseUrl"
 import useUser from "@/src/hooks/useUser"
-import { toast } from "@/components/ui/sonner"
+import { toast } from 'sonner';
 
 export default function MessageApp() {
   const { data: session } = useSession()

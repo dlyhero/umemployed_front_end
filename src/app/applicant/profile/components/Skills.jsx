@@ -27,7 +27,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
   const DEFAULT_CATEGORY_ID = 1;
 
   // Limits and display
-  const MAX_SKILLS = 10;
+  const MAX_SKILLS = 20;
   const initialVisibleCount = 6;
   const visibleSkills = showAll ? userSkills : userSkills.slice(0, initialVisibleCount);
 
