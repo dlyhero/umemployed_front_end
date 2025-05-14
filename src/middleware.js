@@ -14,10 +14,7 @@ export async function middleware(request) {
   console.log('Middleware - Current path:', path); // Debug log
   console.log('Middleware - Token role:', token?.role); // Debug log
 
-  // 1. Always allow verify-email route
-  if (path === '/verifyemail') {
-    return NextResponse.next()
-  }
+ 
 
   // 2. Handle API routes and public assets
   if (path.startsWith('/api') || 
@@ -28,7 +25,7 @@ export async function middleware(request) {
   }
 
   // 3. Public routes (available to everyone)
-  const publicRoutes = ['/', '/auth/error', '/jobs', '/companies/listing']
+  const publicRoutes = ['/', '/auth/error', '/jobs', '/companies/listing', '/notifications', '/messages', '/endorsement']
   if (publicRoutes.includes(path)) {
     return NextResponse.next()
   }

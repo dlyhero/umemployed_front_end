@@ -137,16 +137,20 @@
 /* styles/globals.css */
 @font-face {
   font-family: 'Quicksand';
-  src: url('/Quicksand-Light.woff2') format('woff2'),
-       url('/Quicksand-Light.woff') format('woff');
-  font-weight: 300;
+  src: url('/Quicksand-Regular.woff2') format('woff2'),
+       url('/Quicksand-Regular.woff') format('woff');
+  font-weight: 400;
   font-style: normal;
 }
 
 body {
   font-family: 'Quicksand', sans-serif;
+  font-weight: 400;
   background-color: white
+
 }
+
+
 
 
 @layer base {

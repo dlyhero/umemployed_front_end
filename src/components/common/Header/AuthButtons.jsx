@@ -101,7 +101,7 @@ export default function AuthButtons() {
               }`}
             >
               
-              <span className={`font-medium  group-hover:text-brand transition-colors font-semibold ${
+              <span className={`  group-hover:text-brand transition-colors  ${
                 isResumeActive ? 'text-brand' : ''
               }`}>Resume</span>
             </Link>
