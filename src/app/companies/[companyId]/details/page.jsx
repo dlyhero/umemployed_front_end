@@ -319,7 +319,7 @@ const CompanyDetails = () => {
                     </Button>
                   </Link>
                   <Link href={`/companies/${company.id}/edit`} className="w-full mt-3">
-                    <Button variant="outline" className="w-full text-brand border-brand hover:bg-brand/10">
+                    <Button variant="outline" className="w-full text-brand border-brand  hover:text-brand hover:bg-white">
                       Edit Company Profile
                     </Button>
                   </Link>
@@ -332,7 +332,7 @@ const CompanyDetails = () => {
                 <div className="space-y-4">
                   {company.contact_email && (
                     <div className="flex items-center">
-                      <Users className="w-5 h-5 text-brand mr-3" />
+                      <Users className="w-5 h-5 text-gray-500 mr-3" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
                         <a
@@ -346,14 +346,14 @@ const CompanyDetails = () => {
                   )}
 
                   <div className="flex items-center">
-                    <Users className="w-5 h-5 text-brand mr-3" />
+                    <Users className="w-5 h-5 text-gray-500 mr-3" />
                     <div>
                       <p className="text-sm text-gray-500">Employees</p>
                       <p className="font-medium">{company.size || 'Not specified'}</p>
                     </div>
                   </div>
                   {company.location && <div className="flex items-center">
-                    <MapPin className="w-5 h-5 text-brand mr-3" />
+                    <MapPin className="w-5 h-5 text-gray-500 mr-3" />
                     <div>
                       <p className="text-sm text-gray-500">Location</p>
                       <p className="font-medium">{company.location} {company.country}</p>
@@ -361,7 +361,7 @@ const CompanyDetails = () => {
                   </div>
                   }
                   {company.founded && <div className="flex items-center">
-                    <Building2 className="w-5 h-5 text-brand mr-3" />
+                    <Building2 className="w-5 h-5 text-gray-500 mr-3" />
                     <div>
                       <p className="text-sm text-gray-500">Founded</p>
                       <p className="font-medium">{company.founded || 'Not specified'}</p>
@@ -369,7 +369,7 @@ const CompanyDetails = () => {
                   </div>}
                   {company.website_url && (
                     <div className="flex items-center">
-                      <Globe className="w-5 h-5 text-brand mr-3" />
+                      <Globe className="w-5 h-5 text-gray-500 mr-3" />
                       <div>
                         <p className="text-sm text-gray-500">Website</p>
                         <a
@@ -392,23 +392,23 @@ const CompanyDetails = () => {
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Culture & Benefits</h2>
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <span className="flex-shrink-0 w-5 h-5 text-brand mr-2 mt-0.5">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 text-gray-500 mr-2 mt-0.5">✓</span>
                     <span>Remote-first work environment</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="flex-shrink-0 w-5 h-5 text-brand mr-2 mt-0.5">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 text-gray-500 mr-2 mt-0.5">✓</span>
                     <span>Competitive salaries & equity</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="flex-shrink-0 w-5 h-5 text-brand mr-2 mt-0.5">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 text-gray-500 mr-2 mt-0.5">✓</span>
                     <span>Unlimited PTO & flexible schedules</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="flex-shrink-0 w-5 h-5 text-brand mr-2 mt-0.5">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 text-gray-500 mr-2 mt-0.5">✓</span>
                     <span>Professional development budget</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="flex-shrink-0 w-5 h-5 text-brand mr-2 mt-0.5">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 text-gray-500 mr-2 mt-0.5">✓</span>
                     <span>Comprehensive health benefits</span>
                   </li>
                 </ul>
