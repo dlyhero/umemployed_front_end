@@ -50,15 +50,15 @@ const CompanyCard = ({ company: initialCompany, index }) => {
 
   const getInitials = (name) => {
     if (!name) return '?';
-    
+
     // Get first letters of each word in the company name
     const words = name.split(' ');
     let initials = words[0][0].toUpperCase();
-    
+
     if (words.length > 1) {
       initials += words[words.length - 1][0].toUpperCase();
     }
-    
+
     return initials;
   };
 
@@ -73,7 +73,7 @@ const CompanyCard = ({ company: initialCompany, index }) => {
         />
       );
     }
-    
+
     const initials = getInitials(company.name);
     const colors = [
       'bg-blue-500 text-white',
@@ -85,11 +85,11 @@ const CompanyCard = ({ company: initialCompany, index }) => {
       'bg-pink-500 text-white',
       'bg-teal-500 text-white',
     ];
-    
+
     // Consistent color based on company name
     const colorIndex = (company.name.charCodeAt(0) || 0) % colors.length;
     const colorClass = colors[colorIndex];
-    
+
     return (
       <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass} font-bold text-xl`}>
         {initials}
@@ -138,21 +138,21 @@ const CompanyCard = ({ company: initialCompany, index }) => {
                 </div>
               </div>
             </div>
-            <p className="text-gray-600 mb-6 h-[4 rem] overflow-hidden line-clamp-3">{company.description || 'No description available'}</p>
+            <p className="text-gray-600 mb-4 h-[3.4rem] overflow-hidden line-clamp-3">{company.description || 'No description available'}</p>
           </div>
 
           <div className="bottom-company">
             <div className="divider-bottom-company border-t border-gray-200 mb-4"></div>
             <div className="wrap-company-icon-list flex justify-between">
-              <div className="single-company-icon-list flex items-center">
-                <Users className="icon-company-icon-list w-4 h-4 mr-2 text-brand" />
-                <div className="text-sm text-gray-700">{company.employees|| "0"}</div>
+              {company.size && <div className="single-company-icon-list flex items-center  overflow-hidden mr-2">
+                <Users className="icon-company-icon-list w-4 h-4 mr-1 text-brand " />
+                <div className="text-sm text-gray-700 truncate text-nowrap">{company.size}+</div>
+              </div>}
+              <div className="single-company-icon-list flex items-center text-nowrap mr-2 overflow-hidden">
+                <MapPin className="icon-company-icon-list w-4 h-4 mr-1 text-brand" />
+                <div className="text-sm text-gray-700 runcate text-nowrap">{company.location || 'Location not specified'}</div>
               </div>
-              <div className="single-company-icon-list flex items-center">
-                <MapPin className="icon-company-icon-list w-4 h-4 mr-2 text-brand" />
-                <div className="text-sm text-gray-700">{company.location || 'Location not specified'}</div>
-              </div>
-              <div className="single-company-icon-list flex items-center  px-3 py-1 rounded-full">
+              <div className="single-company-icon-list flex items-center  px-3 py-1 rounded-full  text-nowrap">
                 <div className="text-sm font-medium ">{company.job_openings ? 'Openings available' : 'No openings'}
                 </div>
               </div>
