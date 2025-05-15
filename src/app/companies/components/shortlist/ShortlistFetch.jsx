@@ -126,6 +126,7 @@ const ShortlistFetch = ({
         } else {
           setError(null);
         }
+        console.log('Shortlist fetch completed, candidates:', validShortlisted.length);
         setHasFetched(true);
       } catch (err) {
         console.error('Fetch shortlist error:', err);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -14,8 +14,7 @@ import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
-import ShortlistFetch from './ShortlistFetch';
-
+import  ShortlistFetch  from './ShortlistFetch';
 
 const ShortlistComponent = () => {
   const { companyId, jobId } = useParams();
@@ -31,11 +30,9 @@ const ShortlistComponent = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
 
-  const cachedShortlisted = useMemo(() => shortlisted, [shortlisted]);
-
   useEffect(() => {
     console.log('ShortlistComponent mounted, path:', window.location.pathname);
-    console.log('Shortlisted:', shortlisted.length, 'loading:', loading, 'hasFetched:', hasFetched);
+    console.log('Shortlisted:', shortlisted?.length || 0, 'loading:', loading, 'hasFetched:', hasFetched);
     return () => {
       console.log('ShortlistComponent unmounted');
     };
@@ -58,7 +55,7 @@ const ShortlistComponent = () => {
 
   const handleSchedule = (candidateId) => {
     console.log('Schedule interview for candidate:', candidateId);
-    const candidate = cachedShortlisted.find((app) => app.user_id === candidateId);
+    const candidate = shortlisted.find((app) => app.user_id === candidateId);
     if (candidate) {
       setSelectedCandidate(candidate);
       setIsInterviewModalOpen(true);
@@ -171,8 +168,8 @@ const ShortlistComponent = () => {
                       <h2 className="text-xl font-semibold border-b-4 border-brand/50 w-fit">
                         Shortlisted Candidates
                       </h2>
-                      {cachedShortlisted.length > 0 ? (
-                        cachedShortlisted.map((app) => (
+                      {shortlisted && shortlisted.length > 0 ? (
+                        shortlisted.map((app) => (
                           <CandidateCard
                             key={app.id}
                             candidate={app}
@@ -203,14 +200,16 @@ const ShortlistComponent = () => {
         candidate={selectedCandidate}
         type="job"
       />
-      <InterviewModal
-        isOpen={isInterviewModalOpen}
-        onClose={closeInterviewModal}
-        candidate={selectedCandidate}
-        companyId={companyId}
-        jobId={jobId}
-        accessToken={session?.accessToken}
-      />
+      {InterviewModal ? (
+        <InterviewModal
+          isOpen={isInterviewModalOpen}
+          onClose={closeInterviewModal}
+          candidate={selectedCandidate}
+          companyId={companyId}
+          jobId={jobId}
+          accessToken={session?.accessToken}
+        />
+      ) : null}
     </motion.div>
   );
 };
