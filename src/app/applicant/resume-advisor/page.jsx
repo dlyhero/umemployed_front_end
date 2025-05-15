@@ -299,7 +299,7 @@ const ResumeAdvisorPage = () => {
                                                         <Progress 
                                                             value={score} 
                                                             className="h-2 flex-1" 
-                                                            indicatorClassName={`${getScoreColor(score).replace('text-', 'bg-')}`}
+                                                            indicatorClassName={`${getScoreColor(score).replace('text-', 'bg-brand')}`}
                                                         />
                                                         <span className={`text-sm font-medium ${getScoreColor(score)}`}>
                                                             {score}%

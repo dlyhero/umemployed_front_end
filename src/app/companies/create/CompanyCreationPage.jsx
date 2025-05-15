@@ -10,6 +10,7 @@ import SocialLinksAndVideo from './SocialLinksAndVideo';
 import Loader from '@/src/components/common/Loader/Loader';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/lib/useToast';
 import toast from 'react-hot-toast';
 import companySchema from '@/src/app/companies/create/schemas/companySchema';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -17,6 +18,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 const CompanyCreationPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -31,9 +33,13 @@ const CompanyCreationPage = () => {
     mission_statement: '',
     linkedin: '',
     video_introduction: '',
+    job_openings: '',
   });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+   const user = useSession();
+    console.log(user);
+      
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
   const totalSteps = 3;
 
@@ -57,31 +63,23 @@ const CompanyCreationPage = () => {
   };
 
   useEffect(() => {
-    try {
-      logDebug('Session Check', { status, user: session?.user });
-      if (status === 'authenticated') {
-        if (!session?.user) {
-          throw new Error('Session user data missing');
-        }
-        if (session.user.role !== 'recruiter') {
-          logError('Session Check', new Error('Invalid role'), { role: session.user.role });
-          router.push('/select-role');
-        } else if (session.user.has_company) {
-          logDebug('Session Check', { has_company: true, companyId: session.user.companyId });
-          router.push(`/companies/${session.user.companyId}/dashboard`);
-        }
-      } else if (status === 'unauthenticated') {
-        logDebug('Session Check', { redirect: 'login' });
-        router.push('/login?callbackUrl=/companies/create');
+    if (status === 'authenticated') {
+     if (session?.user?.has_company) {
+        router.push(`/companies/${session.user.companyId}/dashboard`);
       }
-    } catch (error) {
-      logError('Session Check', error, { status });
-      toast.error('Error validating session. Please try again.');
+    } else if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/companies/create');
     }
   }, [status, session, router]);
 
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+      if (coverPhotoPreview) URL.revokeObjectURL(coverPhotoPreview);
+    };
+  }, [logoPreview, coverPhotoPreview]);
+
   if (status === 'loading') {
-    logDebug('Render', { state: 'Loading' });
     return <Loader />;
   }
   if (session?.user?.has_company) {
@@ -90,17 +88,33 @@ const CompanyCreationPage = () => {
   }
 
   const handleInputChange = (e) => {
-    try {
-      const { name, value } = e.target;
-      logDebug('Input Change', { name, value });
-      if (name === 'founded') {
-        setFormData((prev) => ({ ...prev, [name]: value === '' ? '' : parseInt(value) || '' }));
-      } else {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files[0]) {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (files[0].size > maxSize) {
+        toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be under 5MB.`);
+        return;
       }
-    } catch (error) {
-      logError('Input Change', error, { input: e.target });
-      toast.error('Error updating form data.');
+      if (!files[0].type.startsWith('image/')) {
+        toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be an image.`);
+        return;
+      }
+
+      const file = files[0];
+      const previewUrl = URL.createObjectURL(file);
+
+      if (name === 'logo') {
+        setLogoFile(file);
+        setLogoPreview(previewUrl);
+      } else if (name === 'cover_photo') {
+        setCoverPhotoFile(file);
+        setCoverPhotoPreview(previewUrl);
+      }
     }
   };
 
@@ -160,16 +174,14 @@ const CompanyCreationPage = () => {
 
       const response = await axios.post(
         `${BASE_URL}/api/company/create-company/`,
-        payload,
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
-
-      logDebug('API Response', { status: response.status, data: response.data });
 
       session.user.has_company = true;
       session.user.companyId = response.data.id;
@@ -177,7 +189,7 @@ const CompanyCreationPage = () => {
       toast.success('Company created successfully!');
       router.push(`/companies/${response.data.id}/dashboard`);
     } catch (err) {
-      const errorDetails = logError('Form Submit', err, {
+      console.error('Error creating company:', {
         status: err.response?.status,
         data: err.response?.data,
         requestPayload: payload,

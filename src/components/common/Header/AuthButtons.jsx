@@ -101,7 +101,7 @@ export default function AuthButtons() {
               }`}
             >
               
-              <span className={`font-medium  group-hover:text-brand transition-colors font-semibold ${
+              <span className={`  group-hover:text-brand transition-colors  ${
                 isResumeActive ? 'text-brand' : ''
               }`}>Resume</span>
             </Link>
@@ -177,7 +177,7 @@ export default function AuthButtons() {
       ) : (
         <Button
           variant="outline"
-          className={'text-brand border border-brand bg-white hover:bg-none hover:text-brand'}
+          className={'text-brand border border-brand bg-transparent hover:bg-none hover:text-brand py-6 px-4'}
           size="sm"
           onClick={() => signIn(undefined, { callbackUrl: '/' })}
         >

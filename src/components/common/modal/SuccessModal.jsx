@@ -22,8 +22,7 @@ export function SuccessModal({
       const timer = setTimeout(() => {
         onOpenChange(false);
         if (typeof window !== 'undefined') {
-          window.open(redirectUrl, '_blank');
-
+          window.location.replace(redirectUrl);
         }
       }, redirectTimeout);
       return () => clearTimeout(timer);

@@ -24,7 +24,7 @@ const CTA = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
               >
-                Take the next step in your <span className="text-brand">career journey</span>
+                Take the next step in your <span className="text-brand ctAtitle">career journey</span>
               </motion.h2>
               
               <motion.p
@@ -47,10 +47,8 @@ const CTA = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <Button className="w-full justify-between px-8 py-6 text-lg gap-4 bg-brand hover:bg-brand/70 text-white transition-all duration-300 shadow-lg hover:shadow-blue-200">
-                  <div className="flex items-center gap-4">
                     <Briefcase className="w-6 h-6" />
                     <span className="text-base md:text-lg font-medium">Hire Top Talent</span>
-                  </div>
                   <ChevronRight className="w-5 h-5" />
                 </Button>
               </motion.div>
@@ -65,12 +63,10 @@ const CTA = () => {
               >
                 <Button 
                   variant="outline" 
-                  className="w-full justify-between px-8 py-6 text-lg gap-4 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-sm"
+                  className="w-full justify-between px-8 py-6 text-md gap-4 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-sm"
                 >
-                  <div className="flex items-center gap-4">
                     <UserRound className="w-6 h-6" />
-                    <span className="text-base md:text-lg font-medium">Find Your Dream Job</span>
-                  </div>
+                    <span className="text-base md:text-md font-medium">Find Your Dream Job</span>
                   <ChevronRight className="w-5 h-5" />
                 </Button>
               </motion.div>

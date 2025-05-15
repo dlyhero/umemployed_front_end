@@ -26,7 +26,7 @@ export const EducationSection = ({ educations = [], isOwner }) => {
   const { user } = useUser();
   
   // Limits and display
-  const MAX_EDUCATIONS = 10;
+  const MAX_EDUCATIONS = 20;
   const initialVisibleCount = 3;
   const visibleEducations = showAll ? userEducations : userEducations.slice(0, initialVisibleCount);
 

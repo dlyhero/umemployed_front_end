@@ -2,7 +2,7 @@
 import FeaturedOpportunities from "./MainContent/FeaturedOpportunities";
 import WhyChooseUs from "./MainContent/WhyChooseUS";
 import Resources from "./MainContent/Resources";
-import Companies from "./MainContent/CompaniesCard";
+import Companies from "./MainContent/Companies";
 import { signIn, useSession } from "next-auth/react";
 import HeroSection from "./MainContent/HeroSection";
 import CompaniesResources from "./MainContent/CompaniesResources";

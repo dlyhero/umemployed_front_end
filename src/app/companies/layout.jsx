@@ -6,7 +6,7 @@ import Footer from "@/src/components/common/Footer";
 import { Toaster } from "react-hot-toast";
 
 export const metadata = {
-  title: "home",
+  title: "Companies",
 };
 
 export default function RootLayout({ children }) {

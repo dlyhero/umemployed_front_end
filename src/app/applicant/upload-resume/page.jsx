@@ -25,7 +25,7 @@ export default function ResumeUploadPage() {
   } = useResumeUpload(token); // Pass token directly
 
   return (
-    <main className="bg-gray-100 min-h-screen">
+    <main className="min-h-screen">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

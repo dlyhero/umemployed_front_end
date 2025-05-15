@@ -134,16 +134,138 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@font-face {
+  font-family: "Quicksand";
+  src: url("/Quicksand-Regular.woff2") format("woff2"), url("/Quicksand-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
 
 body {
-  background-color: #F3F2EF;
+  font-family: "Quicksand", sans-serif;
+  font-weight: 400;
+  background-color: white;
 }
+
+
+Button{
+  font-size: 16 !important 
+}
+
+Link{
+  font-size: 10px !important;
+}
+
+/* Responsive font sizing - reduce font size on small screens */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px; /* Base font size for small screens */
+  }
+
+  p,
+  span,
+  div,
+  li,
+  input,
+  textarea,
+  button {
+    font-size: 0.85rem; /* Further reduce for specific elements */
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .Herotitle{
+    font-size: 1.8rem;
+  }
+
+  .ctAtitle{
+    font-size: 1.25rem;
+  }
+  .heroName{
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .text-xs {
+    font-size: 0.75rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.85rem !important;
+  }
+
+  .text-base {
+    font-size: 0.9rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.2rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.2rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+Button{
+  font-size: 15 !important 
+}
+}
+
+/* For very small screens, reduce even further */
+@media (max-width: 375px) {
+  html {
+    font-size: 13px;
+  }
+
+  .text-xs {
+    font-size: 0.65rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.75rem !important;
+  }
+
+Button{
+  font-size: 14 !important 
+}
+}
+
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply  text-foreground;
+    @apply bg-background text-foreground;
   }
+}
+
+/* Brand colors */
+.bg-brand-600 {
+  background-color: #0070f3;
+}
+
+.bg-brand-100 {
+  background-color: #e0eefe;
+}
+
+.hover\:bg-brand-700:hover {
+  background-color: #0057c6;
+}
+
+.text-brand-600 {
+  color: #0070f3;
 }

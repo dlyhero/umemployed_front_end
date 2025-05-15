@@ -60,6 +60,10 @@ export function MenuLinks() {
           <Receipt className="w-5 h-5 text-gray-600" />
           <span className="font-medium">Transaction History</span>
         </Link>
+        <Link href="/post-job" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+        <PlusCircle className="w-5 h-5 text-gray-600" />
+        <span className="font-medium">Post a Job</span>
+      </Link>
       </div>
     );
   }
@@ -75,10 +79,7 @@ export function MenuLinks() {
         <Briefcase className="w-5 h-5 text-gray-600" />
         <span className="font-medium">Browse Jobs</span>
       </Link>
-      <Link href="/post-job" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-        <PlusCircle className="w-5 h-5 text-gray-600" />
-        <span className="font-medium">Post a Job</span>
-      </Link>
+     
       {!session && (
         <Link href="/contact" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
           <Mail className="w-5 h-5 text-gray-600" />
