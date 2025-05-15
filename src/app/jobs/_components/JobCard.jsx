@@ -140,7 +140,7 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
           {formatRelativeTime(job?.created_at)}
         </div>
         <Button 
-          size="md" 
+          size="xl" 
           className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[45%]"
           onClick={handleViewJob}
           disabled={!isRecruiter && job.is_applied}
