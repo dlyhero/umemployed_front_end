@@ -10,13 +10,13 @@ import SocialLinksAndVideo from './SocialLinksAndVideo';
 import Loader from '@/src/components/common/Loader/Loader';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
-import { useToast } from '@/lib/useToast';
+import toast from 'react-hot-toast';
+import { Sideba } from '../dashboard/recruiter/Sideba';
 
 const CompanyUpdatePage = () => {
   const { companyId } = useParams();
   const { data: session, status } = useSession();
   const router = useRouter();
-  const toast = useToast();
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -31,14 +31,10 @@ const CompanyUpdatePage = () => {
     mission_statement: '',
     linkedin: '',
     video_introduction: '',
-    job_openings: '',
-    logo: '',
-    cover_photo: '',
   });
-  const [logoFile, setLogoFile] = useState(null);
-  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/update`);
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
   useEffect(() => {
@@ -51,7 +47,7 @@ const CompanyUpdatePage = () => {
       const fetchCompanyData = async () => {
         if (!session?.accessToken) {
           toast.error('Authentication token missing. Please sign in again.');
-          router.push('/login?callbackUrl=/companies/' + companyId + '/update');
+          router.push(`/login?callbackUrl=/companies/${companyId}/update`);
           return;
         }
         try {
@@ -63,7 +59,6 @@ const CompanyUpdatePage = () => {
               },
             }
           );
-          console.log('GET Response:', response.data); // Debug
           setFormData({
             name: response.data.name || '',
             industry: response.data.industry || '',
@@ -78,22 +73,14 @@ const CompanyUpdatePage = () => {
             mission_statement: response.data.mission_statement || '',
             linkedin: response.data.linkedin || '',
             video_introduction: response.data.video_introduction || '',
-            job_openings: response.data.job_openings || '',
-            logo: response.data.logo || '',
-            cover_photo: response.data.cover_photo || '',
           });
         } catch (err) {
-          console.error('Error fetching company:', {
-            status: err.response?.status,
-            data: err.response?.data,
-            message: err.message,
-          });
           let errorMessage = 'Failed to load company data. Please try again.';
           if (err.response?.status === 404) {
             errorMessage = 'Company not found. Please check the company ID.';
           } else if (err.response?.status === 401) {
             errorMessage = 'Unauthorized. Please sign in again.';
-            router.push('/login?callbackUrl=/companies/' + companyId + '/update');
+            router.push(`/login?callbackUrl=/companies/${companyId}/update`);
           }
           toast.error(errorMessage);
         } finally {
@@ -102,9 +89,9 @@ const CompanyUpdatePage = () => {
       };
       fetchCompanyData();
     } else if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/companies/' + companyId + '/update');
+      router.push(`/login?callbackUrl=/companies/${companyId}/update`);
     }
-  }, [status, session, companyId, router, toast]);
+  }, [status, session, companyId, router]);
 
   if (status === 'loading' || loading) {
     return <Loader />;
@@ -115,27 +102,6 @@ const CompanyUpdatePage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    if (files[0]) {
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (files[0].size > maxSize) {
-        toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be under 5MB.`);
-        return;
-      }
-      if (!files[0].type.startsWith('image/')) {
-        toast.error(`${name === 'logo' ? 'Logo' : 'Cover photo'} must be an image.`);
-        return;
-      }
-      console.log(`${name} selected:`, files[0].name, files[0].size, files[0].type); // Debug
-      if (name === 'logo') {
-        setLogoFile(files[0]);
-      } else if (name === 'cover_photo') {
-        setCoverPhotoFile(files[0]);
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.country) {
@@ -144,24 +110,11 @@ const CompanyUpdatePage = () => {
     }
     setSubmitting(true);
 
-    const data = new FormData();
+    const payload = {};
     for (const key in formData) {
-      if (formData[key] && key !== 'logo' && key !== 'cover_photo') {
-        data.append(key, formData[key]);
+      if (formData[key] !== '' && formData[key] !== null && formData[key] !== undefined) {
+        payload[key] = key === 'founded' ? parseInt(formData[key]) : formData[key];
       }
-    }
-    if (logoFile) {
-      data.append('logo', logoFile);
-      console.log('Logo appended:', logoFile.name); // Debug
-    }
-    if (coverPhotoFile) {
-      data.append('cover_photo', coverPhotoFile);
-      console.log('Cover photo appended:', coverPhotoFile.name); // Debug
-    }
-
-    // Debug FormData
-    for (let [key, value] of data.entries()) {
-      console.log(`FormData: ${key} =`, value);
     }
 
     const token = session?.accessToken;
@@ -173,25 +126,19 @@ const CompanyUpdatePage = () => {
 
     try {
       const response = await axios.put(
-        `${BASE_URL}/api/company/update-company/${companyId}`,
-        data,
+        `${BASE_URL}/api/company/update-company/${companyId}/`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
 
-      console.log('Update API response:', response.data); // Debug
       toast.success('Company updated successfully!');
       router.push(`/companies/${companyId}/dashboard`);
     } catch (err) {
-      console.error('Error updating company:', {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.message,
-      });
-
       let errorMessage = 'Failed to update company. Please try again.';
       if (err.response?.data) {
         if (err.response.data.detail) {
@@ -212,80 +159,55 @@ const CompanyUpdatePage = () => {
   };
 
   return (
-    <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl">
-      <div className="mb-6">
-        <img
-          src="/images/company.jpg"
-          alt="Company"
-          className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
-        />
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800">Update Your Company Profile</h2>
-          <p className="text-gray-600 mt-1">Modify your company details below.</p>
-        </div>
-      </div>
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader />
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <CompanyInformation formData={formData} handleChange={handleInputChange} />
-          <ContactInformation formData={formData} handleChange={handleInputChange} />
-          <CompanyDescription formData={formData} handleChange={handleInputChange} />
-          <SocialLinksAndVideo
-            formData={formData}
-            handleChange={handleInputChange}
-            handleFileChange={handleFileChange}
-            logoFile={logoFile}
-            coverPhotoFile={coverPhotoFile}
+    <div className="container mx-auto max-w-6xl px-4 flex flex-col lg:flex-row gap-6 mt-16 mb-16">
+      <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
+      <main className="flex-1 bg-white rounded-lg shadow-md p-4">
+        <div className="mb-4">
+          <img
+            src="/images/company.jpg"
+            alt="Company"
+            className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
           />
-          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
-            <Button
-              variant="destructive"
-              size="default"
-              className="rounded-full w-full sm:w-auto"
-              disabled={submitting}
-              type="button"
-              onClick={() => router.push(`/companies/${companyId}/dashboard`)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="brand"
-              size="default"
-              type="submit"
-              className="rounded-full w-full sm:w-auto flex items-center justify-center"
-              disabled={submitting}
-            >
-              {submitting && (
-                <svg
-                  className="animate-spin h-5 w-5 mr-2 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z"
-                  ></path>
-                </svg>
-              )}
-              {submitting ? 'Updating...' : 'Update Company'}
-            </Button>
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800">Update Your Company Profile</h2>
+            <p className="text-gray-600 text-sm">Modify your company details below.</p>
           </div>
-        </form>
-      )}
-    </main>
+        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-48">
+            <Loader />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <CompanyInformation formData={formData} handleChange={handleInputChange} />
+            <ContactInformation formData={formData} handleChange={handleInputChange} />
+            <CompanyDescription formData={formData} handleChange={handleInputChange} />
+            <SocialLinksAndVideo formData={formData} handleChange={handleInputChange} />
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={submitting}
+                onClick={() => router.push(`/companies/${companyId}/dashboard`)}
+                className="rounded-md"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                type="submit"
+                disabled={submitting}
+                className="bg-[#1e90ff] text-white hover:bg-[#1c86e6] rounded-md"
+              >
+                {submitting ? 'Updating...' : 'Update Company'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </main>
+    </div>
   );
 };
 

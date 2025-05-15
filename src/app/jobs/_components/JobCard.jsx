@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Bookmark, MapPin, DollarSign, Clock, Briefcase } from "lucide-react";
 import { useRouter } from 'next/navigation';
 
-const JobCard = ({ job, onToggleSave }) => {
+const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
   const router = useRouter();
 
   const formatRelativeTime = (dateString) => {
@@ -35,34 +35,27 @@ const JobCard = ({ job, onToggleSave }) => {
   };
 
   const formatSalary = (salaryRange) => {
-    if (!salaryRange) return 'N/A';
-    
-    // Handle cases where salaryRange might already be formatted (from useJobs hook)
-    if (typeof salaryRange === 'string' && salaryRange.includes('$')) {
-      return salaryRange.split('/')[0]; // Return just the salary part if already formatted
+    if (!salaryRange || typeof salaryRange !== 'string') return 'N/A';
+
+    if (salaryRange.includes('$')) {
+      return salaryRange.split('/')[0];
     }
 
-    // Handle raw salary range format (e.g., "50000-100000")
+    if (!salaryRange.includes('-')) return salaryRange;
+
     const [minStr, maxStr] = salaryRange.split('-');
     const min = parseInt(minStr);
     const max = maxStr ? parseInt(maxStr) : null;
 
     if (isNaN(min)) return 'N/A';
 
-    if (max && !isNaN(max)) {
-      // Format both min and max
-      const format = (value) => {
-        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-        if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-        return value.toLocaleString();
-      };
-      return `${format(min)}-${format(max)}`;
-    }
+    const format = (value) => {
+      if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+      if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+      return value.toLocaleString();
+    };
 
-    // Format single value
-    if (min >= 1000000) return `${(min / 1000000).toFixed(1)}M`;
-    if (min >= 1000) return `${(min / 1000).toFixed(0)}k`;
-    return min.toLocaleString();
+    return max && !isNaN(max) ? `${format(min)}-${format(max)}` : format(min);
   };
 
   const handleSave = (e) => {
@@ -74,7 +67,11 @@ const JobCard = ({ job, onToggleSave }) => {
   const handleViewJob = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/jobs/${job.id}`);
+    if (isRecruiter) {
+      router.push(`/companies/${job.company_id}/jobs/${job.id}/applications`);
+    } else {
+      router.push(`/jobs/${job.id}`);
+    }
   };
 
   return (
@@ -132,7 +129,7 @@ const JobCard = ({ job, onToggleSave }) => {
       </div>
 
       <div className="flex-1 mb-2">
-        <p className="text-sm text-muted-foreground h-16 line-clamp-3 my-auto">
+        <p className="text-sm text-muted-foreground line-clamp-3 my-auto">
           {job?.description || "No description"}
         </p>
       </div>
@@ -143,16 +140,16 @@ const JobCard = ({ job, onToggleSave }) => {
           {formatRelativeTime(job?.created_at)}
         </div>
         <Button 
-          size="sm" 
+          size="xl" 
           className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[45%]"
-          onClick={handleViewJob}                                                                                     
-          disabled={job.is_applied}
+          onClick={handleViewJob}
+          disabled={!isRecruiter && job.is_applied}
         >
-          {job.is_applied ? 'Applied' : 'Apply'}
+          {isRecruiter ? 'View Candidates' : job.is_applied ? 'Applied' : 'Apply'}
         </Button>
       </div>
     </motion.div>
   );
 };
 
-export default JobCard;                                                                                                         
+export default JobCard;

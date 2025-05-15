@@ -1,178 +1,92 @@
-"use client";
+'use client';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { toast } from 'react-toastify';
+import JobCard from '../../../jobs/_components/JobCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Bookmark, MapPin, Clock, DollarSign } from "lucide-react";
+const RecentJobListings = ({ companyData }) => {
+  const { companyId } = useParams();
+  const { data: session, status } = useSession();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-// Using shadcn/ui example images
-const companyLogos = [
-  "/examples/company1.png",
-  "/examples/company2.png",
-  "/examples/company3.png",
-  "/examples/company4.png",
-  "/examples/company5.png",
-];
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        if (status === 'loading') {
+          return; // Wait for session to load
+        }
+        if (status === 'unauthenticated') {
+          throw new Error('Not authenticated. Please log in.');
+        }
 
-// Mock job data
-const mockJobs = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: { name: "Tech Corp", logo: companyLogos[0] },
-    job_location_type: "Remote",
-    location: "New York",
-    salary_range: "80k - 100k",
-    created_at: "2d ago",
-    is_saved: false,
-    is_applied: false,
-  },
-  {
-    id: 2,
-    title: "Product Manager",
-    company: { name: "Innovate Inc", logo: companyLogos[1] },
-    job_location_type: "On-site",
-    location: "San Francisco",
-    salary_range: "90k - 120k",
-    created_at: "1w ago",
-    is_saved: true,
-    is_applied: true,
-  },
-  {
-    id: 3,
-    title: "Data Scientist",
-    company: { name: "DataWorks", logo: companyLogos[2] },
-    job_location_type: "Hybrid",
-    location: "Chicago",
-    salary_range: "85k - 110k",
-    created_at: "3d ago",
-    is_saved: false,
-    is_applied: false,
-  },
-  {
-    id: 4,
-    title: "UX Designer",
-    company: { name: "DesignCo", logo: companyLogos[3] },
-    job_location_type: "Remote",
-    location: "Austin",
-    salary_range: "75k - 95k",
-    created_at: "5d ago",
-    is_saved: true,
-    is_applied: false,
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    company: { name: "CloudSystems", logo: companyLogos[4] },
-    job_location_type: "Hybrid",
-    location: "Seattle",
-    salary_range: "95k - 125k",
-    created_at: "4d ago",
-    is_saved: false,
-    is_applied: false,
-  },
-];
+        const token = session?.accessToken; // Adjust if token is elsewhere (e.g., session.user.token)
+        if (!token) {
+          throw new Error('No authentication token found.');
+        }
 
-const RecentJobListings = () => {
-  const [jobs, setJobs] = useState(mockJobs);
+        const response = await fetch(
+          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/jobs`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  const toggleSave = (jobId) => {
-    setJobs(jobs.map((job) =>
-      job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
-    ));
-  };
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Unauthorized: Invalid or expired token');
+          }
+          throw new Error('Failed to fetch jobs');
+        }
+
+        const data = await response.json();
+        setJobs(data.slice(0, 5));
+      } catch (err) {
+        setError(err.message);
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [companyId, status, session]);
+
+  if (loading || status === 'loading') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(5)].map((_, index) => (
+          <Skeleton key={index} className="h-64 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  if (jobs.length === 0) {
+    return <div className="text-gray-500 text-center">No recent jobs found.</div>;
+  }
 
   return (
-    <section className="w-full px-4 py-8 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          viewport={{ once: true }}
-          className="mb-6"
-        >
-          <h2 className="text-xl font-semibold text-gray-800">Featured Jobs</h2>
-          <p className="text-sm text-gray-500">Explore top opportunities for you</p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {jobs.map((job) => (
-            <motion.div
-              key={job.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="bg-white border border-gray-100 rounded-lg p-4 shadow-sm flex flex-col"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={job.company.logo}
-                    alt={job.company.name}
-                    className="w-8 h-8 rounded-md object-contain border border-gray-100 p-0.5"
-                  />
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                    {job.job_location_type}
-                  </span>
-                </div>
-                <button
-                  onClick={() => toggleSave(job.id)}
-                  className={`p-1 rounded-full hover:bg-gray-100 ${
-                    job.is_saved ? "text-blue-600" : "text-gray-400"
-                  }`}
-                >
-                  <Bookmark
-                    className={`w-4 h-4 ${job.is_saved ? "fill-blue-600" : ""}`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex-grow space-y-2">
-                <h3 className="text-lg font-medium text-gray-900 line-clamp-1">
-                  {job.title}
-                </h3>
-                <p className="text-sm text-gray-600">{job.company.name}</p>
-                <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <MapPin className="w-3 h-3 mr-1 text-blue-500" />
-                    {job.location}
-                  </span>
-                  <span className="flex items-center">
-                    <DollarSign className="w-3 h-3 mr-1 text-blue-500" />
-                    ${job.salary_range}
-                  </span>
-                  <span className="flex items-center">
-                    <Clock className="w-3 h-3 mr-1 text-blue-500" />
-                    {job.created_at}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-3">
-                {job.is_applied ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-blue-500 text-blue-500 text-xs"
-                    disabled
-                  >
-                    Applied
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs"
-                  >
-                    Apply Now
-                  </Button>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {jobs.map((job) => (
+        <JobCard
+          key={job.id}
+          job={{ ...job, company_id: companyId }}
+          isRecruiter={true}
+        />
+      ))}
+    </div>
   );
 };
 

@@ -28,7 +28,7 @@ export const FormContainer = ({
   };
 
   return (
-    <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl mt-5">
+    <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl  my-5">
       <div className="text-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Post a New Job</h2>
         <p className="text-gray-600 mt-1">Fill in the details to create a job posting.</p>

@@ -1,154 +1,145 @@
-// src/app/companies/components/Applicant/CandidateCard.jsx
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Archive, Bookmark, MessageSquare, Eye, Star, Calendar } from 'lucide-react';
+import CandidateProfile from './CandidateProfile';
+import CandidateActions from './CandidateActions';
+import CandidateDetails from './CandidateDetails';
+import PaymentModal from '../../../recruiter/PaymentModal/PaymentModal';
+import { checkPaymentStatus, initiateStripePayment } from '@/lib/api/endorsements';
+import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'sonner';
 
-const CandidateCard = ({ candidate, type, handleViewDetails, handleShortlist, activeTab, isShortlisted = false }) => {
+const CandidateCard = ({
+  candidate = {},
+  type = 'company',
+  handleViewDetails = () => {},
+  handleShortlist = () => {},
+  handleEndorse = () => {},
+  handleSchedule = () => {},
+  activeTab = '',
+  isShortlisted = false,
+}) => {
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [candidateId, setCandidateId] = useState(null);
+  const [isEndorseLoading, setIsEndorseLoading] = useState(false);
+  const router = useRouter();
+  const { companyId } = useParams();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    console.log('CandidateCard mounted, path:', window.location.pathname);
+    return () => {
+      console.log('CandidateCard unmounted, last path:', window.location.pathname);
+    };
+  }, []);
+
+  if (!candidate || !candidate.profile) {
+    return <div>Error: Candidate data is missing</div>;
+  }
+
+  const onEndorse = async (id) => {
+    if (status !== 'authenticated') {
+      toast.error('Please sign in to endorse a candidate');
+      router.push('/auth/signin');
+      return;
+    }
+
+    console.log('Endorse started, candidateId:', id, 'token:', session.accessToken);
+    setIsEndorseLoading(true);
+    try {
+      const { has_paid } = await checkPaymentStatus(id, session.accessToken);
+      console.log('Payment status:', has_paid);
+      if (has_paid) {
+        console.log('Payment verified, redirecting to endorsements');
+        router.push(`/companies/candidate/${id}/endorsements`);
+      } else {
+        setCandidateId(id);
+        setIsPaymentModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Check payment status error:', error.response?.data || error.message);
+      toast.error(error.message || 'Failed to check payment status. Please try again or contact support.');
+    } finally {
+      setIsEndorseLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    if (status !== 'authenticated') {
+      toast.error('Please sign in to proceed with payment');
+      router.push('/auth/signin');
+      return;
+    }
+
+    try {
+      console.log('Initiating Stripe payment for candidate:', candidateId);
+      const { session_id } = await initiateStripePayment(candidateId, session.accessToken);
+      console.log('Received Stripe session_id:', session_id);
+      if (session_id.startsWith('cs_live_')) {
+        console.error('Error: Live mode session_id with test mode key');
+        toast.error('Stripe payment failed: Live mode session ID used with test mode key. Please contact support.');
+        return;
+      }
+      const { loadStripe } = await import('@stripe/stripe-js');
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      if (!stripe) {
+        throw new Error('Failed to load Stripe.js');
+      }
+      console.log('Redirecting to Stripe Checkout with session_id:', session_id);
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: session_id,
+        successUrl: `${window.location.origin}/recruiter/payment-success?candidateId=${candidateId}&companyId=${companyId || 'default'}`,
+        cancelUrl: `${window.location.origin}/recruiter/payment-cancel?companyId=${companyId || 'default'}`,
+      });
+      if (error) {
+        console.error('Stripe redirect error:', error);
+        throw new Error(error.message);
+      }
+      setIsPaymentModalOpen(false);
+    } catch (error) {
+      console.error('Stripe payment error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        rawResponse: error.response?.statusText || error.message,
+      });
+      toast.error(
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to initiate Stripe payment. Please try again or contact support.'
+      );
+    }
+  };
+
   return (
-    <Card className="hover:bg-gray-50 transition-colors border">
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col gap-4 md:w-[50%] lg:w-[28%]">
-            <div className="flex gap-x-4">
-              <div className="relative">
-                <img
-                  src={candidate.profile.profileImage}
-                  alt={`${candidate.profile.firstName} ${candidate.profile.lastName}`}
-                  className="w-16 h-16 rounded-full border-2 border-white"
-                />
-                <span
-                  className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
-                    type === 'job' && activeTab !== 'candidates' ? 'bg-gray-400' : 'bg-green-400'
-                  }`}
-                ></span>
-              </div>
-              <div className="flex-1 flex flex-col gap-1">
-                <span className="text-lg font-semibold">
-                  {candidate.profile.firstName} {candidate.profile.lastName}
-                </span>
-                <div className="text-gray-500">{candidate.profile.location}</div>
-                <div className="text-gray-600 line-clamp-2">{candidate.profile.jobTitle}</div>
-              </div>
+    <>
+      <Card className="hover:bg-gray-50 transition-colors border">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col gap-4 md:w-[50%] lg:w-[28%]">
+              <CandidateProfile candidate={candidate} />
+              <CandidateActions
+                candidate={candidate}
+                activeTab={activeTab}
+                isShortlisted={isShortlisted}
+                handleViewDetails={handleViewDetails}
+                handleShortlist={handleShortlist}
+                handleEndorse={onEndorse}
+                handleSchedule={handleSchedule}
+                loading={isEndorseLoading}
+              />
             </div>
-            <div className="flex md:hidden items-start space-x-2">
-              <Button variant="outline" size="icon" className="bg-gray-100">
-                <Archive className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="bg-gray-100">
-                <Bookmark className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" className="flex-1 border-blue-500 text-blue-500">
-                Message
-              </Button>
-              {!isShortlisted ? (
-                <Button
-                  className="flex-1 bg-green-500 text-white"
-                  onClick={() => handleShortlist(candidate.user_id)}
-                >
-                  Shortlist
-                </Button>
-              ) : (
-                <>
-                  <Button className="flex-1 bg-yellow-500 text-white">
-                    <Star className="w-4 h-4 mr-1" />
-                    Endorsement
-                  </Button>
-                  <Button className="flex-1 bg-purple-500 text-white">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Schedule
-                  </Button>
-                </>
-              )}
-              <Button
-                className="flex-1 bg-blue-500 text-white"
-                onClick={() => handleViewDetails(candidate)}
-              >
-                View Details
-              </Button>
-            </div>
-            <div className="hidden md:flex items-start space-x-2">
-              <Button variant="outline" size="icon" className="bg-gray-100">
-                <Archive className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="bg-gray-100">
-                <Bookmark className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" className="border-blue-500 text-blue-500">
-                Message
-              </Button>
-              {!isShortlisted ? (
-                <Button
-                  className="bg-green-500 text-white"
-                  onClick={() => handleShortlist(candidate.user_id)}
-                >
-                  Shortlist
-                </Button>
-              ) : (
-                <>
-                  <Button className="bg-yellow-500 text-white">
-                    <Star className="w-4 h-4 mr-1" />
-                    Endorsement
-                  </Button>
-                  <Button className="bg-purple-500 text-white">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Schedule
-                  </Button>
-                </>
-              )}
-              <Button
-                className="bg-blue-500 text-white"
-                onClick={() => handleViewDetails(candidate)}
-              >
-                View Details
-              </Button>
-            </div>
+            <CandidateDetails candidate={candidate} type={type} />
           </div>
-          <div className="flex flex-col gap-4 md:flex-row md:w-[80%]">
-            <div className="space-y-4 w-full md:w-[250px]">
-              <div className="flex flex-col gap-2">
-                {type === 'company' ? (
-                  <>
-                    <span className="text-lg text-green-500 font-semibold truncate">
-                      {candidate.job.title}
-                    </span>
-                    <span className="text-lg font-semibold">
-                      Resume match: {candidate.matchingPercentage}%
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-lg font-semibold truncate">
-                    Assessment Score: {candidate.matchingPercentage}%
-                  </span>
-                )}
-                <span className="text-gray-600">Quiz Score: {candidate.quizScore}%</span>
-              </div>
-            </div>
-            <div className="space-y-4 w-full md:w-[300px]">
-              <div className="text-base font-semibold">About Candidate:</div>
-              <div className="text-gray-700 line-clamp-2">{candidate.profile.coverLetter}</div>
-            </div>
-            <div className="space-y-4 w-full">
-              <div className="text-base font-semibold">Qualifications:</div>
-              <div className="flex flex-wrap gap-2">
-                {candidate.profile.skills.slice(0, 3).map((skill, index) => (
-                  <Badge key={index} className="bg-blue-100 text-blue-500">
-                    {skill}
-                  </Badge>
-                ))}
-                {candidate.profile.skills.length > 3 && (
-                  <Badge className="bg-gray-200 text-gray-700">
-                    ...and {candidate.profile.skills.length - 3} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSelectPayment={handlePayment}
+      />
+    </>
   );
 };
 

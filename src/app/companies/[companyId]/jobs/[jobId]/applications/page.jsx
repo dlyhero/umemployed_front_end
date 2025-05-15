@@ -5,3 +5,5 @@ import ApplicantComponent from '../../../../components/Applicant/ApplicantCompon
 export default function JobApplications({ params }) {
   return <ApplicantComponent type="job" />;
 }
+
+

@@ -12,6 +12,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/lib/useToast';
 import toast from 'react-hot-toast';
+import companySchema from '@/src/app/companies/create/schemas/companySchema';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const CompanyCreationPage = () => {
   const { data: session, status } = useSession();
@@ -33,15 +35,32 @@ const CompanyCreationPage = () => {
     video_introduction: '',
     job_openings: '',
   });
-  const [logoFile, setLogoFile] = useState(null);
-  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
    const user = useSession();
     console.log(user);
       
   const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+  const totalSteps = 3;
+
+  const logError = (context, error, additionalData = {}) => {
+    const errorDetails = {
+      timestamp: new Date().toISOString(),
+      context,
+      error: error.message || 'Unknown error',
+      stack: error.stack || 'No stack trace',
+      ...additionalData,
+    };
+    console.error(`[ERROR] ${context}:`, JSON.stringify(errorDetails, null, 2));
+    return errorDetails;
+  };
+
+  const logDebug = (context, data) => {
+    console.debug(`[DEBUG] ${context}:`, JSON.stringify({
+      timestamp: new Date().toISOString(),
+      ...data,
+    }, null, 2));
+  };
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -63,7 +82,10 @@ const CompanyCreationPage = () => {
   if (status === 'loading') {
     return <Loader />;
   }
-  if (session?.user?.has_company) return null;
+  if (session?.user?.has_company) {
+    logDebug('Render', { state: 'User has company, skipping render' });
+    return null;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,35 +118,60 @@ const CompanyCreationPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.country) {
-      toast.error('Company name and country are required.');
-      return;
-    }
-    setLoading(true);
-
-    const data = new FormData();
-    for (const key in formData) {
-      if (formData[key]) {
-        data.append(key, formData[key]);
+  const handleContinue = () => {
+    logDebug('Continue Button', { step, formData });
+    if (step === 1) {
+      if (!formData.name || !formData.country) {
+        toast.error('Company name and country are required.');
+        return;
       }
     }
-    if (logoFile) {
-      data.append('logo', logoFile, logoFile.name);
+    if (step < totalSteps) {
+      setStep(step + 1);
     }
-    if (coverPhotoFile) {
-      data.append('cover_photo', coverPhotoFile, coverPhotoFile.name);
-    }
+  };
 
-    const token = session?.accessToken;
-    if (!token) {
-      toast.error('No authentication token found. Please sign in again.');
-      setLoading(false);
-      return;
+  const handlePrevious = () => {
+    logDebug('Previous Button', { step });
+    if (step > 1) {
+      setStep(step - 1);
     }
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
+      logDebug('Form Submit', { formData, step });
+      if (step !== totalSteps) {
+        logError('Form Submit', new Error('Submission attempted on wrong step'), { step });
+        return;
+      }
+      const result = companySchema.safeParse(formData);
+      if (!result.success) {
+        const errors = result.error.flatten().fieldErrors;
+        const errorMessage = Object.values(errors).flat().join(', ');
+        throw new Error(errorMessage || 'Invalid form data.');
+      }
+
+      setLoading(true);
+      const payload = {};
+      for (const key in formData) {
+        if (formData[key] !== '' && formData[key] !== null && formData[key] !== undefined) {
+          payload[key] = key === 'founded' ? parseInt(formData[key]) : formData[key];
+        }
+      }
+
+      const token = session?.accessToken;
+      if (!token) {
+        throw new Error('No authentication token found. Please sign in again.');
+      }
+
+      logDebug('API Request', {
+        url: `${BASE_URL}/api/company/create-company/`,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        payload,
+      });
+
       const response = await axios.post(
         `${BASE_URL}/api/company/create-company/`,
         data,
@@ -145,7 +192,7 @@ const CompanyCreationPage = () => {
       console.error('Error creating company:', {
         status: err.response?.status,
         data: err.response?.data,
-        message: err.message,
+        requestPayload: payload,
       });
 
       let errorMessage = 'Failed to create company. Please try again.';
@@ -160,6 +207,8 @@ const CompanyCreationPage = () => {
           const errors = Object.values(err.response.data).flat();
           errorMessage = errors.join(', ');
         }
+      } else {
+        errorMessage = err.message;
       }
 
       toast.error(errorMessage);
@@ -168,57 +217,90 @@ const CompanyCreationPage = () => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (step < totalSteps) {
+        handleContinue();
+      }
+    }
+  };
+
+  const renderStep = () => {
+    logDebug('Render Step', { step });
+    return (
+      <>
+        {step === 1 ? (
+          <CompanyInformation formData={formData} handleChange={handleInputChange} />
+        ) : step === 2 ? (
+          <div className="space-y-4">
+            <ContactInformation formData={formData} handleChange={handleInputChange} />
+            <CompanyDescription formData={formData} handleChange={handleInputChange} />
+          </div>
+        ) : step === 3 ? (
+          <SocialLinksAndVideo formData={formData} handleChange={handleInputChange} />
+        ) : null}
+      </>
+    );
+  };
+
   return (
-    <main className="container mx-auto p-6 bg-white rounded-lg shadow-md max-w-2xl">
-      <div className="mb-6">
+    <main className="container mx-auto p-4 bg-white rounded-lg shadow-md max-w-3xl mt-16 mb-16">
+      <div className="mb-4 text-center">
         <img
           src="/images/company.jpg"
           alt="Company"
           className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
         />
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800">Create Your Company Profile</h2>
-          <p className="text-gray-600 mt-1">Provide your company details below.</p>
-        </div>
+        <h2 className="text-xl font-bold text-gray-800">Create Your Company Profile</h2>
+        <p className="text-gray-600 text-sm">Step {step} of {totalSteps}</p>
       </div>
       {loading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-48">
           <Loader />
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <CompanyInformation formData={formData} handleChange={handleInputChange} />
-          <ContactInformation formData={formData} handleChange={handleInputChange} />
-          <CompanyDescription formData={formData} handleChange={handleInputChange} />
-          <SocialLinksAndVideo
-            formData={formData}
-            handleChange={handleInputChange}
-            handleFileChange={handleFileChange}
-            logoFile={logoFile}
-            coverPhotoFile={coverPhotoFile}
-            logoPreview={logoPreview}
-            coverPhotoPreview={coverPhotoPreview}
-          />
-          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
-            <Button
-              variant="destructive"
-              size="default"
-              className="rounded-full w-full sm:w-auto"
-              disabled={loading}
-              type="button"
-              onClick={() => router.push('/select-role')}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="brand"
-              size="default"
-              type="submit"
-              className="rounded-full w-full sm:w-auto"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create Company'}
-            </Button>
+        <form onSubmit={handleSubmit} className="space-y-4" onKeyDown={handleKeyDown}>
+          {renderStep()}
+          <div className="flex items-center justify-between mt-6">
+            {step !== 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={handlePrevious}
+                disabled={loading}
+                className="rounded-md"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+            )}
+            <div className="flex-1 flex justify-end">
+              {step < totalSteps ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={loading}
+                  className="bg-[#1e90ff] text-white hover:bg-[#1c86e6] rounded-md"
+                >
+                  Continue
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  type="submit"
+                  disabled={loading}
+                  className="bg-[#1e90ff] text-white hover:bg-[#1c86e6] rounded-md"
+                >
+                  {loading ? 'Creating...' : 'Create Company'}
+                </Button>
+              )}
+            </div>
           </div>
         </form>
       )}
