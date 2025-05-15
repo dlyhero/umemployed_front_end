@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -14,7 +14,7 @@ import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
-import ShortlistFetch from './ShortlistFetch';
+import  ShortlistFetch  from './ShortlistFetch';
 
 const ShortlistComponent = () => {
   const { companyId, jobId } = useParams();
@@ -28,8 +28,18 @@ const ShortlistComponent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  useEffect(() => {
+    console.log('ShortlistComponent mounted, path:', window.location.pathname);
+    console.log('Shortlisted:', shortlisted?.length || 0, 'loading:', loading, 'hasFetched:', hasFetched);
+    return () => {
+      console.log('ShortlistComponent unmounted');
+    };
+  }, [shortlisted, loading, hasFetched]);
 
   const handleTabChange = (tab) => {
+    console.log('Tab changed to:', tab);
     if (tab === 'candidates') {
       router.push(`/companies/${companyId}/jobs/${jobId}/applications`);
     } else if (tab === 'archived') {
@@ -40,10 +50,11 @@ const ShortlistComponent = () => {
   };
 
   const handleEndorse = (candidateId) => {
-    toast.info(`Endorsement for candidate ${candidateId} is not yet implemented.`);
+    console.log('Endorse triggered for candidate:', candidateId);
   };
 
   const handleSchedule = (candidateId) => {
+    console.log('Schedule interview for candidate:', candidateId);
     const candidate = shortlisted.find((app) => app.user_id === candidateId);
     if (candidate) {
       setSelectedCandidate(candidate);
@@ -54,6 +65,7 @@ const ShortlistComponent = () => {
   };
 
   const handleViewDetails = (candidate) => {
+    console.log('View details for candidate:', candidate?.user_id);
     if (!candidate || !candidate.profile) {
       console.warn('Invalid candidate passed to handleViewDetails:', candidate);
       return;
@@ -97,7 +109,6 @@ const ShortlistComponent = () => {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-auto">
         <header className="flex justify-between items-center md:hidden mb-6">
-          {/* <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1> */}
           <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
@@ -125,15 +136,18 @@ const ShortlistComponent = () => {
             <div className="hidden md:block mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Shortlisted Candidates</h1>
             </div>
-            <ShortlistFetch
-              companyId={companyId}
-              jobId={jobId}
-              session={session}
-              status={status}
-              setShortlisted={setShortlisted}
-              setLoading={setLoading}
-              setError={setError}
-            />
+            {!hasFetched && (
+              <ShortlistFetch
+                companyId={companyId}
+                jobId={jobId}
+                session={session}
+                status={status}
+                setShortlisted={setShortlisted}
+                setLoading={setLoading}
+                setError={setError}
+                setHasFetched={setHasFetched}
+              />
+            )}
             {loading ? (
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-brand/50 mx-auto" />
@@ -154,7 +168,7 @@ const ShortlistComponent = () => {
                       <h2 className="text-xl font-semibold border-b-4 border-brand/50 w-fit">
                         Shortlisted Candidates
                       </h2>
-                      {shortlisted.length > 0 ? (
+                      {shortlisted && shortlisted.length > 0 ? (
                         shortlisted.map((app) => (
                           <CandidateCard
                             key={app.id}
@@ -186,14 +200,16 @@ const ShortlistComponent = () => {
         candidate={selectedCandidate}
         type="job"
       />
-      <InterviewModal
-        isOpen={isInterviewModalOpen}
-        onClose={closeInterviewModal}
-        candidate={selectedCandidate}
-        companyId={companyId}
-        jobId={jobId}
-        accessToken={session?.accessToken}
-      />
+      {InterviewModal ? (
+        <InterviewModal
+          isOpen={isInterviewModalOpen}
+          onClose={closeInterviewModal}
+          candidate={selectedCandidate}
+          companyId={companyId}
+          jobId={jobId}
+          accessToken={session?.accessToken}
+        />
+      ) : null}
     </motion.div>
   );
 };
