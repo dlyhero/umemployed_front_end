@@ -215,7 +215,7 @@ const CompanyDetails = () => {
               </motion.div>
             )}
 
-         
+
 
             {/* Company description */}
             <motion.div
@@ -231,23 +231,23 @@ const CompanyDetails = () => {
                 </p>
                 {company.mission_statement && (<>
                   <h2 className="text-2xl font-bold text-gray-900 mb-4 mt-6">Our Mission</h2>
-                <div className="prose max-w-none text-gray-700">
-                  <p className="mb-4">
-                    {company.mission_statement || `${company.name} is committed to ${company.industry ? `revolutionizing the ${company.industry} industry` : 'delivering exceptional value'} through innovation, integrity, and a relentless focus on customer satisfaction.`}
-                  </p>
+                  <div className="prose max-w-none text-gray-700">
+                    <p className="mb-4">
+                      {company.mission_statement || `${company.name} is committed to ${company.industry ? `revolutionizing the ${company.industry} industry` : 'delivering exceptional value'} through innovation, integrity, and a relentless focus on customer satisfaction.`}
+                    </p>
 
-                </div></>)}
-               {
-                company.vision && (<> <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Our Vision</h3>
-                  <p className="mb-4">
-                    {company.vision}
-                  </p></>)
-               }
+                  </div></>)}
+                {
+                  company.vision && (<> <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Our Vision</h3>
+                    <p className="mb-4">
+                      {company.vision}
+                    </p></>)
+                }
 
                 <blockquote className="border-l-4 border-brand pl-4 py-2 my-4 text-gray-700 italic">
                   "At {company.name}, we're not just matching resumes to job descriptions—we're creating meaningful connections."
                 </blockquote>
-               
+
               </div>
             </motion.div>
 
