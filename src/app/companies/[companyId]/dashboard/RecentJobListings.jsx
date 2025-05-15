@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import JobCard from '../../../jobs/_components/JobCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
