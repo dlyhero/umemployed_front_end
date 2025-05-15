@@ -188,7 +188,7 @@ const CompanyDetails = () => {
             </motion.div>
 
             {/* Video Introduction */}
-            {company.video_url && (
+            {company.video_introduction && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -432,7 +432,7 @@ const CompanyDetails = () => {
       </main>
 
       {/* Video Modal */}
-      {showVideoModal && company.video_url && (
+      {showVideoModal && company.video_introduction && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setShowVideoModal(false)}>
           <div className="relative w-full max-w-4xl aspect-video" onClick={e => e.stopPropagation()}>
             <button
@@ -442,7 +442,7 @@ const CompanyDetails = () => {
               Close
             </button>
             <iframe
-              src={company.video_url}
+              src={company.video_introduction}
               className="w-full h-full rounded-lg"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
