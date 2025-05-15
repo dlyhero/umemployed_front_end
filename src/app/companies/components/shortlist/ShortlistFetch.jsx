@@ -11,6 +11,7 @@ const ShortlistFetch = ({
   setShortlisted,
   setLoading,
   setError,
+  setHasFetched,
 }) => {
   const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
@@ -125,6 +126,7 @@ const ShortlistFetch = ({
         } else {
           setError(null);
         }
+        setHasFetched(true);
       } catch (err) {
         console.error('Fetch shortlist error:', err);
         setError(err.message || 'Unable to load shortlisted candidates due to a server error.');
@@ -140,7 +142,7 @@ const ShortlistFetch = ({
       setLoading(false);
       setError('Invalid company or job ID');
     }
-  }, [companyId, jobId, session, status, setShortlisted, setLoading, setError]);
+  }, [companyId, jobId, session?.accessToken, status, setShortlisted, setLoading, setError, setHasFetched]);
 
   return null;
 };
