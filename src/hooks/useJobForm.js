@@ -85,7 +85,7 @@ export const useJobForm = (currentStep) => {
       }
     };
     fetchJobOptions();
-  }, [form, fetchJobOptions]);
+  }, [form]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
