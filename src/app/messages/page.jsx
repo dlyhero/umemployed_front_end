@@ -776,7 +776,7 @@ export default function MessageApp() {
     <div className="flex flex-col flex-1 w-full bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl px-4 mx-auto flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-800">Messaging</h1>
           <div className="flex items-center space-x-4">
             <button className="p-2 rounded-full hover:bg-gray-100">
