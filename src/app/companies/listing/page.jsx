@@ -4,17 +4,19 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { motion } from "framer-motion"
-import { Building2, Users, MapPin, ArrowRight, Star, Briefcase } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Building2, Star, Briefcase, Search, Filter, FilterIcon, LucideListFilterPlus } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import baseUrl from "../../api/baseUrl"
 import CompanyCard from "../../companies/listing/CompanyCard"
+import { Skeleton } from "@/components/ui/skeleton"
 
-const Companies = () => {
+const CompanyListing = () => {
   const [companies, setCompanies] = useState([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("featured")
+  const [activeTab, setActiveTab] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
   const { data: session, status } = useSession()
@@ -52,43 +54,59 @@ const Companies = () => {
     }
   }, [status, session, router])
 
+  const filteredCompanies = companies.filter(company => {
+    const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         company.industry.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesTab = activeTab === "all" || 
+                      (activeTab === "featured" && company.featured) ||
+                      (activeTab === "tech" && company.industry === "Technology")
+
+    return matchesSearch && matchesTab
+  })
+
   if (loading) {
-    return <CompaniesLoading />
+    return <CompanyListingLoading />
   }
 
-  // Categorize companies for tabs
-  const featuredCompanies = companies.slice(0, 6)
-  const techCompanies = companies.filter(c => c.industry === 'Technology').slice(0, 6)
-  const startupCompanies = companies.filter(c => c.employees?.includes('1-50') || c.employees?.includes('51-200')).slice(0, 6)
-
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-base">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Discover Companies</h2>
-              <p className="text-gray-600">Find your next opportunity with these top employers</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Companies</h1>
+          <p className="text-gray-600">Browse all companies on UmEmployed</p>
+          
+          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search companies..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            <Button 
-              variant="outline"
-              className="hidden sm:flex border-brand text-brand hover:bg-brand/10"
-              onClick={() => router.push("/companies")}
-            >
-              Browse All Companies
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button variant="outline" className="border-gray-300">
+              <LucideListFilterPlus className="w-4 h-4 mr-2" />
+              Filters
             </Button>
           </div>
         </motion.div>
 
-        <Tabs defaultValue="featured" className="w-full">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
           <div className="relative">
             <TabsList className="w-full justify-start overflow-x-auto pb-2">
+              <TabsTrigger value="all" className="px-4 py-2">
+                All Companies
+              </TabsTrigger>
               <TabsTrigger value="featured" className="px-4 py-2">
                 <Star className="w-4 h-4 mr-2" />
                 Featured
@@ -97,18 +115,38 @@ const Companies = () => {
                 <Briefcase className="w-4 h-4 mr-2" />
                 Tech
               </TabsTrigger>
-              <TabsTrigger value="startups" className="px-4 py-2">
-                <Building2 className="w-4 h-4 mr-2" />
-                Startups
-              </TabsTrigger>
             </TabsList>
           </div>
 
+          <TabsContent value="all">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              {filteredCompanies.length > 0 ? (
+                filteredCompanies.map((company) => (
+                  <CompanyCard 
+                    company={company} 
+                    key={company.id} 
+                    onClick={() => router.push(`/companies/${company.id}`)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-10">
+                  <p className="text-gray-500">
+                    {searchQuery ? "No companies match your search" : "No companies available"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
           <TabsContent value="featured">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {featuredCompanies.length > 0 ? (
-                featuredCompanies.map((company, index) => (
-                  <CompanyCard company={company} key={`featured-${index}`} />
+              {filteredCompanies.length > 0 ? (
+                filteredCompanies.map((company) => (
+                  <CompanyCard 
+                    company={company} 
+                    key={company.id} 
+                    onClick={() => router.push(`/companies/${company.id}`)}
+                  />
                 ))
               ) : (
                 <div className="col-span-3 text-center py-10">
@@ -120,9 +158,13 @@ const Companies = () => {
 
           <TabsContent value="tech">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {techCompanies.length > 0 ? (
-                techCompanies.map((company, index) => (
-                  <CompanyCard company={company} key={`tech-${index}`} />
+              {filteredCompanies.length > 0 ? (
+                filteredCompanies.map((company) => (
+                  <CompanyCard 
+                    company={company} 
+                    key={company.id} 
+                    onClick={() => router.push(`/companies/${company.id}`)}
+                  />
                 ))
               ) : (
                 <div className="col-span-3 text-center py-10">
@@ -131,44 +173,24 @@ const Companies = () => {
               )}
             </div>
           </TabsContent>
-
-          <TabsContent value="startups">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {startupCompanies.length > 0 ? (
-                startupCompanies.map((company, index) => (
-                  <CompanyCard company={company} key={`startup-${index}`} />
-                ))
-              ) : (
-                <div className="col-span-3 text-center py-10">
-                  <p className="text-gray-500">No startup companies available</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
         </Tabs>
-
-        <div className="mt-8 flex justify-center sm:hidden">
-          <Button
-            variant="outline"
-            className="border-brand text-brand hover:bg-brand/10 w-full sm:w-auto"
-            onClick={() => router.push("/companies")}
-          >
-            Browse All Companies
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
       </div>
     </section>
   )
 }
 
-const CompaniesLoading = () => {
+const CompanyListingLoading = () => {
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Skeleton className="h-9 w-64 mb-2" />
           <Skeleton className="h-5 w-80" />
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-24" />
         </div>
 
         <div className="flex space-x-4 overflow-x-auto pb-2">
@@ -178,7 +200,7 @@ const CompaniesLoading = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {[1, 2, 3].map((item) => (
+          {[1, 2, 3, 4, 5, 6].map((item) => (
             <div key={item} className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-start gap-4 mb-4">
                 <Skeleton className="w-16 h-16 rounded-lg" />
@@ -198,13 +220,9 @@ const CompaniesLoading = () => {
             </div>
           ))}
         </div>
-
-        <div className="mt-8 flex justify-center">
-          <Skeleton className="h-10 w-40 rounded-md" />
-        </div>
       </div>
     </section>
   )
 }
 
-export default Companies
+export default CompanyListing
