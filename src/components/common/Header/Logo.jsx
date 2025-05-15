@@ -33,7 +33,7 @@ export function Logo() {
   }
 
   return (
-    <Link href="/" className="inline-block text-brand text-5xl sm:text-6xl md:text-7xl font-bold rounded-lg sm:mb-2 ">
+    <Link href="/" className="inline-block text-brand text-4xl sm:text-5xl md:text-6xl font-bold rounded-lg sm:mb-2 ">
       <motion.svg
         viewBox="0 0 150 100" // Keep this fixed
         fill="none"
