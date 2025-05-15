@@ -26,7 +26,7 @@ export function Header() {
     <header
      className={
       cn(
-      "bg-white md:bg-none md:backdrop-blur-sm z-40  top-0 ",
+      "bg-white md:bg-transparent md:backdrop-blur-sm z-40  top-0 ",
       scrolled && "",
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
