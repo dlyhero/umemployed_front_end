@@ -66,7 +66,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
-    error: "404",
+    error: "auth/error",
     OfflinePage: "/offline",
   },
   callbacks: {
