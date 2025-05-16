@@ -11,7 +11,9 @@ const CandidateActions = ({
   handleShortlist = () => {},
   handleEndorse = () => {},
   handleSchedule = () => {},
+  handleGiveEndorsement = () => {}, // New prop
   loading = false,
+  isAuthenticated = false, // New prop for auth check
 }) => {
   const userId = candidate.user_id || '';
 
@@ -37,7 +39,7 @@ const CandidateActions = ({
             <Button
               className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
               onClick={() => handleEndorse(userId)}
-              disabled={loading}
+              disabled={loading || !isAuthenticated}
             >
               {loading ? (
                 <svg
@@ -63,14 +65,22 @@ const CandidateActions = ({
               ) : (
                 <Star className="w-5 h-5 mr-1" />
               )}
-              Endorse
+              See Endorsements
             </Button>
             <Button
               className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
               onClick={() => handleSchedule(userId)}
+              disabled={!isAuthenticated}
             >
               <Calendar className="w-5 h-5 mr-1" />
               Schedule Interview
+            </Button>
+            <Button
+              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={!isAuthenticated}
+            >
+              Give Endorsement
             </Button>
           </>
         ) : (
@@ -94,6 +104,7 @@ const CandidateActions = ({
               <Button
                 className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
                 onClick={() => handleShortlist(userId)}
+                disabled={!isAuthenticated}
               >
                 Shortlist
               </Button>
@@ -103,6 +114,13 @@ const CandidateActions = ({
               onClick={() => handleViewDetails(candidate)}
             >
               View Details
+            </Button>
+            <Button
+              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={!isAuthenticated}
+            >
+              Give Endorsement
             </Button>
           </>
         )}
@@ -127,7 +145,7 @@ const CandidateActions = ({
             <Button
               className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
               onClick={() => handleEndorse(userId)}
-              disabled={loading}
+              disabled={loading || !isAuthenticated}
             >
               {loading ? (
                 <svg
@@ -153,14 +171,22 @@ const CandidateActions = ({
               ) : (
                 <Star className="w-5 h-5 mr-1" />
               )}
-              Endorse
+              See Endorsements
             </Button>
             <Button
               className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
               onClick={() => handleSchedule(userId)}
+              disabled={!isAuthenticated}
             >
               <Calendar className="w-5 h-5 mr-1" />
               Schedule Interview
+            </Button>
+            <Button
+              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={!isAuthenticated}
+            >
+              Give Endorsement
             </Button>
           </>
         ) : (
@@ -184,6 +210,7 @@ const CandidateActions = ({
               <Button
                 className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
                 onClick={() => handleShortlist(userId)}
+                disabled={!isAuthenticated}
               >
                 Shortlist
               </Button>
@@ -193,6 +220,13 @@ const CandidateActions = ({
               onClick={() => handleViewDetails(candidate)}
             >
               View Details
+            </Button>
+            <Button
+              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={!isAuthenticated}
+            >
+              Give Endorsement
             </Button>
           </>
         )}
