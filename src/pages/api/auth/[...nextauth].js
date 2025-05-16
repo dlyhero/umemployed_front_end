@@ -5,6 +5,7 @@ import axios from "axios";
 import baseUrl from "@/src/app/api/baseUrl";
 
 export const authOptions = {
+
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -65,7 +66,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
-    error: "/auth/error",
+    error: "404",
     OfflinePage: "/offline",
   },
   callbacks: {
