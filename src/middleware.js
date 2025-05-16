@@ -51,14 +51,11 @@ export async function middleware(request) {
     '/',
     '/jobs',
     '/companies/listing',
-    `/companies/joblisitng/${token.company_id}`,
     '/blog',
     '/about',
     '/contact',
     '/help',
     '/pricing',
-    '404',
-    "not-found" // explicitly allow the error page
   ];
 
   if (publicRoutes.includes(path)) {
@@ -107,9 +104,6 @@ if (token.role === 'job_seeker') {
   const allowedPaths = [
     '/applicant',
     '/jobs',
-    `/companies/listing/${token.company_id}`,
-    `/companies/${token.company_id}/details`,
-    `/companies/joblisitng/${token.company_id}`,
     '/companies/listing', // in case you show all companies
     '/upload-resume',
     '/profile',
