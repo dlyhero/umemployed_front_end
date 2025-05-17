@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'sonner';
 import QuickActions from './QuickActions';
 import { RecruiterTips } from './RecruiterTips';
 import PostJob from './PostJob';
@@ -16,18 +15,17 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
-const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com/api';
+const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api';
 
 const Dashboard = ({ companyId, companyData }) => {
-  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/dashboard`);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [jobData, setJobData] = useState([]);
   const [applicationData, setApplicationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { data: session } = useSession();
+  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/dashboard`);
 
-  // Mock tips (unchanged)
   const mockTips = [
     { title: 'Tip 1', content: 'Optimize your job postings.' },
     { title: 'Tip 2', content: 'Respond to candidates quickly.' },
@@ -36,7 +34,6 @@ const Dashboard = ({ companyId, companyData }) => {
     { title: 'Tip 5', content: 'Engage with top talent early.' },
   ];
 
-  // Fetch job and application data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,22 +44,22 @@ const Dashboard = ({ companyId, companyData }) => {
           Authorization: `Bearer ${session.accessToken}`,
         };
 
-        // Fetch jobs
-        const jobsResponse = await fetch(`${BASE_URL}/company/company/${companyId}/jobs/`, {
-          headers,
-        });
+        // Fetch limited jobs for RecentJobListings
+        const jobsResponse = await fetch(
+          `${BASE_URL}/company/company/${companyId}/jobs/?limit=5`,
+          { headers }
+        );
         if (!jobsResponse.ok) throw new Error('Failed to fetch jobs');
         const jobs = await jobsResponse.json();
+        setJobData(jobs);
 
-        // Fetch applications
+        // Fetch limited applications for CandidateApplications
         const applicationsResponse = await fetch(
-          `${BASE_URL}/company/company/${companyId}/applications/`,
+          `${BASE_URL}/company/company/${companyId}/applications/?limit=5`,
           { headers }
         );
         if (!applicationsResponse.ok) throw new Error('Failed to fetch applications');
         const applications = await applicationsResponse.json();
-
-        setJobData(jobs);
         setApplicationData(applications);
       } catch (err) {
         setError(err.message);
@@ -77,13 +74,11 @@ const Dashboard = ({ companyId, companyData }) => {
     }
   }, [companyId, session]);
 
-  // Calculate metrics for AnalyticsOverview
   const metrics = {
     activeJobs: jobData.length,
     totalApplications: jobData.reduce((sum, job) => sum + (job.application_count || 0), 0),
   };
 
-  // Calculate application count for CandidateApplications
   const applicationCount = applicationData.length;
 
   if (loading) {
@@ -96,7 +91,6 @@ const Dashboard = ({ companyId, companyData }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 flex gap-6">
-      <ToastContainer position="top-right" autoClose={3000} />
       <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
       <div className="flex-1">
         <header className="flex justify-between items-center md:hidden mb-6">

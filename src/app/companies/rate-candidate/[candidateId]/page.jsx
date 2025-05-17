@@ -7,14 +7,14 @@ import EndorsementForm from "../../components/rate-candidate/EndorsementForm";
 import SidebarLinks from "../../components/rate-candidate/SidebarLinks";
 import SidebarWhyEndorse from "../../components/rate-candidate/SidebarWhyEndorse";
 import { Button } from "@/components/ui/button";
-import { useParams } from 'next/navigation';
+import { useParams } from "next/navigation";
 
 export default function RateCandidatePage() {
   const { candidateId } = useParams();
   const [rating, setRating] = useState(null);
   const [showEndorsement, setShowEndorsement] = useState(false);
 
-  console.log('Candidate ID in RateCandidatePage:', candidateId);
+  console.log("Candidate ID in RateCandidatePage:", candidateId);
 
   const handleRating = (value) => {
     setRating(value);

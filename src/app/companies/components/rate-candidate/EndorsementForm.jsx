@@ -13,44 +13,53 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useSession } from 'next-auth/react';
-import { toast } from 'sonner';
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import StarRating from "./StarRating";
 
 export default function EndorsementForm({ candidateId, stars }) {
   const { data: session, status } = useSession();
   const [formData, setFormData] = useState({
-    candidateName: '',
-    professionalism: '',
-    skills: '',
-    communication: '',
-    teamwork: '',
-    reliability: '',
-    review: '',
+    candidateName: "",
+    professionalism: "",
+    skills: "",
+    communication: "",
+    teamwork: "",
+    reliability: "",
+    review: "",
+    stars: stars || 0,
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    console.log('Candidate ID:', candidateId);
-    console.log('Session:', session);
-    console.log('Session Status:', status);
+  // Map descriptive ratings to numeric values
+  const ratingMap = {
+    Excellent: "5",
+    Good: "4",
+    Average: "3",
+    "Below Average": "2",
+  };
 
+  useEffect(() => {
     const fetchCandidateName = async () => {
       if (!candidateId || !session?.accessToken) {
-        console.log('Missing candidateId or accessToken:', { candidateId, accessToken: session?.accessToken });
-        setError('Missing candidate ID or authentication');
+        console.log("Missing candidateId or accessToken:", {
+          candidateId,
+          accessToken: session?.accessToken,
+        });
+        setError("Missing candidate ID or authentication");
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+        const baseUrl = "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net";
         const response = await fetch(`${baseUrl}/api/resume/user-profile/${candidateId}/`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.accessToken}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
           },
         });
 
@@ -61,10 +70,10 @@ export default function EndorsementForm({ candidateId, stars }) {
         const profile = await response.json();
         setFormData((prev) => ({
           ...prev,
-          candidateName: profile.contact_info?.name || 'Unknown',
+          candidateName: profile.contact_info?.name || "Unknown",
         }));
       } catch (err) {
-        console.error('Error fetching candidate name:', err);
+        console.error("Error fetching candidate name:", err);
         setError(`Failed to load candidate profile: ${err.message}`);
         toast.error(`Failed to load candidate profile: ${err.message}`);
       } finally {
@@ -72,14 +81,14 @@ export default function EndorsementForm({ candidateId, stars }) {
       }
     };
 
-    if (candidateId && session && status === 'authenticated') {
+    if (candidateId && session && status === "authenticated") {
       fetchCandidateName();
     } else {
       setLoading(false);
       if (!candidateId) {
-        setError('No candidate ID provided');
-      } else if (status !== 'authenticated') {
-        setError('User not authenticated');
+        setError("No candidate ID provided");
+      } else if (status !== "authenticated") {
+        setError("User not authenticated");
       }
     }
   }, [candidateId, session, status]);
@@ -87,90 +96,113 @@ export default function EndorsementForm({ candidateId, stars }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!candidateId || !session?.accessToken) {
-      toast.error('Missing candidate ID or authentication');
-      setError('Missing candidate ID or authentication');
+      toast.error("Missing candidate ID or authentication");
+      setError("Missing candidate ID or authentication");
       return;
     }
 
     const payload = {
-      professionalism: formData.professionalism || 'Average',
-      skills: formData.skills || 'Average',
-      communication: formData.communication || 'Average',
-      teamwork: formData.teamwork || 'Average',
-      reliability: formData.reliability || 'Average',
-      stars: stars || 0,
-      review: formData.review || '',
+      professionalism: ratingMap[formData.professionalism] || "3",
+      skills: ratingMap[formData.skills] || "3",
+      communication: ratingMap[formData.communication] || "3",
+      teamwork: ratingMap[formData.teamwork] || "3",
+      reliability: ratingMap[formData.reliability] || "3",
+      stars: formData.stars || 0,
+      review: formData.review || "",
     };
 
-    console.log('Submitting payload:', payload);
-
     // Validate payload
-    const validRatings = ['Excellent', 'Good', 'Average', 'Below Average'];
-    const invalidFields = Object.entries(payload).filter(
-      ([key, value]) =>
-        ['professionalism', 'skills', 'communication', 'teamwork', 'reliability'].includes(key) &&
-        !validRatings.includes(value)
+    const numericFields = [
+      "professionalism",
+      "skills",
+      "communication",
+      "teamwork",
+      "reliability",
+    ];
+    const invalidFields = numericFields.filter(
+      (key) => !["5", "4", "3", "2"].includes(payload[key])
     );
 
     if (invalidFields.length > 0) {
-      const errorMsg = `Invalid ratings: ${invalidFields.map(([key]) => key).join(', ')}`;
+      const errorMsg = `Invalid ratings: ${invalidFields.join(", ")}`;
       toast.error(errorMsg);
       setError(errorMsg);
       return;
     }
 
     if (payload.stars < 0 || payload.stars > 5) {
-      toast.error('Star rating must be between 0 and 5');
-      setError('Star rating must be between 0 and 5');
+      toast.error("Star rating must be between 0 and 5");
+      setError("Star rating must be between 0 and 5");
       return;
     }
 
     setSubmitting(true);
     try {
-      const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+      const baseUrl = "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net";
       const endpoint = `${baseUrl}/api/company/rate-candidate/${candidateId}/`;
-      console.log('Submitting to endpoint:', endpoint);
+      console.log("Submitting to endpoint:", endpoint);
+      console.log("Payload:", payload);
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      });
+      console.log("Access Token:", session.accessToken);
+
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.accessToken}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
         },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { message: `Server error: ${response.statusText || 'Unknown error'}` };
-        }
-        console.log('Error response:', errorData);
-        throw new Error(`Failed to submit endorsement: ${response.status} - ${errorData.message || 'Unknown error'}`);
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        throw new Error(
+          `Server returned non-JSON response: ${response.status} ${response.statusText}`
+        );
       }
 
-      toast.success('Endorsement submitted successfully');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(
+          `Failed to submit endorsement: ${response.status} - ${errorData.message || "Unknown error"}`
+        );
+      }
+
+      const responseData = await response.json();
+      console.log("Success response:", responseData);
+      toast.success("Endorsement submitted successfully");
       setFormData({
-        ...formData,
-        professionalism: '',
-        skills: '',
-        communication: '',
-        teamwork: '',
-        reliability: '',
-        review: '',
+        candidateName: formData.candidateName,
+        professionalism: "",
+        skills: "",
+        communication: "",
+        teamwork: "",
+        reliability: "",
+        review: "",
+        stars: 0,
       });
       setError(null);
     } catch (err) {
-      console.error('Error submitting endorsement:', err);
-      toast.error(err.message || 'Failed to submit endorsement');
-      setError(err.message || 'Failed to submit endorsement');
+      console.error("Error submitting endorsement:", err);
+      toast.error(err.message || "Failed to submit endorsement");
+      setError(err.message || "Failed to submit endorsement");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const ratingOptions = ['Excellent', 'Good', 'Average', 'Below Average'];
+  const handleRatingChange = (newRating) => {
+    setFormData({ ...formData, stars: newRating });
+  };
+
+  const ratingOptions = ["Excellent", "Good", "Average", "Below Average"];
 
   return (
     <motion.div
@@ -180,7 +212,7 @@ export default function EndorsementForm({ candidateId, stars }) {
       className="flex-1 bg-white rounded-lg p-6 border border-gray-200"
     >
       <h1 className="text-3xl font-semibold text-blue-600 text-center mb-6">
-        Endorse {formData.candidateName || 'Candidate'}
+        Endorse {formData.candidateName || "Candidate"}
       </h1>
       {loading ? (
         <div className="text-center">Loading candidate data...</div>
@@ -197,6 +229,13 @@ export default function EndorsementForm({ candidateId, stars }) {
               value={formData.candidateName}
               readOnly
               className="mt-2 bg-gray-100 text-gray-600"
+            />
+          </div>
+          <div>
+            <Label className="text-gray-700 font-medium">Star Rating</Label>
+            <StarRating
+              rating={formData.stars}
+              onRatingChange={handleRatingChange}
             />
           </div>
           <div>
@@ -326,12 +365,12 @@ export default function EndorsementForm({ candidateId, stars }) {
               className="mt-2 h-36"
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full bg-brand hover:bg-brand/90 text-white"
             disabled={submitting}
           >
-            {submitting ? 'Submitting...' : 'Submit Endorsement'}
+            {submitting ? "Submitting..." : "Submit Endorsement"}
           </Button>
         </form>
       )}

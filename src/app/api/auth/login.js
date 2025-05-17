@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: "umemployed-app-afec951f7ec7.herokuapp.com/api/users",
+    baseURL: "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/users",
     headers: {
         "Content-Type": "application/json"
     }

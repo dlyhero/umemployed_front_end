@@ -75,7 +75,7 @@ export const useJobForm = (currentStep) => {
           console.warn('No token available for fetchJobOptions');
         }
 
-        const response = await fetch('https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/job-options/', {
+        const response = await fetch('https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/job-options/', {
           headers,
         });
         if (!response.ok) {
@@ -126,7 +126,7 @@ export const useJobForm = (currentStep) => {
       if (!token) {
         throw new Error('No authentication token available');
       }
-      const response = await fetch(`https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/jobs/${jobId}/extracted-skills/`, {
+      const response = await fetch(`https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${jobId}/extracted-skills/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export const useJobForm = (currentStep) => {
   };
 
   const onSubmit = async (data) => {
-    const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com/api';
+    const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api';
     console.log('onSubmit called with data:', data, 'session status:', status, 'token:', session?.accessToken || session?.token);
 
     if (status === 'loading') {

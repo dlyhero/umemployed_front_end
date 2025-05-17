@@ -1,4 +1,4 @@
-const baseUrl = "https://umemployed-app-afec951f7ec7.herokuapp.com/api";
+const baseUrl = "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api";
 
 export default baseUrl;
 

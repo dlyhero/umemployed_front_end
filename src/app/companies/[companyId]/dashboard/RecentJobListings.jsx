@@ -29,7 +29,7 @@ const RecentJobListings = ({ companyData }) => {
         }
 
         const response = await fetch(
-          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/jobs`,
+          `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company/${companyId}/jobs`,
           {
             method: 'GET',
             headers: {

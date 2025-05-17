@@ -1,5 +1,5 @@
 // src/app/api/companies/fetchCompany.js
-const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
 
 export async function fetchCompany(companyId, token) {
   if (!token) {

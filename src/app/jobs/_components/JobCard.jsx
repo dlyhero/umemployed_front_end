@@ -141,7 +141,7 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
         </div>
         <Button 
           size="xl" 
-          className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[45%]"
+          className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[55%]"
           onClick={handleViewJob}
           disabled={!isRecruiter && job.is_applied}
         >
