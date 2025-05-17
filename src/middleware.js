@@ -24,7 +24,7 @@ export async function middleware(request) {
   }
 
   // 3. Handle auth routes (login, signup, etc.)
-  const authRoutes = ['/login', '/signup', '/forgot-password', '/verify-email', '/reset-password'];
+  const authRoutes = ['/login', '/signup', '/forgot-password', '/verify_email', '/reset-password'];
   if (authRoutes.includes(path)) {
     if (token) {
       url.pathname = token.role === 'none' ? '/select-role' : getDashboardPath(token);
@@ -34,7 +34,7 @@ export async function middleware(request) {
   }
 
   // 4. Handle logout
-  if (path === '/logout') {
+  if (path === '/') {
     const response = NextResponse.redirect(new URL('/', url));
     response.cookies.delete('next-auth.session-token');
     return response;
@@ -42,7 +42,7 @@ export async function middleware(request) {
 
   // 5. Redirect unauthenticated users to login
   if (!token) {
-    url.pathname = '/login';
+    url.pathname = '/';
     url.searchParams.set('callbackUrl', path);
     return NextResponse.redirect(url);
   }
