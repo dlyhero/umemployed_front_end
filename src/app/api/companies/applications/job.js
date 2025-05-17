@@ -1,7 +1,7 @@
 export async function GET(request, { params }) {
     const companyId = params.companyId;
     const jobId = params.jobId;
-    const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+    const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
     const applicationsUrl = `${baseUrl}/api/company/company/${companyId}/job/${jobId}/applications/`;
   
     try {

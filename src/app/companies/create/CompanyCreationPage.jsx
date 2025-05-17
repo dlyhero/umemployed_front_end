@@ -31,12 +31,10 @@ const CompanyCreationPage = () => {
     mission_statement: '',
     linkedin: '',
     video_introduction: '',
-    job_openings: '',
   });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
-  const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+  const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
   const totalSteps = 3;
 
   const logError = (context, error, additionalData = {}) => {
@@ -59,16 +57,31 @@ const CompanyCreationPage = () => {
   };
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      if (session?.user?.has_company) {
-        router.push(`/companies/${session.user.companyId}/dashboard`);
+    try {
+      logDebug('Session Check', { status, user: session?.user });
+      if (status === 'authenticated') {
+        if (!session?.user) {
+          throw new Error('Session user data missing');
+        }
+        if (session.user.role !== 'recruiter') {
+          logError('Session Check', new Error('Invalid role'), { role: session.user.role });
+          router.push('/select-role');
+        } else if (session.user.has_company) {
+          logDebug('Session Check', { has_company: true, companyId: session.user.companyId });
+          router.push(`/companies/${session.user.companyId}/dashboard`);
+        }
+      } else if (status === 'unauthenticated') {
+        logDebug('Session Check', { redirect: 'login' });
+        router.push('/login?callbackUrl=/companies/create');
       }
-    } else if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/companies/create');
+    } catch (error) {
+      logError('Session Check', error, { status });
+      toast.error('Error validating session. Please try again.');
     }
   }, [status, session, router]);
 
   if (status === 'loading') {
+    logDebug('Render', { state: 'Loading' });
     return <Loader />;
   }
   if (session?.user?.has_company) {
@@ -77,8 +90,18 @@ const CompanyCreationPage = () => {
   }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    try {
+      const { name, value } = e.target;
+      logDebug('Input Change', { name, value });
+      if (name === 'founded') {
+        setFormData((prev) => ({ ...prev, [name]: value === '' ? '' : parseInt(value) || '' }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    } catch (error) {
+      logError('Input Change', error, { input: e.target });
+      toast.error('Error updating form data.');
+    }
   };
 
   const handleContinue = () => {
@@ -107,7 +130,6 @@ const CompanyCreationPage = () => {
       logDebug('Form Submit', { formData, step });
       if (step !== totalSteps) {
         logError('Form Submit', new Error('Submission attempted on wrong step'), { step });
-        toast.error('Please complete all steps before submitting.');
         return;
       }
       const result = companySchema.safeParse(formData);
@@ -147,13 +169,20 @@ const CompanyCreationPage = () => {
         }
       );
 
+      logDebug('API Response', { status: response.status, data: response.data });
+
       session.user.has_company = true;
       session.user.companyId = response.data.id;
 
       toast.success('Company created successfully!');
       router.push(`/companies/${response.data.id}/dashboard`);
     } catch (err) {
-      logError('Form Submit', err, { formData, step });
+      const errorDetails = logError('Form Submit', err, {
+        status: err.response?.status,
+        data: err.response?.data,
+        requestPayload: payload,
+      });
+
       let errorMessage = 'Failed to create company. Please try again.';
       if (err.response?.data) {
         if (err.response.data.detail) {
@@ -169,6 +198,7 @@ const CompanyCreationPage = () => {
       } else {
         errorMessage = err.message;
       }
+
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -176,9 +206,11 @@ const CompanyCreationPage = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && step < totalSteps) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      handleContinue();
+      if (step < totalSteps) {
+        handleContinue();
+      }
     }
   };
 
@@ -209,7 +241,7 @@ const CompanyCreationPage = () => {
           className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
         />
         <h2 className="text-xl font-bold text-gray-800">Create Your Company Profile</h2>
-        <p className="text-gray-600 text-sm">Step {step} of {totalSteps}</p>
+        <p className="text-gray-600 text-sm">Step {step} of {2}</p>
       </div>
       {loading ? (
         <div className="flex justify-center items-center h-48">

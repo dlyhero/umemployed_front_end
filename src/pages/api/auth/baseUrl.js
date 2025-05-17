@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default axios.create({
-    baseURL: "https://umemployed-app-afec951f7ec7.herokuapp.com/swagger/",
+    baseURL: "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/swagger/",
     method: 'POST',
     headers:{
         "Content-Type": "application/json"
@@ -9,6 +9,6 @@ export default axios.create({
 })
 
   const response = await baseUrl({
-            url: "https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/login/",
+            url: "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/users/login/",
             data: { email, password }
           });

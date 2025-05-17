@@ -46,7 +46,7 @@ export default function EndorsementForm({ candidateId, stars }) {
 
       try {
         setLoading(true);
-        const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+        const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
         const response = await fetch(`${baseUrl}/api/resume/user-profile/${candidateId}/`, {
           headers: {
             'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export default function EndorsementForm({ candidateId, stars }) {
 
     setSubmitting(true);
     try {
-      const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+      const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
       const endpoint = `${baseUrl}/api/company/rate-candidate/${candidateId}/`;
       console.log('Submitting to endpoint:', endpoint);
       const response = await fetch(endpoint, {

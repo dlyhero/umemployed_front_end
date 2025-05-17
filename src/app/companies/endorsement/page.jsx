@@ -45,7 +45,7 @@ const EndorsementsPage = () => {
         // Fetch candidate profile for name
         console.log('Fetching candidate profile for candidateId:', candidateId);
         const profileResponse = await fetch(
-          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/resume/user-profile/${candidateId}/`,
+          `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/resume/user-profile/${candidateId}/`,
           {
             headers: {
               'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -17,7 +17,10 @@ const ApplicantComponent = ({ type = 'job' }) => {
   const { companyId, jobId } = useParams();
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('candidates');
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState(
+    pathname === `/companies/${companyId}/applications` ? 'candidates' : 'candidates'
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -25,11 +28,17 @@ const ApplicantComponent = ({ type = 'job' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    console.log('Active tab:', activeTab, 'Pathname:', pathname);
+  }, [activeTab, pathname]);
+
   const handleTabChange = (tab) => {
     if (tab === 'shortlist') {
       router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
     } else if (tab === 'archived') {
       router.push(`/companies/${companyId}/jobs/${jobId}/archived`);
+    } else if (tab === `/companies/${companyId}/applications`) {
+      setActiveTab('candidates'); // Map Applications path to candidates tab
     } else {
       setActiveTab(tab);
     }
@@ -54,16 +63,6 @@ const ApplicantComponent = ({ type = 'job' }) => {
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCandidate(null);
-  };
-
-  const closeInterviewModal = () => {
-    setIsInterviewModalOpen(false);
-    setSelectedCandidate(null);
-  };
-
   const handleShortlist = async (candidateId) => {
     if (!session?.accessToken) {
       toast.error('Unauthorized: No access token available');
@@ -72,7 +71,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
 
     try {
       const response = await fetch(
-        `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/job/${jobId}/shortlist/`,
+        `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company/${companyId}/job/${jobId}/shortlist/`,
         {
           method: 'POST',
           headers: {
@@ -106,6 +105,14 @@ const ApplicantComponent = ({ type = 'job' }) => {
     }
   };
 
+  const handleEndorse = (candidateId) => {
+    if (!session?.accessToken) {
+      toast.error('Unauthorized: No access token available');
+      return;
+    }
+    router.push(`/companies/candidate/${candidateId}/endorsements`);
+  };
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -133,13 +140,13 @@ const ApplicantComponent = ({ type = 'job' }) => {
         <ApplicationHeader
           companyId={companyId}
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabChange} // Use handleTabChange for consistency
         />
         <div className="flex gap-6">
           <div className="hidden md:block w-64 flex-shrink-0">
             <Sideba
-              activeTab={`/companies/${companyId}/applications`}
-              setActiveTab={setActiveTab}
+              activeTab={activeTab} // Use activeTab state
+              setActiveTab={handleTabChange} // Use handleTabChange for consistency
               companyId={companyId}
             />
           </div>
@@ -162,6 +169,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
               handleViewDetails={handleViewDetails}
               handleShortlist={handleShortlist}
               handleSchedule={handleSchedule}
+              handleEndorse={handleEndorse}
               companyId={companyId}
               jobId={jobId}
               type={type}
@@ -171,13 +179,19 @@ const ApplicantComponent = ({ type = 'job' }) => {
       </div>
       <CandidateModal
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCandidate(null);
+        }}
         candidate={selectedCandidate}
         type={type}
       />
       <InterviewModal
         isOpen={isInterviewModalOpen}
-        onClose={closeInterviewModal}
+        onClose={() => {
+          setIsInterviewModalOpen(false);
+          setSelectedCandidate(null);
+        }}
         candidate={selectedCandidate}
         companyId={companyId}
         jobId={jobId}

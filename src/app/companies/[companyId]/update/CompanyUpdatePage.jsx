@@ -1,6 +1,5 @@
 'use client';
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import CompanyInformation from './CompanyInformation';
@@ -8,10 +7,13 @@ import ContactInformation from './ContactInformation';
 import CompanyDescription from './CompanyDescription';
 import SocialLinksAndVideo from './SocialLinksAndVideo';
 import Loader from '@/src/components/common/Loader/Loader';
-import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Sideba } from '../dashboard/recruiter/Sideba';
+import { MobileMenu } from '../dashboard/MobileMenu';
+import { Menu } from 'lucide-react';
+
+const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
 
 const CompanyUpdatePage = () => {
   const { companyId } = useParams();
@@ -34,8 +36,8 @@ const CompanyUpdatePage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(`/companies/${companyId}/update`);
-  const BASE_URL = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -51,7 +53,7 @@ const CompanyUpdatePage = () => {
           return;
         }
         try {
-          const response = await axios.get(
+          const response = await fetch(
             `${BASE_URL}/api/company/company-details/${companyId}/`,
             {
               headers: {
@@ -59,26 +61,30 @@ const CompanyUpdatePage = () => {
               },
             }
           );
+          if (!response.ok) {
+            throw new Error(response.status === 404 ? 'Company not found.' : 'Failed to load company data.');
+          }
+          const data = await response.json();
           setFormData({
-            name: response.data.name || '',
-            industry: response.data.industry || '',
-            size: response.data.size || '',
-            location: response.data.location || '',
-            founded: response.data.founded || '',
-            website_url: response.data.website_url || '',
-            country: response.data.country || '',
-            contact_email: response.data.contact_email || '',
-            contact_phone: response.data.contact_phone || '',
-            description: response.data.description || '',
-            mission_statement: response.data.mission_statement || '',
-            linkedin: response.data.linkedin || '',
-            video_introduction: response.data.video_introduction || '',
+            name: data.name || '',
+            industry: data.industry || '',
+            size: data.size || '',
+            location: data.location || '',
+            founded: data.founded || '',
+            website_url: data.website_url || '',
+            country: data.country || '',
+            contact_email: data.contact_email || '',
+            contact_phone: data.contact_phone || '',
+            description: data.description || '',
+            mission_statement: data.mission_statement || '',
+            linkedin: data.linkedin || '',
+            video_introduction: data.video_introduction || '',
           });
         } catch (err) {
-          let errorMessage = 'Failed to load company data. Please try again.';
-          if (err.response?.status === 404) {
+          let errorMessage = err.message || 'Failed to load company data. Please try again.';
+          if (err.message.includes('404')) {
             errorMessage = 'Company not found. Please check the company ID.';
-          } else if (err.response?.status === 401) {
+          } else if (err.message.includes('401')) {
             errorMessage = 'Unauthorized. Please sign in again.';
             router.push(`/login?callbackUrl=/companies/${companyId}/update`);
           }
@@ -92,10 +98,6 @@ const CompanyUpdatePage = () => {
       router.push(`/login?callbackUrl=/companies/${companyId}/update`);
     }
   }, [status, session, companyId, router]);
-
-  if (status === 'loading' || loading) {
-    return <Loader />;
-  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -125,59 +127,67 @@ const CompanyUpdatePage = () => {
     }
 
     try {
-      const response = await axios.put(
+      const response = await fetch(
         `${BASE_URL}/api/company/update-company/${companyId}/`,
-        payload,
         {
+          method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify(payload),
         }
       );
-
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || errorData.non_field_errors?.join(', ') || 'Failed to update company.');
+      }
       toast.success('Company updated successfully!');
       router.push(`/companies/${companyId}/dashboard`);
     } catch (err) {
-      let errorMessage = 'Failed to update company. Please try again.';
-      if (err.response?.data) {
-        if (err.response.data.detail) {
-          errorMessage = err.response.data.detail;
-        } else if (err.response.data.non_field_errors) {
-          errorMessage = err.response.data.non_field_errors.join(', ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        } else {
-          const errors = Object.values(err.response.data).flat();
-          errorMessage = errors.join(', ');
-        }
-      }
-      toast.error(errorMessage);
+      toast.error(err.message || 'Failed to update company. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (status === 'loading' || loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="container mx-auto max-w-6xl px-4 flex flex-col lg:flex-row gap-6 mt-16 mb-16">
       <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
-      <main className="flex-1 bg-white rounded-lg shadow-md p-4">
-        <div className="mb-4">
-          <img
-            src="/images/company.jpg"
-            alt="Company"
-            className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
-          />
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800">Update Your Company Profile</h2>
-            <p className="text-gray-600 text-sm">Modify your company details below.</p>
+      <div className="flex-1">
+        <header className="flex justify-between items-center md:hidden mb-6">
+          <h1 className="text-xl font-semibold text-gray-900">Update Company</h1>
+          <Button
+            variant="ghost"
+            className="p-2 text-gray-900"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+        </header>
+        <MobileMenu
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          companyId={companyId}
+        />
+        <main className="bg-white rounded-lg shadow-md p-4">
+          <div className="mb-4">
+            <img
+              src="/images/company.jpg"
+              alt="Company"
+              className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
+            />
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-gray-800">Update Your Company Profile</h2>
+              <p className="text-gray-600 text-sm">Modify your company details below.</p>
+            </div>
           </div>
-        </div>
-        {loading ? (
-          <div className="flex justify-center items-center h-48">
-            <Loader />
-          </div>
-        ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <CompanyInformation formData={formData} handleChange={handleInputChange} />
             <ContactInformation formData={formData} handleChange={handleInputChange} />
@@ -205,8 +215,8 @@ const CompanyUpdatePage = () => {
               </Button>
             </div>
           </form>
-        )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

@@ -80,7 +80,7 @@ const CompanyCreationPage = () => {
 
     try {
       const response = await axios.post(
-        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/create-company/',
+        'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/create-company/',
         data,
         {
           headers: {

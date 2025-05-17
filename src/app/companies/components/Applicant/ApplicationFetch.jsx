@@ -12,7 +12,7 @@ const ApplicationFetch = ({
   setLoading,
   setError,
 }) => {
-  const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+  const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
 
   useEffect(() => {
     const fetchApplications = async () => {

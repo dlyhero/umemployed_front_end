@@ -3,7 +3,7 @@ import axios from "axios";
 const sendEmailVerification = async (email) => {
     try {
         const response = await axios.post(
-            'https://umemployed-app-afec951f7ec7.herokuapp.com/api/users/resend-confirmation-email/',
+            'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/users/resend-confirmation-email/',
             { email }, // Make sure this matches your backend expectation
             {
                 headers: {
