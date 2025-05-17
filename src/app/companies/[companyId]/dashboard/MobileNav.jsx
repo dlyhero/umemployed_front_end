@@ -22,18 +22,18 @@ export const MobileNav = ({ companyId, closeMenu, activeTab, setActiveTab }) => 
         return (
           <button
             key={index}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors duration-200 ${
               isActive
-                ? 'bg-[#1e40af]/10 text-[#1e40af]'
-                : 'text-gray-900 hover:bg-[#1e40af]/10 hover:text-[#1e40af]'
+                ? 'bg-[#1e90ff]/10 text-[#1e90ff]'
+                : 'text-gray-600 hover:bg-[#1e90ff]/10 hover:text-[#1e90ff]'
             }`}
             onClick={() => {
-              router.push(item.path);
               setActiveTab(item.path);
+              router.push(item.path);
               closeMenu();
             }}
           >
-            <span className={isActive ? 'text-[#1e40af]' : 'text-gray-600'}>{item.icon}</span>
+            <span className={isActive ? 'text-[#1e90ff]' : 'text-gray-600'}>{item.icon}</span>
             <span className="font-medium">{item.label}</span>
           </button>
         );
