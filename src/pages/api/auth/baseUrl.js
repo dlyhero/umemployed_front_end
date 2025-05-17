@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default axios.create({
-    baseURL: "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/swagger/",
+    baseURL: "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net",
     method: 'POST',
     headers:{
         "Content-Type": "application/json"
