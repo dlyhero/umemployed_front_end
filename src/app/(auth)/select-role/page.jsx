@@ -14,11 +14,11 @@ export default function SelectRolePage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const user = useSession();
+
   console.log(user);
     
 
   const handleAccountTypeSelect = async (accountType) => {
-    if (status !== "authenticated" || loading) return;
 
     setLoading(true);
     setError(null);
@@ -26,17 +26,21 @@ export default function SelectRolePage() {
 
     try {
       const token = session?.accessToken || session?.user?.accessToken;
-      if (!token) throw new Error("Authentication required");
 
       await selectAccountType(accountType, token);
       
       setSuccess("Account type selected successfully!");
+
+      console.log("accont", accountType);
       
       // Immediate redirect without delay
       if (accountType === ACCOUNT_TYPES.RECRUITER.value) {
+         router.push("/companies/create");
+
       } else {
         router.push("/applicant/upload-resume");
       }
+
 
     } catch (err) {
       setError(err.message);

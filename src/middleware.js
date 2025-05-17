@@ -25,14 +25,13 @@ export async function middleware(request) {
   // Define public patterns
   const isCompanyDetailsPage = /^\/companies\/[^\/]+\/details$/.test(path);
   const isCompanyJobListingPage = /^\/companies\/[^\/]+\/joblisting$/.test(path);
-  const isPublicJobPage =  /^\/jobs\/[^\/]+\/details$/.test(path);
+  const isPublicJobPage = /^\/jobs\/[^\/]+\/details$/.test(path);
 
   // 2. Public routes
   const publicRoutes = [
     '/',
     '/jobs',
     '/companies/listing',
-    'jobs',
     '/blog',
     '/about',
     '/contact',
@@ -54,13 +53,18 @@ export async function middleware(request) {
     '/login',
     '/signup',
     '/forgot-password',
-    '/verify_email',
+    '/verify-email',
     '/reset-password'
   ];
 
   if (authRoutes.includes(path)) {
-    // If user is already logged in, redirect them to their dashboard
     if (token) {
+      // If user has no role, send them to select-role
+      if (!token.role || token.role === 'none') {
+        url.pathname = '/select-role';
+        return NextResponse.redirect(url);
+      }
+      // Otherwise send them to their default page
       url.pathname = getDefaultRedirect(token);
       return NextResponse.redirect(url);
     }
@@ -68,7 +72,7 @@ export async function middleware(request) {
   }
 
   // 4. Handle logout
-  if (path === '/') {
+  if (path === '/logout') {
     const response = NextResponse.redirect(new URL('/', request.url));
     response.cookies.delete('next-auth.session-token');
     return response;
@@ -81,16 +85,24 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // 6. Handle users without role
+  // 6. Check if user needs to select role
   if (!token.role || token.role === 'none') {
-    if (path !== '/select-role') {
-      url.pathname = '/select-role';
-      return NextResponse.redirect(url);
+    // Allow access to select-role page
+    if (path === '/select-role') {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+    // Redirect all other pages to select-role
+    url.pathname = '/select-role';
+    return NextResponse.redirect(url);
   }
 
-  // 7. Job Seeker routes
+  // 7. Prevent access to select-role if already has role
+  if (path === '/select-role' && token.role && token.role !== 'none') {
+    url.pathname = getDefaultRedirect(token);
+    return NextResponse.redirect(url);
+  }
+
+  // 8. Job Seeker routes
   if (token.role === 'job_seeker') {
     const allowedPaths = [
       '/applicant',
@@ -121,7 +133,7 @@ export async function middleware(request) {
     return NextResponse.next({ headers: noCacheHeaders });
   }
 
-  // 8. Recruiter routes
+  // 9. Recruiter routes
   if (token.role === 'recruiter') {
     const allowedPaths = [
       '/companies',
@@ -152,7 +164,7 @@ export async function middleware(request) {
     return NextResponse.next({ headers: noCacheHeaders });
   }
 
-  // 9. Fallback to 404 for unknown routes
+  // 10. Fallback to 404 for unknown routes
   return NextResponse.rewrite(new URL('/not-found', request.url));
 }
 

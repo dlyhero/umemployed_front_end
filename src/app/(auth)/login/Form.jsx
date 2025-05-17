@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import useUser from '@/src/hooks/useUser';
 
 export default function LoginForm() {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -15,6 +16,7 @@ export default function LoginForm() {
     const [loading, setLoading] = useState(false);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const user = useUser();
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -22,7 +24,7 @@ export default function LoginForm() {
         if (status === "authenticated") {
             // Add a small delay to ensure session is fully loaded
             const timer = setTimeout(() => {
-                const role = session?.user?.role;
+                const role = user?.user?.role;
                 console.log("Current session:", session);
         
 
