@@ -12,7 +12,7 @@ export default function FooterLinks() {
     { href: "/accounts/user/terms/", text: "Terms of Service" },
     { href: "/accounts/user/safety/", text: "Safety Center" },
     { href: "/accounts/user/blog/", text: "Blog" },
-    { href: "/accounts/user/contact/", text: "Contact Us" },
+    { href: "/contact", text: "Contact Us" },
     { href: "/accounts/user/partners/", text: "Partners" },
   ];
 

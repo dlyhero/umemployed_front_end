@@ -60,7 +60,7 @@ function JobListingContent() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1395px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Filters Button */}
         <div className="lg:hidden mb-6">
           <Button
