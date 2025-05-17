@@ -7,33 +7,9 @@ const noCacheHeaders = {
 };
 
 export async function middleware(request) {
-  console.log('req:', request.nextUrl.pathname);
   const url = request.nextUrl.clone();
   const path = url.pathname;
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-
-
-  const knownRoutePatterns = [
-    /^\/login/,
-    /^\/signup/,
-    /^\/forgot-password/,
-    /^\/verify-email/,
-    /^\/reset-password/,
-    /^\/applicant/,
-    /^\/companies/,
-    /^\/jobs/,
-    /^\/upload-resume/,
-    /^\/profile/,
-    /^\/settings/,
-    /^\/notifications/,
-    /^\/messages/,
-    /^\/select-role/,
-    /^\/blog/,
-    /^\/about/,
-    /^\/contact/,
-    /^\/help/,
-    /^\/pricing/
-  ];
 
   // 1. Handle static files and API routes
   if (
@@ -46,11 +22,17 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // Define public patterns
+  const isCompanyDetailsPage = /^\/companies\/[^\/]+\/details$/.test(path);
+  const isCompanyJobListingPage = /^\/companies\/[^\/]+\/joblisting$/.test(path);
+  const isPublicJobPage =  /^\/jobs\/[^\/]+\/details$/.test(path);
+
   // 2. Public routes
   const publicRoutes = [
     '/',
     '/jobs',
     '/companies/listing',
+    'jobs',
     '/blog',
     '/about',
     '/contact',
@@ -58,12 +40,17 @@ export async function middleware(request) {
     '/pricing',
   ];
 
-  if (publicRoutes.includes(path)) {
+  if (
+    publicRoutes.includes(path) || 
+    isCompanyDetailsPage || 
+    isCompanyJobListingPage ||
+    isPublicJobPage
+  ) {
     return NextResponse.next();
   }
 
-  // 3. Auth-only routes (for logged-out users)
-  const authOnlyRoutes = [
+  // 3. Auth routes (login, signup, etc.)
+  const authRoutes = [
     '/login',
     '/signup',
     '/forgot-password',
@@ -71,7 +58,8 @@ export async function middleware(request) {
     '/reset-password'
   ];
 
-  if (authOnlyRoutes.includes(path)) {
+  if (authRoutes.includes(path)) {
+    // If user is already logged in, redirect them to their dashboard
     if (token) {
       url.pathname = getDefaultRedirect(token);
       return NextResponse.redirect(url);
@@ -79,14 +67,21 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // 4. Handle unauthenticated users
+  // 4. Handle logout
+  if (path === '/') {
+    const response = NextResponse.redirect(new URL('/', request.url));
+    response.cookies.delete('next-auth.session-token');
+    return response;
+  }
+
+  // 5. Handle unauthenticated users
   if (!token) {
     url.pathname = '/login';
     url.searchParams.set('callbackUrl', request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 
-  // 5. Handle users without role
+  // 6. Handle users without role
   if (!token.role || token.role === 'none') {
     if (path !== '/select-role') {
       url.pathname = '/select-role';
@@ -95,38 +90,38 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // 6. Job Seeker routes
- // 6. Job Seeker routes
-if (token.role === 'job_seeker') {
-  const isCompanyDetailsPage = path.includes('/companies/') && path.endsWith('/details');
-  const isCompanyJoblisting = path.includes('/companies/joblisitng/');
+  // 7. Job Seeker routes
+  if (token.role === 'job_seeker') {
+    const allowedPaths = [
+      '/applicant',
+      '/jobs',
+      '/companies/listing',
+      '/upload-resume',
+      '/profile',
+      '/settings',
+      '/notifications',
+      '/messages'
+    ];
 
-  const allowedPaths = [
-    '/applicant',
-    '/jobs',
-    '/companies/listing', // in case you show all companies
-    '/upload-resume',
-    '/profile',
-    '/settings',
-    '/notifications',
-    '/messages'
-  ];
+    const isAllowed = allowedPaths.some(p => path.startsWith(p)) || 
+                     isCompanyDetailsPage || 
+                     isCompanyJobListingPage ||
+                     isPublicJobPage;
 
-  if (!allowedPaths.some(p => path.startsWith(p)) && !isCompanyDetailsPage && !isCompanyJoblisting) {
-    url.pathname = token.has_resume ? '/applicant/dashboard' : '/upload-resume';
-    return NextResponse.redirect(url, { headers: noCacheHeaders });
+    if (!isAllowed) {
+      url.pathname = token.has_resume ? '/applicant/dashboard' : '/upload-resume';
+      return NextResponse.redirect(url, { headers: noCacheHeaders });
+    }
+
+    if (path === '/upload-resume' && token.has_resume) {
+      url.pathname = '/applicant/dashboard';
+      return NextResponse.redirect(url, { headers: noCacheHeaders });
+    }
+
+    return NextResponse.next({ headers: noCacheHeaders });
   }
 
-  if (path === '/upload-resume' && token.has_resume) {
-    url.pathname = '/applicant/dashboard';
-    return NextResponse.redirect(url, { headers: noCacheHeaders });
-  }
-
-  return NextResponse.next({ headers: noCacheHeaders });
-}
-
-
-  // 7. Recruiter routes
+  // 8. Recruiter routes
   if (token.role === 'recruiter') {
     const allowedPaths = [
       '/companies',
@@ -137,7 +132,12 @@ if (token.role === 'job_seeker') {
       '/messages'
     ];
 
-    if (!allowedPaths.some(p => path.startsWith(p))) {
+    const isAllowed = allowedPaths.some(p => path.startsWith(p)) || 
+                     isCompanyDetailsPage || 
+                     isCompanyJobListingPage ||
+                     isPublicJobPage;
+
+    if (!isAllowed) {
       url.pathname = token.has_company
         ? `/companies/${token.company_id}/dashboard`
         : '/companies/create';
@@ -152,14 +152,8 @@ if (token.role === 'job_seeker') {
     return NextResponse.next({ headers: noCacheHeaders });
   }
 
-  // 8. Fallback: rewrite to 404 if no earlier conditions matched
-  const isKnownRoute = knownRoutePatterns.some(pattern => pattern.test(path));
-  
-  if (!isKnownRoute && !publicRoutes.includes(path)) {
-    url.pathname = 'not-found';
-    return NextResponse.rewrite(url);
-  }
-  return NextResponse.rewrite(url);
+  // 9. Fallback to 404 for unknown routes
+  return NextResponse.rewrite(new URL('/not-found', request.url));
 }
 
 function getDefaultRedirect(token) {

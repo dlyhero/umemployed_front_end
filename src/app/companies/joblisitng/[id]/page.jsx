@@ -34,20 +34,12 @@ const CompanyJobListings = ({ companyName }) => {
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const token = session?.user?.accessToken || session?.accessToken;
-      if (!token) {
-        setError('No authentication token found.');
-        setLoading(false);
-        return;
-      }
-
+      
       try {
         const response = await axios.get(
           `${baseUrl}/company/company/${params.id}/jobs/`,
           {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
+          
           }
         );
         setJobs(response.data);

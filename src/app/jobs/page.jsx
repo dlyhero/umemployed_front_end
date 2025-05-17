@@ -123,22 +123,22 @@ function JobListingContent() {
                     <Briefcase className="w-4 h-4 mr-2" />
                     Jobs {activeTab === 'jobs' && `(${loading ? '' : jobs.length})`}
                   </TabsTrigger>
-                  <TabsTrigger
+                  {(session && session?.user.role !== "recruiter") && <TabsTrigger
                     value="saved"
                     className="whitespace-nowrap"
                     onClick={() => handleTabChange("saved")}
                   >
                     <Bookmark className="w-4 h-4 mr-2" />
                     Saved ({loading && activeTab === 'saved' ? '' : savedJobs.length})
-                  </TabsTrigger>
-                  <TabsTrigger
+                  </TabsTrigger>}
+                  {(session && session?.user.role !== "recruiter") && <TabsTrigger
                     value="applied"
                     className="whitespace-nowrap"
                     onClick={() => handleTabChange("applied")}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Applied ({loading && activeTab === 'applied' ? '' : appliedJobs.length})
-                  </TabsTrigger>
+                  </TabsTrigger>}
                 </TabsList>
               </ScrollArea>
 
