@@ -54,7 +54,7 @@ export async function middleware(request) {
     '/login',
     '/signup',
     '/forgot-password',
-    '/verify-email',
+    '/verify_email',
     '/reset-password'
   ];
 
