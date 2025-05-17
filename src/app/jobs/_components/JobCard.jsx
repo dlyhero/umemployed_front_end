@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Bookmark, MapPin, DollarSign, Clock, Briefcase } from "lucide-react";
+import { Bookmark, MapPin, Clock, Briefcase } from "lucide-react";
 import { useRouter } from 'next/navigation';
 
 const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
@@ -105,12 +105,14 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-brand whitespace-nowrap">
             ${formatSalary(job.salary_range || job.formattedSalary)}/year
           </span>
-          <button 
-            onClick={handleSave}
-            className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
-          >
-            <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
-          </button>
+          {!isRecruiter && (
+            <button 
+              onClick={handleSave}
+              className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
+            >
+              <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -145,7 +147,7 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
           onClick={handleViewJob}
           disabled={!isRecruiter && job.is_applied}
         >
-          {isRecruiter ? 'View Candidates' : job.is_applied ? 'Applied' : 'Apply'}
+          {isRecruiter ? 'Candidates' : job.is_applied ? 'Applied' : 'Apply'}
         </Button>
       </div>
     </motion.div>
