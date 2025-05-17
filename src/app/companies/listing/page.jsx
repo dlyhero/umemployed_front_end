@@ -23,11 +23,7 @@ const CompanyListing = () => {
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      if (status === "unauthenticated") {
-        router.push("/api/auth/signin")
-        return
-      }
-
+   
       const token = session?.user?.accessToken || session?.accessToken
       if (!token) {
         setLoading(false)
