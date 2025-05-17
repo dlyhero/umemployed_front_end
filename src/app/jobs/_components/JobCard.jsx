@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Bookmark, MapPin, DollarSign, Clock, Briefcase } from "lucide-react";
+import { Bookmark, MapPin, Clock, Briefcase } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -146,12 +146,14 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false, loading}) => {
           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-brand whitespace-nowrap">
             ${formatSalary(job.salary_range || job.formattedSalary)}/year
           </span>
-          {(session && session?.user.role !== "recruiter") && <button 
-            onClick={handleSave}
-            className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
-          >
-            <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
-          </button>}
+          {!isRecruiter && (
+            <button 
+              onClick={handleSave}
+              className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
+            >
+              <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -176,19 +178,23 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false, loading}) => {
       </div>
 
       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-        <div className="flex items-center text-xs text-gray-500">
-          <Clock className="w-3 h-3 mr-1" />
-          {formatRelativeTime(job?.created_at)}
-        </div>
-       {(session && session.user.role !== 'recruiter') && <Button 
-          size="xl" 
-          className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[55%]"
-          onClick={handleViewJob}
-          disabled={!isRecruiter && job.is_applied}
-        >
-          {isRecruiter ? 'View Candidates' : job.is_applied ? 'Applied' : 'Apply'}
-        </Button>}
-      </div>
+  <div className="flex items-center text-xs text-gray-500">
+    <Clock className="w-3 h-3 mr-1" />
+    {formatRelativeTime(job?.created_at)}
+  </div>
+
+  {(session && session.user.role !== 'recruiter') && (
+    <Button 
+      size="xl" 
+      className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[55%]"
+      onClick={handleViewJob}
+      disabled={!isRecruiter && job.is_applied}
+    >
+      {isRecruiter ? 'Candidates' : job.is_applied ? 'Applied' : 'Apply'}
+    </Button>
+  )}
+</div>
+
     </motion.div>
   );
 };

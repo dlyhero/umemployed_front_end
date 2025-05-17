@@ -1,12 +1,11 @@
 'use client';
-
-import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
-import { toast } from 'react-hot-toast';
 
-export default function DescriptionContent() {
+export default function Description() {
   const currentStep = 'description';
   const searchParams = useSearchParams();
   const jobId = searchParams.get('jobId');
@@ -43,14 +42,17 @@ export default function DescriptionContent() {
   }
 
   return (
-    <FormContainer
-      step={step}
-      form={form}
-      nextStep={() => form.handleSubmit(handleSubmit)()}
-      prevStep={prevStep}
-      onSubmit={handleSubmit}
-      stepIsValid={stepIsValid}
-      jobOptions={jobOptions}
-    />
+    <>
+      <Toaster position="top-right" />
+      <FormContainer
+        step={step}
+        form={form}
+        nextStep={() => form.handleSubmit(handleSubmit)()}
+        prevStep={prevStep}
+        onSubmit={handleSubmit}
+        stepIsValid={stepIsValid}
+        jobOptions={jobOptions}
+      />
+    </>
   );
 }
