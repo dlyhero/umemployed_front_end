@@ -19,24 +19,17 @@ const CompanyListing = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
-  const { data: session, status } = useSession()
 
   useEffect(() => {
     const fetchCompanies = async () => {
-   
-      const token = session?.user?.accessToken || session?.accessToken
-      if (!token) {
-        setLoading(false)
-        return
-      }
+
 
       try {
         const response = await axios.get(`${baseUrl}/company/companies/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+
         })
         setCompanies(response.data)
+        console.log(response)
       } catch (err) {
         console.error("Error fetching companies:", err.response || err.message)
         setCompanies([])
@@ -45,17 +38,15 @@ const CompanyListing = () => {
       }
     }
 
-    if (status !== "loading") {
-      fetchCompanies()
-    }
-  }, [status, session, router])
+    fetchCompanies();
+  }, [router])
 
   const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         company.industry.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesTab = activeTab === "all" || 
-                      (activeTab === "featured" && company.featured) ||
-                      (activeTab === "tech" && company.industry === "Technology")
+    const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      company.industry.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesTab = activeTab === "all" ||
+      (activeTab === "featured" && company.featured) ||
+      (activeTab === "tech" && company.industry === "Technology")
 
     return matchesSearch && matchesTab
   })
@@ -75,7 +66,7 @@ const CompanyListing = () => {
         >
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Companies</h1>
           <p className="text-gray-600">Browse all companies on UmEmployed</p>
-          
+
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -93,8 +84,8 @@ const CompanyListing = () => {
           </div>
         </motion.div>
 
-        <Tabs 
-          value={activeTab} 
+        <Tabs
+          value={activeTab}
           onValueChange={setActiveTab}
           className="w-full"
         >
@@ -118,9 +109,9 @@ const CompanyListing = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {filteredCompanies.length > 0 ? (
                 filteredCompanies.map((company) => (
-                  <CompanyCard 
-                    company={company} 
-                    key={company.id} 
+                  <CompanyCard
+                    company={company}
+                    key={company.id}
                     onClick={() => router.push(`/companies/${company.id}`)}
                   />
                 ))
@@ -138,9 +129,9 @@ const CompanyListing = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {filteredCompanies.length > 0 ? (
                 filteredCompanies.map((company) => (
-                  <CompanyCard 
-                    company={company} 
-                    key={company.id} 
+                  <CompanyCard
+                    company={company}
+                    key={company.id}
                     onClick={() => router.push(`/companies/${company.id}`)}
                   />
                 ))
@@ -156,9 +147,9 @@ const CompanyListing = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {filteredCompanies.length > 0 ? (
                 filteredCompanies.map((company) => (
-                  <CompanyCard 
-                    company={company} 
-                    key={company.id} 
+                  <CompanyCard
+                    company={company}
+                    key={company.id}
                     onClick={() => router.push(`/companies/${company.id}`)}
                   />
                 ))

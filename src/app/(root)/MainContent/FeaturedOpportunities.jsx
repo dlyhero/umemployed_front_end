@@ -8,7 +8,7 @@ import JobCard from "../../jobs/_components/JobCard";
 import { useJobs } from "@/src/hooks/useJob";
 
 const FeaturedOpportunities = () => {
-  const { allJobs, toggleSaveJob, saveJobs } = useJobs();
+  const { allJobs, toggleSaveJob, saveJobs, loading } = useJobs();
   const [displayJobs, setDisplayJobs] = useState([]);
 
   // Set jobs from allJobs
@@ -71,6 +71,7 @@ const FeaturedOpportunities = () => {
                   <JobCard
                         key={job.id}
                         job={job}
+                        loading={loading}
                         onToggleSave={() => toggleSaveJob(job.id)}
                       />
                 </div>

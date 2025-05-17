@@ -9,44 +9,31 @@ import axios from 'axios';
 import baseUrl from '../../api/baseUrl';
 
 const CompanyCard = ({ company: initialCompany, index }) => {
-  const { data: session, status } = useSession();
   const [company, setCompany] = useState(initialCompany);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
-      if (status === 'loading') return;
-      if (status === 'unauthenticated') {
-        setError('Please log in to view company details');
-        setLoading(false);
-        return;
-      }
-
-      const token = session?.user?.accessToken || session?.accessToken;
-      if (!token) {
-        setError('No authentication token found');
-        setLoading(false);
-        return;
-      }
-
+    
       try {
-        const response = await axios.get(`${baseUrl}/company/company-details/${initialCompany.id}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        if (typeof window !== 'undefined') {
+          const response = await axios.get(`${baseUrl}/company/company-details/${initialCompany.id}/`, {
+          
+          });
+          setCompany(response.data);
+        }
         setCompany(response.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching company details:', err);
+        console.log('Error fetching company details:', err);
         setError('Failed to load company details');
         setLoading(false);
       }
     };
 
     fetchCompanyDetails();
-  }, [initialCompany.id, session, status]);
+  }, [initialCompany.id, ]);
 
   const getInitials = (name) => {
     if (!name) return '?';
@@ -97,21 +84,7 @@ const CompanyCard = ({ company: initialCompany, index }) => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 flex items-center justify-center h-64">
-        <p>Loading...</p>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 flex items-center justify-center h-64">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
 
   return (
     <>

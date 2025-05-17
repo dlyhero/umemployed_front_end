@@ -149,7 +149,7 @@ body {
 
 
 Button{
-  font-size: 16 !important 
+  font-size: 15 !important 
 }
 
 Link{
@@ -169,38 +169,38 @@ Link{
   input,
   textarea,
   button {
-    font-size: 0.85rem; /* Further reduce for specific elements */
+    font-size: 0.8rem; /* Further reduce for specific elements */
   }
 
   h1 {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   .Herotitle{
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   .ctAtitle{
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
   .heroName{
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   h2 {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 
   h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .text-xs {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
 
   .text-sm {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
   }
 
   .text-base {
@@ -208,15 +208,15 @@ Link{
   }
 
   .text-lg {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
   }
 
   .text-xl {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
   }
 
   .text-2xl {
-    font-size: 1.25rem !important;
+    font-size: 1.2rem !important;
   }
 
 Button{

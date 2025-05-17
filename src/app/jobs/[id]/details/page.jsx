@@ -10,6 +10,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -45,23 +46,23 @@ const JobDetailPage = () => {
         <p className="text-muted-foreground">
           Please explain why you need to retake this assessment. We'll review your request and get back to you.
         </p>
-        
+
         <textarea
           className="w-full border rounded-lg p-4 min-h-[200px]"
           value={retakeReason}
           onChange={(e) => setRetakeReason(e.target.value)}
           placeholder="Enter your reasons here..."
         />
-        
+
         <div className="flex gap-4">
-          <Button 
+          <Button
             className="border-brand text-brand hover:text-brand flex-1"
-            variant="outline" 
+            variant="outline"
             onClick={onClose}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             className="flex-1 bg-brand hover:bg-brand/80 text-white"
             onClick={submitRetakeRequest}
             disabled={!retakeReason.trim()}
@@ -116,14 +117,15 @@ const JobDetailPage = () => {
     }
 
     const fetchJobData = async () => {
+
       try {
         setIsLoading(true);
         const api = axios.create({
           baseURL: baseUrl,
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`
-          }
         });
+
+
+
 
         // Check cache first
         const cachedJob = localStorage.getItem(`job-${jobId}`);
@@ -133,19 +135,16 @@ const JobDetailPage = () => {
           setIsSaved(parsed.isSaved);
           setSimilarJobs(parsed.similarJobs || []);
         }
+        // Fetch jobs without authorization
+        const jobRes = await api.get(`/job/jobs/${jobId}/`);
 
-        // Fetch fresh data in background
-        const [jobRes, savedRes, appliedRes] = await Promise.all([
-          api.get(`/job/jobs/${jobId}/`).catch(() => ({ data: null })),
-          api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
-          api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
-        ]);
 
         if (!jobRes.data) {
           toast.error('Job not found');
           router.push('/jobs');
           return;
         }
+
 
         const formattedJob = {
           ...jobRes.data,
@@ -166,39 +165,57 @@ const JobDetailPage = () => {
           hire_number: jobRes.data.hire_number || 1
         };
 
-        const isJobSaved = savedRes.data.some(job => job.id == jobId);
-        const isJobApplied = appliedRes.data.some(job => job.id == jobId);
+        if (session?.accessToken) {
+          const authApi = axios.create({
+            baseURL: baseUrl,
+            headers: {
+              Authorization: `Bearer ${session?.accessToken}`
+            }
+          });
 
-        // Fetch similar jobs
-        let similar = [];
-        try {
-          const similarRes = await api.get('/job/job-options/');
-          similar = similarRes.data.jobs
-            ?.filter(j => j.id != jobId)
-            ?.slice(0, 3)
-            ?.map(j => ({
-              ...j,
-              created_at: formatDate(j.created_at),
-              description: cleanDescription(j.description || '')
-            })) || [];
-        } catch {
-          similar = [];
+
+          // Fetch fresh data in background
+          const [savedRes, appliedRes] = await Promise.all([
+            authApi.get('/job/saved-jobs/').catch(() => ({ data: [] })),
+            authApi.get('/job/applied-jobs/').catch(() => ({ data: [] }))
+          ]);
+
+
+
+          const isJobSaved = savedRes.data.some(job => job.id == jobId);
+          const isJobApplied = appliedRes.data.some(job => job.id == jobId);
+
+          // Fetch similar jobs
+          let similar = [];
+          try {
+            const similarRes = await authApi.get('/job/job-options/');
+            similar = similarRes.data.jobs
+              ?.filter(j => j.id != jobId)
+              ?.slice(0, 3)
+              ?.map(j => ({
+                ...j,
+                created_at: formatDate(j.created_at),
+                description: cleanDescription(j.description || '')
+              })) || [];
+          } catch {
+            similar = [];
+          }
+
+          // Update state
+          setJob(formattedJob);
+          setIsSaved(isJobSaved);
+          setSimilarJobs(similar);
+
+          // Cache data
+          localStorage.setItem(
+            `job-${jobId}`,
+            JSON.stringify({
+              job: formattedJob,
+              isSaved: isJobSaved,
+              similarJobs: similar
+            })
+          );
         }
-
-        // Update state
-        setJob(formattedJob);
-        setIsSaved(isJobSaved);
-        setSimilarJobs(similar);
-
-        // Cache data
-        localStorage.setItem(
-          `job-${jobId}`,
-          JSON.stringify({
-            job: formattedJob,
-            isSaved: isJobSaved,
-            similarJobs: similar
-          })
-        );
       } catch (err) {
         console.error('Error fetching job:', err);
         toast.error(err.response?.data?.message || 'Failed to load job details');
@@ -208,9 +225,9 @@ const JobDetailPage = () => {
       }
     };
 
-    if (session) {
-      fetchJobData();
-    }
+
+    fetchJobData();
+
   }, [session, jobId, router]);
 
   const formatDate = (dateString) => {
@@ -225,12 +242,13 @@ const JobDetailPage = () => {
       .replace(/<[^>]*>/g, '')
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
+      .replace(/&nbsp;/g, ' ')
       .trim();
   };
 
   const toggleSave = async () => {
     try {
-      const api = axios.create({
+      const authApi = axios.create({
         baseURL: baseUrl,
         headers: {
           Authorization: `Bearer ${session?.accessToken}`
@@ -257,7 +275,7 @@ const JobDetailPage = () => {
       }
 
       // Make API call
-      await api.post(`/job/jobs/${jobId}/save/`);
+      await authApi.post(`/job/jobs/${jobId}/save/`);
 
       toast.success(newSavedState ? 'Job saved successfully' : 'Job unsaved successfully');
     } catch (err) {
@@ -300,27 +318,102 @@ const JobDetailPage = () => {
       toast.error(err.response?.data?.message || 'Failed to submit retake request');
     }
   };
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white py-8">
+      <div className="min-h-screen bg-white pb-8 pt-2">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Button
-            variant="ghost"
-            className="mb-6 gap-1.5 px-0 hover:bg-transparent"
-            onClick={() => router.push('/jobs')}
-          >
-            <ChevronLeft className="h-5 w-5" />
-            Back to jobs
-          </Button>
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-96 bg-gray-200 rounded"></div>
+          <Skeleton className="w-32 h-4 mb-6" />
+
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="lg:w-2/3 space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="w-14 h-14 rounded-lg" />
+                      <div>
+                        <Skeleton className="w-40 h-4 mb-2" />
+                        <Skeleton className="w-52 h-3" />
+                      </div>
+                    </div>
+                    <Skeleton className="w-10 h-10 rounded-full" />
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  <div className="border-t border-b py-6 mb-6 space-y-4">
+                    <Skeleton className="w-3/4 h-6" />
+                    <div className="flex flex-wrap gap-2">
+                      {[...Array(4)].map((_, i) => (
+                        <Skeleton key={i} className="h-6 w-28 rounded" />
+                      ))}
+                    </div>
+                    <Skeleton className="w-1/2 h-5" />
+                    <Skeleton className="w-1/3 h-3" />
+                  </div>
+
+                  <div>
+                    <div className="flex border-b mb-6">
+                      <Skeleton className="h-10 w-24 mr-2" />
+                      <Skeleton className="h-10 w-24" />
+                    </div>
+
+                    <div className="space-y-4">
+                      <Skeleton className="w-40 h-5" />
+                      <Skeleton className="w-full h-20 rounded" />
+                      <Skeleton className="w-32 h-5 mt-6" />
+                      <ul className="space-y-2 pl-5">
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} className="h-3 w-64" />
+                        ))}
+                      </ul>
+                      <Skeleton className="w-32 h-5 mt-6" />
+                      <ul className="space-y-2 pl-5">
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} className="h-3 w-64" />
+                        ))}
+                      </ul>
+                      <Skeleton className="w-32 h-5 mt-6" />
+                      <ul className="space-y-2 pl-5">
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} className="h-3 w-64" />
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Skeleton className="h-10 w-full sm:w-1/2 rounded" />
+                    <Skeleton className="h-10 w-full sm:w-1/2 rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:w-1/3">
+              <Card className="sticky top-6">
+                <CardHeader>
+                  <Skeleton className="w-40 h-6" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2 border p-4 rounded-lg">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-2/3" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
-    );
+    )
+
+
   }
+
 
   if (!job) {
     return (
@@ -378,14 +471,14 @@ const JobDetailPage = () => {
                         {job.company?.name?.charAt(0) || 'C'}
                       </div>
                     )}
-                    <div>
+                    {job.company.size && <div>
                       <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>
                       <p className="text-muted-foreground text-sm">
                         {job.company?.industry || 'Industry not specified'} • {job.company?.size || 'N/A'} employees
                       </p>
-                    </div>
+                    </div>}
                   </div>
-                  <Button
+                  {(session && session?.user.role !== "recruiter") && <Button
                     variant="ghost"
                     size="icon"
                     onClick={toggleSave}
@@ -396,7 +489,7 @@ const JobDetailPage = () => {
                     ) : (
                       <Bookmark className="h-5 w-5 text-gray-400" />
                     )}
-                  </Button>
+                  </Button>}
                 </div>
               </CardHeader>
 
@@ -406,12 +499,12 @@ const JobDetailPage = () => {
                     {job.title || 'Job Title'}
                   </h1>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.job_location_type || 'Location not specified'}</Badge>
-                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.location || 'Remote'}</Badge>
-                    <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.experience_level || 'Experience not specified'}</Badge>
-                    {job.level && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.level}</Badge>}
-                    {job.weekly_ranges && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>{job.weekly_ranges}</Badge>}
-                    {job.hire_number > 1 && <Badge variant="secondary" className={`bg-blue-100 text-brand`}>Hiring {job.hire_number} people</Badge>}
+                    <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>{job.job_location_type || 'Location not specified'}</Badge>
+                    <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>{job.location || 'Remote'}</Badge>
+                    <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>{job.experience_level || 'Experience not specified'}</Badge>
+                    {job.level && <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>{job.level}</Badge>}
+                    {job.weekly_ranges && <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>{job.weekly_ranges}</Badge>}
+                    {job.hire_number > 1 && <Badge variant="secondary" className={`bg-gray-100 text-gray-700 font-semibold`}>Hiring {job.hire_number} people</Badge>}
                   </div>
                   <p className="text-xl font-semibold">
                     ${job.salary_range || 'Salary not specified'}/year
@@ -491,41 +584,59 @@ const JobDetailPage = () => {
                       <div>
                         <h2 className="text-xl font-bold mb-4">About {job.company?.name || 'the company'}</h2>
                         <p className="text-muted-foreground leading-relaxed">
-                          {job.company?.description || 'No company description available'}
+                          {cleanDescription(job.company?.description) || 'No company description available'}
                         </p>
                       </div>
+                      {job.company.mission_statement && <div>
+                        <h2 className="text-xl font-bold mb-4">Mission</h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {cleanDescription(job.company?.mission_statement)}
+                        </p>
+                      </div>}
 
                       <div>
                         <h3 className="text-lg font-bold mb-3">Company Details</h3>
                         <div className="grid grid-cols-2 gap-4 text-muted-foreground">
                           <div>
-                            <p className="font-medium">Industry</p>
+                            <p className="font-semibold">Industry:</p>
                             <p>{job.company?.industry || 'Not specified'}</p>
                           </div>
-                          <div>
-                            <p className="font-medium">Company Size</p>
-                            <p>{job.company?.employees || 'N/A'} employees</p>
-                          </div>
-                          {job.company?.website && (
+                          {job.company.size && <div>
+                            <p className="font-semibold">Company Size:</p>
+                            <p>{job.company?.size} employees</p>
+                          </div>}
+                          {job.company.location && <div>
+                            <p className="font-semibold">Company Location:</p>
+                            <p>{job.company?.location}</p>
+                          </div>}
+                          {job.company.founded && <div>
+                            <p className="font-semibold">Company Founded:</p>
+                            <p>{job.company?.founded}</p>
+                          </div>}
+                          {job.company?.website_url && (
                             <div>
-                              <p className="font-medium">Website</p>
+                              <p className="font-semibold">Website:</p>
                               <a
-                                href={job.company.website}
+                                href={job.company.website_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-brand hover:underline"
                               >
-                                {job.company.website}
+                                {job.company.website_url}
                               </a>
                             </div>
                           )}
+                          {job.company.linkedin && <div>
+                            <p className="font-semibold">linkedIn:</p>
+                            <p className='text-brand hover:underline'>{job.company?.linkedin}</p>
+                          </div>}
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                {(session && session?.user.role !== "recruiter") && <div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -548,7 +659,7 @@ const JobDetailPage = () => {
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
                   </Button>
-                </div>
+                </div>}
               </CardContent>
             </Card>
           </div>
