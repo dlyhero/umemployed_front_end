@@ -1,88 +1,54 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-const noCacheHeaders = {
-  'Cache-Control': 'no-store, max-age=0',
-  'Pragma': 'no-cache'
-};
-
 export async function middleware(request) {
   const url = request.nextUrl.clone();
   const path = url.pathname;
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
-  // 1. Handle static files and API routes
-  if (
-    path.startsWith('/_next') ||
-    path.startsWith('/api') ||
-    path.startsWith('/static') ||
-    path.includes('.') ||
-    ['/favicon.ico', '/robots.txt'].includes(path)
-  ) {
+  // 1. Skip static files and API routes
+  if (path.startsWith('/_next') || path.startsWith('/api') || path.includes('.')) {
     return NextResponse.next();
   }
 
-  // Define public patterns
-  const isCompanyDetailsPage = /^\/companies\/[^\/]+\/details$/.test(path);
-  const isCompanyJobListingPage = /^\/companies\/[^\/]+\/joblisting$/.test(path);
-  const isPublicJobPage =  /^\/jobs\/[^\/]+\/details$/.test(path);
-
-  // 2. Public routes
-  const publicRoutes = [
-    '/',
-    '/jobs',
-    '/companies/listing',
-    'jobs',
-    '/blog',
-    '/about',
-    '/contact',
-    '/help',
-    '/pricing',
+  // 2. Define public routes and patterns
+  const publicRoutes = ['/', '/jobs', '/companies/listing', '/blog', '/about', '/contact', '/help', '/pricing'];
+  const publicPatterns = [
+    /^\/companies\/[^\/]+\/details$/,
+    /^\/companies\/[^\/]+\/joblisting$/,
+    /^\/jobs\/[^\/]+\/details$/
   ];
 
-  if (
-    publicRoutes.includes(path) || 
-    isCompanyDetailsPage || 
-    isCompanyJobListingPage ||
-    isPublicJobPage
-  ) {
+  if (publicRoutes.includes(path) || publicPatterns.some(pattern => pattern.test(path))) {
     return NextResponse.next();
   }
 
-  // 3. Auth routes (login, signup, etc.)
-  const authRoutes = [
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/verify_email',
-    '/reset-password'
-  ];
-
+  // 3. Handle auth routes (login, signup, etc.)
+  const authRoutes = ['/login', '/signup', '/forgot-password', '/verify-email', '/reset-password'];
   if (authRoutes.includes(path)) {
-    // If user is already logged in, redirect them to their dashboard
     if (token) {
-      url.pathname = getDefaultRedirect(token);
+      url.pathname = token.role === 'none' ? '/select-role' : getDashboardPath(token);
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
 
   // 4. Handle logout
-  if (path === '/') {
-    const response = NextResponse.redirect(new URL('/', request.url));
+  if (path === '/logout') {
+    const response = NextResponse.redirect(new URL('/', url));
     response.cookies.delete('next-auth.session-token');
     return response;
   }
 
-  // 5. Handle unauthenticated users
+  // 5. Redirect unauthenticated users to login
   if (!token) {
     url.pathname = '/login';
-    url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+    url.searchParams.set('callbackUrl', path);
     return NextResponse.redirect(url);
   }
 
-  // 6. Handle users without role
-  if (!token.role || token.role === 'none') {
+  // 6. Handle role selection flow
+  if (token.role === 'none') {
     if (path !== '/select-role') {
       url.pathname = '/select-role';
       return NextResponse.redirect(url);
@@ -90,82 +56,46 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // 7. Job Seeker routes
-  if (token.role === 'job_seeker') {
-    const allowedPaths = [
-      '/applicant',
-      '/jobs',
-      '/companies/listing',
-      '/upload-resume',
-      '/profile',
-      '/settings',
-      '/notifications',
-      '/messages'
-    ];
-
-    const isAllowed = allowedPaths.some(p => path.startsWith(p)) || 
-                     isCompanyDetailsPage || 
-                     isCompanyJobListingPage ||
-                     isPublicJobPage;
-
-    if (!isAllowed) {
-      url.pathname = token.has_resume ? '/applicant/dashboard' : '/upload-resume';
-      return NextResponse.redirect(url, { headers: noCacheHeaders });
-    }
-
-    if (path === '/upload-resume' && token.has_resume) {
-      url.pathname = '/applicant/dashboard';
-      return NextResponse.redirect(url, { headers: noCacheHeaders });
-    }
-
-    return NextResponse.next({ headers: noCacheHeaders });
+  // 7. Prevent access to select-role if role is already set
+  if (path === '/select-role') {
+    url.pathname = getDashboardPath(token);
+    return NextResponse.redirect(url);
   }
 
-  // 8. Recruiter routes
-  if (token.role === 'recruiter') {
-    const allowedPaths = [
-      '/companies',
-      '/jobs',
-      '/applicants',
-      '/settings',
-      '/notifications',
-      '/messages'
-    ];
+  // 8. Role-based routing
+  const dashboardPath = getDashboardPath(token);
+  const allowedPaths = getAllowedPaths(token);
 
-    const isAllowed = allowedPaths.some(p => path.startsWith(p)) || 
-                     isCompanyDetailsPage || 
-                     isCompanyJobListingPage ||
-                     isPublicJobPage;
-
-    if (!isAllowed) {
-      url.pathname = token.has_company
-        ? `/companies/${token.company_id}/dashboard`
-        : '/companies/create';
-      return NextResponse.redirect(url, { headers: noCacheHeaders });
-    }
-
-    if (path === '/companies/create' && token.has_company) {
-      url.pathname = `/companies/${token.company_id}/dashboard`;
-      return NextResponse.redirect(url, { headers: noCacheHeaders });
-    }
-
-    return NextResponse.next({ headers: noCacheHeaders });
+  if (!allowedPaths.some(allowedPath => path.startsWith(allowedPath))) {
+    url.pathname = dashboardPath;
+    return NextResponse.redirect(url);
   }
 
-  // 9. Fallback to 404 for unknown routes
-  return NextResponse.rewrite(new URL('/not-found', request.url));
+  return NextResponse.next();
 }
 
-function getDefaultRedirect(token) {
-  if (!token) return '/login';
-  if (!token.role || token.role === 'none') return '/select-role';
-  if (token.role === 'job_seeker') return token.has_resume ? '/applicant/dashboard' : '/upload-resume';
-  if (token.role === 'recruiter') return token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create';
+function getDashboardPath(token) {
+  if (!token?.role) return '/';
+  if (token.role === 'job_seeker') {
+    return token.has_resume ? '/applicant/dashboard' : '/upload-resume';
+  }
+  if (token.role === 'recruiter') {
+    return token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create';
+  }
   return '/';
 }
 
+function getAllowedPaths(token) {
+  const basePaths = ['/settings', '/notifications', '/messages', '/profile'];
+  if (token?.role === 'job_seeker') {
+    return [...basePaths, '/applicant', '/jobs', '/companies/listing', '/upload-resume'];
+  }
+  if (token?.role === 'recruiter') {
+    return [...basePaths, '/companies', '/jobs', '/applicants'];
+  }
+  return [];
+}
+
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|public).*)'],
 };

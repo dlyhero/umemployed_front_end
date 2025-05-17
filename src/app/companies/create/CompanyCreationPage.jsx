@@ -56,29 +56,6 @@ const CompanyCreationPage = () => {
     }, null, 2));
   };
 
-  useEffect(() => {
-    try {
-      logDebug('Session Check', { status, user: session?.user });
-      if (status === 'authenticated') {
-        if (!session?.user) {
-          throw new Error('Session user data missing');
-        }
-        if (session.user.role !== 'recruiter') {
-          logError('Session Check', new Error('Invalid role'), { role: session.user.role });
-          router.push('/select-role');
-        } else if (session.user.has_company) {
-          logDebug('Session Check', { has_company: true, companyId: session.user.companyId });
-          router.push(`/companies/${session.user.companyId}/dashboard`);
-        }
-      } else if (status === 'unauthenticated') {
-        logDebug('Session Check', { redirect: 'login' });
-        router.push('/login?callbackUrl=/companies/create');
-      }
-    } catch (error) {
-      logError('Session Check', error, { status });
-      toast.error('Error validating session. Please try again.');
-    }
-  }, [status, session, router]);
 
   if (status === 'loading') {
     logDebug('Render', { state: 'Loading' });
