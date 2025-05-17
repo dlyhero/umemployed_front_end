@@ -11,6 +11,7 @@ import Loader from "@/src/components/common/Loader/Loader";
 import baseUrl from "@/src/app/api/baseUrl";
 import Link from "next/link";
 import { useJobs } from "@/src/hooks/useJob";
+import useUser from "@/src/hooks/useUser";
 
 const CompanyDetails = () => {
   const params = useParams();
@@ -21,37 +22,26 @@ const CompanyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { toggleSaveJob } = useJobs();
-  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);  
+  const user = useUser();
+  console.log(user);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
-      const token = session?.user?.accessToken || session?.accessToken;
-      if (!token) {
-        setError('No authentication token found.');
-        setLoading(false);
-        return;
-      }
+    
+     
 
       try {
         // Fetch company details
         const companyRes = await axios.get(
           `${baseUrl}/company/company-details/${params.companyId}/`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
+          
         );
         setCompany(companyRes.data);
-
+       console.log("company", companyRes)
         // Fetch company jobs
         const jobsRes = await axios.get(
           `${baseUrl}/company/company/${params.companyId}/jobs/`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          }
         );
         setJobs(jobsRes.data);
       } catch (err) {
@@ -62,10 +52,9 @@ const CompanyDetails = () => {
       }
     };
 
-    if (session) {
       fetchCompanyData();
-    }
-  }, [params.companyId, session]);
+    
+  }, [params.companyId]);
 
   const getInitials = (name) => {
     if (!name) return '?';
@@ -113,7 +102,8 @@ const CompanyDetails = () => {
     );
   };
 
-  const isRecruiter = session?.user?.role === 'recruiter';
+  const isRecruiter = (session?.user?.role === 'recruiter' && user?.user.has_company)  && user.user?.company_id === company.id;
+
 
   if (loading) {
     return <Loader />;
@@ -262,7 +252,7 @@ const CompanyDetails = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Open Positions at {company.name}</h2>
                 {isRecruiter && (
                   <Link href={`/jobs/new?company=${company.id}`}>
-                    <Button variant="outline" className="text-brand border-brand hover:bg-brand/10">
+                    <Button variant="outline" className="text-brand border-brand hover:bg-brand/10 font-semibold">
                       <Plus className="w-4 h-4 mr-2" />
                       Post Job
                     </Button>
@@ -285,7 +275,7 @@ const CompanyDetails = () => {
                     <p className="text-gray-600">No open positions at this time</p>
                     {isRecruiter && (
                       <Link href={`/jobs/new?company=${company.id}`} className="mt-4 inline-block">
-                        <Button className="bg-brand text-white hover:bg-brand/90">
+                        <Button className="bg-brand text-white hover:bg-brand/90 font-semibold">
                           <Plus className="w-4 h-4 mr-2" />
                           Post Your First Job
                         </Button>
@@ -306,26 +296,7 @@ const CompanyDetails = () => {
               className="sticky top-6 space-y-6"
             >
               {/* Post Job Card for Recruiters */}
-              {isRecruiter && (
-                <div className="bg-white rounded-xl border border-brand/20 p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Manage Your Company</h3>
-                  <p className="text-gray-600 mb-4">
-                    As a recruiter for {company.name}, you can post new job openings and manage existing ones.
-                  </p>
-                  <Link href={`/jobs/new?company=${company.id}`} className="w-full">
-                    <Button className="w-full bg-brand text-white hover:bg-brand/90">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Post New Job
-                    </Button>
-                  </Link>
-                  <Link href={`/companies/${company.id}/edit`} className="w-full mt-3">
-                    <Button variant="outline" className="w-full text-brand border-brand  hover:text-brand hover:bg-white">
-                      Edit Company Profile
-                    </Button>
-                  </Link>
-                </div>
-              )}
-
+             
               {/* Company facts */}
               <div className="bg-white rounded-xl border p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Company Facts</h2>

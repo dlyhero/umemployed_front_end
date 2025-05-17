@@ -19,22 +19,13 @@ const Companies = () => {
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      if (status === "unauthenticated") {
-        router.push("/api/auth/signin")
-        return
-      }
+  
 
-      const token = session?.user?.accessToken || session?.accessToken
-      if (!token) {
-        setLoading(false)
-        return
-      }
+  
 
       try {
         const response = await axios.get(`${baseUrl}/company/companies/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        
         })
         setCompanies(response.data)
       } catch (err) {

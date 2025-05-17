@@ -47,7 +47,7 @@ const Resources = () => {
 
         <div className="grid gap-8 md:grid-cols-3">
           {items.map((item, index) => (
-            <motion.Card key={item.id} className="overflow-hidden group pt-0"
+            <motion.div key={item.id} className="overflow-hidden group pt-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -92,7 +92,7 @@ const Resources = () => {
                   </svg>
                 </Button>
               </div>
-            </motion.Card>
+            </motion.div>
           ))}
         </div>
       </div>

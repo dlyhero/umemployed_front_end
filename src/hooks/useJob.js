@@ -63,11 +63,9 @@ export const useJobs = () => {
       setLoading(true);
       const api = axios.create({
         baseURL: baseUrl,
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`
-        }
       });
 
+      // Fetch jobs without authorization
       const jobsResponse = await api.get('/job/jobs/');
       const formattedJobs = jobsResponse.data.map(job => ({
         ...job,
@@ -79,15 +77,29 @@ export const useJobs = () => {
         description: job.description.replace(/<[^>]*>/g, '')
       }));
 
-
       setAllJobs(formattedJobs);
       setFilteredJobs(formattedJobs);
 
-      const savedResponse = await api.get('/job/saved-jobs/');
-      setSavedJobs(savedResponse.data.map(job => job.id));
+      // Only fetch saved and applied jobs if user is authenticated
+      if (session?.accessToken) {
+        const authApi = axios.create({
+          baseURL: baseUrl,
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`
+          }
+        });
 
-      const appliedResponse = await api.get('/job/applied-jobs/');
-      setAppliedJobs(appliedResponse.data.map(job => job.id));
+        try {
+          const savedResponse = await authApi.get('/job/saved-jobs/');
+          setSavedJobs(savedResponse.data.map(job => job.id));
+
+          const appliedResponse = await authApi.get('/job/applied-jobs/');
+          setAppliedJobs(appliedResponse.data.map(job => job.id));
+        } catch (authError) {
+          console.error('Error fetching protected data:', authError);
+          // Don't treat this as a fatal error - we still have jobs data
+        }
+      }
 
       const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
         .filter(Boolean)
@@ -162,15 +174,20 @@ export const useJobs = () => {
   };
 
   useEffect(() => {
-    if (session) fetchData();
-  }, [session, fetchData]);
+    fetchData();
+  }, [session]);
 
   const toggleSaveJob = async (jobId) => {
+    if (!session?.accessToken) {
+      toast.error('Please sign in to save jobs');
+      return;
+    }
+
     try {
       const api = axios.create({
         baseURL: baseUrl,
         headers: {
-          Authorization: `Bearer ${session?.accessToken}`
+          Authorization: `Bearer ${session.accessToken}`
         }
       });
 
