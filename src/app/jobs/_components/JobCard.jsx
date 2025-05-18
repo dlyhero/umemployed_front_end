@@ -102,7 +102,7 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
         </div>
 
         <div className="flex flex-col items-end gap-1">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-brand whitespace-nowrap">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium  text-brand whitespace-nowrap">
             ${formatSalary(job.salary_range || job.formattedSalary)}/year
           </span>
           {!isRecruiter && (
@@ -121,10 +121,10 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
       </h3>
 
       <div className="flex flex-wrap gap-1.5 mb-3">
-        <span className={`text-xs px-2 py-1 rounded-md ${
-          job.job_location_type?.toLowerCase() === 'remote' ? 'bg-green-100 text-green-800' : 
+        <span className={`px-2 py-1 rounded-md text-sm ${
+          job.job_location_type?.toLowerCase() === 'remote' ? 'bg-green-100 text-brand ' : 
           job.job_location_type?.toLowerCase() === 'contract' ? 'bg-blue-50 text-brand' : 
-          'bg-gray-200 text-gray-800'
+          'text-brand'
         }`}>
           {job?.job_location_type || 'Full-Time'}
         </span>

@@ -51,7 +51,7 @@ export function MenuLinks() {
         }`}
       >
         <MessageSquare className="w-5 h-5" />
-        <span className="font-medium">Messages</span>
+        <span className="font-semibold">Messages</span>
       </Link>
     </>
   );
@@ -67,7 +67,7 @@ export function MenuLinks() {
           }`}
         >
           <Settings className="w-5 h-5" />
-          <span className="font-medium">Settings</span>
+          <span className="font-semibold">Settings</span>
         </Link>
         <button
           onClick={handleEndorsementClick}
@@ -80,7 +80,7 @@ export function MenuLinks() {
           ) : (
             <ThumbsUp className="w-5 h-5" />
           )}
-          <span className="font-medium">{loading ? "Loading..." : "Endorsement"}</span>
+          <span className="font-semibold">{loading ? "Loading..." : "Endorsement"}</span>
         </button>
         <Link 
           href="/transactions" 
@@ -89,7 +89,7 @@ export function MenuLinks() {
           }`}
         >
           <Receipt className="w-5 h-5" />
-          <span className="font-medium">Transaction History</span>
+          <span className="font-semibold">Transaction History</span>
         </Link>
         <Link 
           href="/post-job" 
@@ -98,7 +98,7 @@ export function MenuLinks() {
           }`}
         >
           <PlusCircle className="w-5 h-5" />
-          <span className="font-medium">Post a Job</span>
+          <span className="font-semibold">Post a Job</span>
         </Link>
       </div>
     );
@@ -114,7 +114,7 @@ export function MenuLinks() {
         }`}
       >
         <Building2 className="w-5 h-5" />
-        <span className="font-medium">Companies</span>
+        <span className="font-semibold">Companies</span>
       </Link>
       <Link 
         href="/jobs" 
@@ -123,7 +123,7 @@ export function MenuLinks() {
         }`}
       >
         <Briefcase className="w-5 h-5" />
-        <span className="font-medium">Browse Jobs</span>
+        <span className="font-semibold">Browse Jobs</span>
       </Link>
      
       {!session && (
@@ -134,7 +134,7 @@ export function MenuLinks() {
           }`}
         >
           <Mail className="w-5 h-5" />
-          <span className="font-medium">Contact Us</span>
+          <span className="font-semibold">Contact Us</span>
         </Link>
       )}
     </div>
