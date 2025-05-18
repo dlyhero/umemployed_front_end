@@ -20,7 +20,7 @@ export function NavLinks() {
         <Building2 className={`w-4 h-4 group-hover:text-brand transition-colors ${
           isActive('/companies') ? 'text-brand' : 'text-gray-600'
         }`} />
-        <span className={`text-sm font-medium group-hover:text-brand transition-colors ${
+        <span className={`text-sm font-semibold group-hover:text-brand transition-colors ${
           isActive('/companies') ? 'text-brand' : 'text-gray-600'
         }`}>
           Companies
@@ -35,7 +35,7 @@ export function NavLinks() {
         <Briefcase className={`w-4 h-4 group-hover:text-brand transition-colors ${
           isActive('/jobs') ? 'text-brand' : 'text-gray-600'
         }`} />
-        <span className={`text-sm font-medium group-hover:text-brand transition-colors ${
+        <span className={`text-sm font-semibold group-hover:text-brand transition-colors ${
           isActive('/jobs') ? 'text-brand' : 'text-gray-600'
         }`}>
           Browse Jobs
