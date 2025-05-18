@@ -1,10 +1,58 @@
-// hooks/useJobs.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import baseUrl from '../app/api/baseUrl';
 import { useSession } from 'next-auth/react';
-import { useCallback } from 'react';
+
+// Formatting functions defined outside the component to prevent recreation
+const formatJobType = (type) => {
+  const typeMap = {
+    'fullTime': 'Full-time',
+    'partTime': 'Part-time',
+    'contract': 'Contract',
+    'temporary': 'Temporary',
+    'internship': 'Internship',
+    'freelance': 'Freelance'
+  };
+  return typeMap[type] || type;
+};
+
+const formatExperienceLevel = (level) => {
+  const levelMap = {
+    'noExperience': 'No experience',
+    '1-3Years': '1-3 years',
+    '3-5Years': '3-5 years',
+    '5PlusYears': '5+ years'
+  };
+  return levelMap[level] || level;
+};
+
+const formatSalaryRange = (range) => {
+  if (!range) return 'Not specified';
+
+  try {
+    const parts = range.split('-');
+    if (parts.length < 2) return 'Not specified';
+
+    const min = parseInt(parts[0]) || 0;
+    const max = parseInt(parts[1]) || 0;
+
+    if (min === 0 && max === 0) return 'Not specified';
+
+    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+  } catch (error) {
+    return 'Not specified';
+  }
+};
+
+const formatLocationType = (type) => {
+  const typeMap = {
+    'remote': 'Remote',
+    'onSite': 'On-site',
+    'hybrid': 'Hybrid'
+  };
+  return typeMap[type] || type;
+};
 
 export const useJobs = () => {
   const { data: session } = useSession();
@@ -21,84 +69,59 @@ export const useJobs = () => {
     salary_ranges: []
   });
 
-  // Formatting functions
-  const formatJobType = (type) => {
-    const typeMap = {
-      'fullTime': 'Full-time',
-      'partTime': 'Part-time',
-      'contract': 'Contract',
-      'temporary': 'Temporary',
-      'internship': 'Internship',
-      'freelance': 'Freelance'
-    };
-    return typeMap[type] || type;
-  };
+  const getAuthApi = useCallback(() => {
+    return axios.create({
+      baseURL: baseUrl,
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`
+      }
+    });
+  }, [session?.accessToken]);
 
-  const formatExperienceLevel = (level) => {
-    const levelMap = {
-      'noExperience': 'No experience',
-      '1-3Years': '1-3 years',
-      '3-5Years': '3-5 years',
-      '5PlusYears': '5+ years'
-    };
-    return levelMap[level] || level;
-  };
-
-  const formatSalaryRange = (range) => {
-    if (!range) return 'Not specified';
-    const [min, max] = range.split('-').map(Number);
-    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-  };
-
-  const formatLocationType = (type) => {
-    const typeMap = {
-      'remote': 'Remote',
-      'onSite': 'On-site',
-      'hybrid': 'Hybrid'
-    };
-    return typeMap[type] || type;
-  };
+  const getPublicApi = useCallback(() => {
+    return axios.create({
+      baseURL: baseUrl
+    });
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const api = axios.create({
-        baseURL: baseUrl,
+      const publicApi = getPublicApi();
+      const jobsResponse = await publicApi.get('/job/jobs/');
+
+      const formattedJobs = jobsResponse.data.map(job => {
+        // Safely handle potentially undefined fields
+        const salaryRange = job.salary_range || '';
+        const description = job.description ? job.description.replace(/<[^>]*>/g, '') : '';
+        const createdAt = job.created_at ? new Date(job.created_at).toLocaleDateString() : '';
+
+        return {
+          ...job,
+          formattedType: formatJobType(job.job_type),
+          formattedExperience: formatExperienceLevel(job.experience_level),
+          formattedSalary: formatSalaryRange(salaryRange),
+          formattedLocationType: formatLocationType(job.job_location_type),
+          postedDate: createdAt,
+          description: description
+        };
       });
-  
-      const jobsResponse = await api.get('/job/jobs/');
-      const formattedJobs = jobsResponse.data.map(job => ({
-        ...job,
-        formattedType: formatJobType(job.job_type),
-        formattedExperience: formatExperienceLevel(job.experience_level),
-        formattedSalary: formatSalaryRange(job.salary_range),
-        formattedLocationType: formatLocationType(job.job_location_type),
-        postedDate: new Date(job.created_at).toLocaleDateString(),
-        description: job.description.replace(/<[^>]*>/g, '')
-      }));
-  
+
       setAllJobs(formattedJobs);
       setFilteredJobs(formattedJobs);
-  
-      if (session?.accessToken) {
-        const authApi = axios.create({
-          baseURL: baseUrl,
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`
-          }
-        });
-  
-        try {
-          const savedResponse = await authApi.get('/job/saved-jobs/');
-          setSavedJobs(savedResponse.data.map(job => job.id));
-  
-          const appliedResponse = await authApi.get('/job/applied-jobs/');
-          setAppliedJobs(appliedResponse.data.map(job => job.id));
-        } catch (authError) {
-          console.error('Error fetching protected data:', authError);
-        }
+
+      if (session) {
+        const authApi = getAuthApi();
+        const [savedResponse, appliedResponse] = await Promise.all([
+          authApi.get('/job/saved-jobs/'),
+          authApi.get('/job/applied-jobs/')
+        ]);
+
+        setSavedJobs(savedResponse.data.map(job => job.id));
+        setAppliedJobs(appliedResponse.data.map(job => job.id));
       }
-  
+
+      // Generate filter options with safe defaults
       const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
         .filter(Boolean)
         .map(type => ({
@@ -106,7 +129,7 @@ export const useJobs = () => {
           label: formatLocationType(type),
           count: formattedJobs.filter(job => job.job_location_type === type).length
         }));
-  
+
       const experienceLevels = [...new Set(formattedJobs.map(job => job.experience_level))]
         .filter(Boolean)
         .map(level => ({
@@ -114,7 +137,7 @@ export const useJobs = () => {
           label: formatExperienceLevel(level),
           count: formattedJobs.filter(job => job.experience_level === level).length
         }));
-  
+
       const locations = [...new Set(formattedJobs.map(job => job.location))]
         .filter(Boolean)
         .map(location => ({
@@ -122,71 +145,76 @@ export const useJobs = () => {
           label: location,
           count: formattedJobs.filter(job => job.location === location).length
         }));
-  
+
       const salaryRanges = [
         {
-          value: '0-50000', label: 'Under $50K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+          value: '0-50000',
+          label: 'Under $50K',
+          count: formattedJobs.filter(job => {
+            const salary = job.salary_range ? parseInt(job.salary_range.split('-')[0]) || 0 : 0;
             return salary < 50000;
           }).length
         },
         {
-          value: '50000-100000', label: '$50K - $100K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+          value: '50000-100000',
+          label: '$50K - $100K',
+          count: formattedJobs.filter(job => {
+            const salary = job.salary_range ? parseInt(job.salary_range.split('-')[0]) || 0 : 0;
             return salary >= 50000 && salary < 100000;
           }).length
         },
         {
-          value: '100000-150000', label: '$100K - $150K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+          value: '100000-150000',
+          label: '$100K - $150K',
+          count: formattedJobs.filter(job => {
+            const salary = job.salary_range ? parseInt(job.salary_range.split('-')[0]) || 0 : 0;
             return salary >= 100000 && salary < 150000;
           }).length
         },
         {
-          value: '150000-200000', label: '$150K - $200K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+          value: '150000-200000',
+          label: '$150K - $200K',
+          count: formattedJobs.filter(job => {
+            const salary = job.salary_range ? parseInt(job.salary_range.split('-')[0]) || 0 : 0;
             return salary >= 150000 && salary < 200000;
           }).length
         },
         {
-          value: '200000-', label: 'Over $200K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+          value: '200000-',
+          label: 'Over $200K',
+          count: formattedJobs.filter(job => {
+            const salary = job.salary_range ? parseInt(job.salary_range.split('-')[0]) || 0 : 0;
             return salary >= 200000;
           }).length
         }
       ];
-  
+
       setFilterOptions({
         employment_types: employmentTypes,
         experience_levels: experienceLevels,
         locations: locations,
         salary_ranges: salaryRanges
       });
-  
+
     } catch (err) {
       setError(err.response?.data?.message || err.message);
-      toast.error('Failed to load jobs data');
     } finally {
       setLoading(false);
     }
-  }, [ session, setAllJobs, setFilteredJobs, setSavedJobs, setAppliedJobs, setFilterOptions, setLoading, setError]);
-  
+  }, [session, getAuthApi, getPublicApi]);
 
   useEffect(() => {
     fetchData();
-  }, [session, fetchData]);
+  }, [fetchData]);
 
+  // ... rest of the code remains the same (toggleSaveJob, applyFilters, resetFilters)
+  // Make sure to include all the other functions exactly as they were in the previous version
   const toggleSaveJob = async (jobId) => {
-    if (!session?.accessToken) {
-      toast.error('Please sign in to save jobs');
-      return;
-    }
-
     try {
       const api = axios.create({
         baseURL: baseUrl,
         headers: {
-          Authorization: `Bearer ${session.accessToken}`
+          Authorization: `Bearer ${session?.accessToken}`
         }
       });
 

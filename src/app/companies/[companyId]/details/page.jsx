@@ -37,7 +37,6 @@ const CompanyDetails = () => {
           
         );
         setCompany(companyRes.data);
-       console.log("company", companyRes)
         // Fetch company jobs
         const jobsRes = await axios.get(
           `${baseUrl}/company/company/${params.companyId}/jobs/`,
