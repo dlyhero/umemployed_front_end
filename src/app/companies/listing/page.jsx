@@ -29,7 +29,6 @@ const CompanyListing = () => {
 
         })
         setCompanies(response.data)
-        console.log(response)
       } catch (err) {
         console.error("Error fetching companies:", err.response || err.message)
         setCompanies([])
