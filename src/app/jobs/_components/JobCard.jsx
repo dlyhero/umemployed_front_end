@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suitcase } from "@phosphor-icons/react";
+import useUser from "@/src/hooks/useUser";
 
 const JobCard = ({ job, onToggleSave, loading }) => {
   const { data: session } = useSession();
   const router = useRouter();
+  const user = useUser();
 
   const isRecruiter = (session?.user?.role === 'recruiter' && user?.user.has_company)  && user.user?.company_id === company.id;
 
