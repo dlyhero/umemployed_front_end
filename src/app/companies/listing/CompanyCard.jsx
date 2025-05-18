@@ -111,7 +111,7 @@ const CompanyCard = ({ company: initialCompany, index }) => {
                 </div>
               </div>
             </div>
-            <p className="text-gray-600 mb-4 h-[3.4rem] overflow-hidden line-clamp-3">{company.description || 'No description available'}</p>
+            <p className="text-gray-600 mb-4 h-[3.6rem] overflow-hidden line-clamp-3">{company.description || 'No description available'}</p>
           </div>
 
           <div className="bottom-company">
