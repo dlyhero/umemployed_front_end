@@ -159,7 +159,7 @@ export default function AuthButtons() {
                 isResumeActive ? 'rounded-none' : ''
               }`}
             >
-              <span className={`group-hover:text-brand transition-colors ${
+              <span className={`group-hover:text-brand transition-colors font-semibold ${
                 isResumeActive ? 'text-brand' : ''
               }`}>Resume</span>
             </Link>

@@ -458,8 +458,8 @@ const JobDetailPage = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 relative rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
-                        <Suitcase  className="w-10 h-10"/>
+                      <div className="w-14 h-14 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
+                        <Suitcase  className="w-10 h-10 text-brand"/>
                       </div>
                       
                     {job.company.size && <div >
@@ -490,14 +490,14 @@ const JobDetailPage = () => {
                     {job.title || 'Job Title'}
                   </h1>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>{job.job_location_type || 'Location not specified'}</Badge>
-                    <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>{job.location || 'Remote'}</Badge>
-                    <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>{job.experience_level || 'Experience not specified'}</Badge>
-                    {job.level && <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>{job.level}</Badge>}
-                    {job.weekly_ranges && <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>{job.weekly_ranges}</Badge>}
-                    {job.hire_number > 1 && <Badge variant="secondary" className={`bg-gray-100 text-brand font-semibold`}>Hiring {job.hire_number} people</Badge>}
+                    <Badge variant="secondary" className={` text-brand text-md`}>{job.job_location_type || 'Location not specified'}</Badge>
+                    <Badge variant="secondary" className={` text-brand text-md`}>{job.location || 'Remote'}</Badge>
+                    <Badge variant="secondary" className={` text-brand text-md`}>{job.experience_level || 'Experience not specified'}</Badge>
+                    {job.level && <Badge variant="secondary" className={` text-brand text-md`}>{job.level}</Badge>}
+                    {job.weekly_ranges && <Badge variant="secondary" className={` text-brand text-md`}>{job.weekly_ranges}</Badge>}
+                    {job.hire_number > 1 && <Badge variant="secondary" className={` text-brand text-md`}>Hiring {job.hire_number} people</Badge>}
                   </div>
-                  <p className="text-xl font-semibold">
+                  <p className="text-xl font-semibold text-brand">
                     ${job.salary_range || 'Salary not specified'}/year
                   </p>
                   <p className="text-sm text-muted-foreground">
