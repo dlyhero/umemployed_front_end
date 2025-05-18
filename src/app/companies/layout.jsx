@@ -11,8 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-      <html>
-        <body className="antialiased text-[15px]">
+        <div className="antialiased text-[15px]">
         <AuthProvider>
           <Header />
           {children}
@@ -25,7 +24,6 @@ export default function RootLayout({ children }) {
           />
           <Footer />
         </AuthProvider>
-      </body>
-      </html>
+      </div>
   );
 }

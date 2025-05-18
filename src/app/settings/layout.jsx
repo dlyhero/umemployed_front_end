@@ -46,8 +46,7 @@ import {
     ]
   
     return (
-      <html>
-        <body>
+      <div>
           <AuthProvider>
             <Header />
             <SettingsProvider>
@@ -69,8 +68,7 @@ import {
               </div>
             </SettingsProvider>
           </AuthProvider>
-        </body>
-      </html>
+      </div>
     )
   }
   

@@ -46,7 +46,7 @@ export default function AuthButtons() {
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      await signOut({ callbackUrl: '/' });
+      await signOut({ callbackUrl: '/logout' });
     } finally {
       setSigningOut(false);
     }

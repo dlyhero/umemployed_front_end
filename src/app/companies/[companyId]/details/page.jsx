@@ -24,7 +24,6 @@ const CompanyDetails = () => {
   const { toggleSaveJob } = useJobs();
   const [showVideoModal, setShowVideoModal] = useState(false);  
   const user = useUser();
-  console.log(user);
 
   useEffect(() => {
     const fetchCompanyData = async () => {

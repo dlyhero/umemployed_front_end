@@ -15,8 +15,7 @@ export const metadata = {
 
 export default function ProfileLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={` antialiased text-[15px]`}
       >  
         <AuthProvider>
@@ -25,7 +24,6 @@ export default function ProfileLayout({ children }) {
           <Footer3 />
           <Toaster position="top-center" richColors/>
         </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

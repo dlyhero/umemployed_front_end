@@ -66,6 +66,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
+    signOut: "/logout",
     error: "auth/error",
     OfflinePage: "/offline",
   },

@@ -10,19 +10,11 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Settings className="h-6 w-6" />
         <h1 className="text-2xl font-bold">Settings Dashboard</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <SettingsCard 
-          icon={<User />}
-          title="Profile"
-          description="Update your personal information"
-          href="/settings/profile"
-          preview={`${settings.profile.firstName} ${settings.profile.lastName}`}
-        />
-
+      
         <SettingsCard 
           icon={<Settings />}
           title="Account"
@@ -72,14 +64,14 @@ function SettingsCard({ icon, title, description, href, preview }) {
     <Link href={href}>
       <div className="border rounded-lg p-6 hover:bg-muted/50 transition cursor-pointer h-full">
         <div className="flex items-center gap-3 mb-4">
-          <div className="bg-blue-100 p-2 rounded-full">
+          <div className="p-2 rounded-full">
             {icon}
           </div>
           <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-2">{description}</p>
         <p className="text-sm font-medium">{preview}</p>
-        <Button variant="link" className="mt-4 px-0">
+        <Button variant="link"  className="text-gray-600 font-semibold mt-4 px-0">
           Configure →
         </Button>
       </div>
