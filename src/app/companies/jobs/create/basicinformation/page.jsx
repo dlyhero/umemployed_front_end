@@ -1,60 +1,56 @@
-// app/companies/jobs/create/basicinformation/page.tsx
-'use client'
+"use client"
 
-import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { Toaster, toast } from 'react-hot-toast'
-import { useJobForm } from '../../../../../hooks/useJobForm'
-import { FormContainer } from '../../components'
-import LoadingSpinner from '@/src/components/common/LoadingSpinner'
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Toaster, toast } from "react-hot-toast"
+import { FormContainer } from "../../components/FormContainer"
+import { useJobForm } from "../../../../../hooks/useJobForm"
 
-function BasicInformationContent() {
-  const [isMounted, setIsMounted] = useState(false)
+export default function BasicInformationContent() {
+  const [loading, setLoading] = useState(false)
+  const [jobId, setJobId] = useState(null)
   const router = useRouter()
-  const params = useParams()
-  const companyId = params?.companyId 
 
-  const {
-    step,
-    form,
-    onSubmit: handleSubmit,
-    stepIsValid,
-    nextStep,
-    prevStep,
-    jobOptions,
-    extractedSkills
-  } = useJobForm('basicinformation')
-
+  // Get jobId from URL on client side only
   useEffect(() => {
-    setIsMounted(true)
+    // This will only run in the browser
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search)
+      const urlJobId = urlParams.get("jobId")
+      if (urlJobId) {
+        setJobId(urlJobId)
+      }
+    }
   }, [])
 
-  if (!isMounted || !form) {
-    return <LoadingSpinner fullPage />
+  // Initialize the hook with jobId from URL
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions } = useJobForm("basicinformation", jobId)
+
+  const handleSubmit = async (data) => {
+    try {
+      const result = await onSubmit(data)
+      if (result?.error) {
+        toast.error(result.error)
+        return result
+      }
+      toast.success("Basic information saved successfully!")
+      if (result.id) {
+        setLoading(true) // Show loader during navigation
+        router.push(`/companies/jobs/create/requirements?jobId=${result.id}`)
+      }
+      return result
+    } catch (error) {
+      toast.error("Failed to save basic information")
+      return { error: error.message }
+    }
   }
 
-  const onSubmit = async (data) => {
-    try {
-      if (!handleSubmit) {
-        throw new Error('Form submission handler not ready')
-      }
-
-      const result = await handleSubmit(data)
-      
-      if (result?.error) {
-        throw new Error(result.error)
-      }
-
-      if (step === 4) {
-        toast.success('Job created successfully!')
-        router.push(`/companies/${companyId}/dashboard`)
-      } else {
-        toast.success(`Step ${step} saved successfully!`)
-        nextStep()
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to submit step')
-    }
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+      </div>
+    )
   }
 
   return (
@@ -63,21 +59,12 @@ function BasicInformationContent() {
       <FormContainer
         step={step}
         form={form}
-        nextStep={nextStep}
+        nextStep={() => form.handleSubmit(handleSubmit)()}
         prevStep={prevStep}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
-        extractedSkills={extractedSkills}
       />
     </>
-  )
-}
-
-export default function BasicInformationPage() {
-  return (
-    <Suspense fallback={<LoadingSpinner fullPage />}>
-      <BasicInformationContent />
-    </Suspense>
   )
 }
