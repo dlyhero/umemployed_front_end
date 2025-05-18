@@ -47,11 +47,7 @@ const CompanyUpdatePage = () => {
         return;
       }
       const fetchCompanyData = async () => {
-        if (!session?.accessToken) {
-          toast.error('Authentication token missing. Please sign in again.');
-          router.push(`/login?callbackUrl=/companies/${companyId}/update`);
-          return;
-        }
+     
         try {
           const response = await fetch(
             `${BASE_URL}/api/company/company-details/${companyId}/`,
@@ -94,9 +90,7 @@ const CompanyUpdatePage = () => {
         }
       };
       fetchCompanyData();
-    } else if (status === 'unauthenticated') {
-      router.push(`/login?callbackUrl=/companies/${companyId}/update`);
-    }
+    } 
   }, [status, session, companyId, router]);
 
   const handleInputChange = (e) => {
