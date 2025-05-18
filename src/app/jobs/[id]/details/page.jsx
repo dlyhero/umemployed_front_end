@@ -239,11 +239,21 @@ const JobDetailPage = () => {
 
   const cleanDescription = (html) => {
     if (!html || typeof html !== 'string') return '';
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .replace(/&nbsp;/g, ' ')
+    
+    // Create a temporary div to parse HTML
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    
+    // Get text content and clean it
+    let text = tmp.textContent || tmp.innerText || '';
+    
+    return text
+      .replace(/<[^>]*>/g, ' ')          // Remove any remaining HTML tags
+      .replace(/[*_\-]/g, ' ')           // Remove *, _, and -
+      .replace(/&nbsp;/gi, ' ')          // Replace HTML non-breaking spaces
+      .replace(/[ \t\r\n]+/g, ' ')       // Replace multiple spaces/tabs/newlines
+      .replace(/^[ \t]+/g, '')           // Remove leading spaces
+      .replace(/[ \t]+$/g, '')           // Remove trailing spaces
       .trim();
   };
 
