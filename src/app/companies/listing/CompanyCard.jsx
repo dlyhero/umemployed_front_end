@@ -26,7 +26,6 @@ const CompanyCard = ({ company: initialCompany, index }) => {
         setCompany(response.data);
         setLoading(false);
       } catch (err) {
-        console.log('Error fetching company details:', err);
         setError('Failed to load company details');
         setLoading(false);
       }
