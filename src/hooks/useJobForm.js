@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { step1Schema, step2Schema, step3Schema, step4Schema } from '../app/companies/jobs/schemas/jobSchema';
@@ -120,37 +120,45 @@ export const useJobForm = (currentStep) => {
         loadSkills();
       }
     }
-  }, [form, currentStep]);
+  }, [form, currentStep, fetchExtractedSkills]);
 
   const saveFormData = (data) => {
     localStorage.setItem('jobFormData', JSON.stringify(data));
   };
 
-  const fetchExtractedSkills = async (jobId) => {
-    console.log('fetchExtractedSkills called with jobId:', jobId, 'token:', session?.accessToken || session?.token);
-    try {
-      const response = await fetch(`https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${jobId}/extracted-skills/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
-        },
-      });
-      console.log('fetchExtractedSkills response status:', response.status);
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('fetchExtractedSkills error:', errorData);
-        throw new Error(errorData.message || 'Failed to fetch extracted skills');
+
+  const fetchExtractedSkills = useCallback(
+    async (jobId) => {
+      console.log('fetchExtractedSkills called with jobId:', jobId, 'token:', session?.accessToken || session?.token);
+      try {
+        const response = await fetch(`https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${jobId}/extracted-skills/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+          },
+        });
+  
+        console.log('fetchExtractedSkills response status:', response.status);
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('fetchExtractedSkills error:', errorData);
+          throw new Error(errorData.message || 'Failed to fetch extracted skills');
+        }
+  
+        const data = await response.json();
+        const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
+        console.log('fetchExtractedSkills successful, skills:', skills);
+        return skills;
+      } catch (error) {
+        console.error('Error fetching extracted skills:', error.message);
+        return [];
       }
-      const data = await response.json();
-      const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
-      console.log('fetchExtractedSkills successful, skills:', skills);
-      return skills;
-    } catch (error) {
-      console.error('Error fetching extracted skills:', error.message);
-      return [];
-    }
-  };
+    },
+    [session?.accessToken, session?.token] // dependencies
+  );
+  
 
   const onSubmit = async (data) => {
     const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api'; // Use the real backend URL

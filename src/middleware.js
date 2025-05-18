@@ -32,9 +32,9 @@ export async function middleware(request) {
 
   // If not authenticated and trying to access protected route
   if (!token) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('callbackUrl', path)
-    return NextResponse.redirect(loginUrl)
+    const HomeUrl = new URL('/', request.url)
+    HomeUrl.searchParams.set('callbackUrl', path)
+    return NextResponse.redirect(HomeUrl)
   }
 
   // If user hasn't selected a role yet

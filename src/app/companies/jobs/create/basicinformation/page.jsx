@@ -1,43 +1,60 @@
-'use client';
-import { useRouter, useParams } from 'next/navigation';
-import { useState } from 'react'; // Add useState
-import { Toaster, toast } from 'react-hot-toast';
-import { FormContainer } from '../../components/FormContainer';
-import { useJobForm } from '../../../../../hooks/useJobForm';
+// app/companies/jobs/create/basicinformation/page.tsx
+'use client'
 
-export default function BasicInformation() {
-  const currentStep = 'basicinformation';
-  const { companyId } = useParams();
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions } = useJobForm(currentStep);
-  const [loading, setLoading] = useState(false); // Add loading state
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import { Toaster, toast } from 'react-hot-toast'
+import { useJobForm } from '../../../../../hooks/useJobForm'
+import { FormContainer } from '../../components'
+import LoadingSpinner from '@/src/components/common/LoadingSpinner'
 
-  const router = useRouter();
+function BasicInformationContent() {
+  const [isMounted, setIsMounted] = useState(false)
+  const router = useRouter()
+  const params = useParams()
+  const companyId = params?.companyId 
 
-  const handleSubmit = async (data) => {
+  const {
+    step,
+    form,
+    onSubmit: handleSubmit,
+    stepIsValid,
+    nextStep,
+    prevStep,
+    jobOptions,
+    extractedSkills
+  } = useJobForm('basicinformation')
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted || !form) {
+    return <LoadingSpinner fullPage />
+  }
+
+  const onSubmit = async (data) => {
     try {
-      const result = await onSubmit(data);
-      if (result?.error) {
-        toast.error(result.error);
-        return result;
+      if (!handleSubmit) {
+        throw new Error('Form submission handler not ready')
       }
-      toast.success('Basic information saved successfully!');
-      if (result.id) {
-        setLoading(true); // Show loader during navigation
-        router.push(`/companies/jobs/create/requirements?jobId=${result.id}`);
-      }
-      return result;
-    } catch (error) {
-      toast.error('Failed to save basic information');
-      return { error: error.message };
-    }
-  };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
-      </div>
-    );
+      const result = await handleSubmit(data)
+      
+      if (result?.error) {
+        throw new Error(result.error)
+      }
+
+      if (step === 4) {
+        toast.success('Job created successfully!')
+        router.push(`/companies/${companyId}/dashboard`)
+      } else {
+        toast.success(`Step ${step} saved successfully!`)
+        nextStep()
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to submit step')
+    }
   }
 
   return (
@@ -46,12 +63,21 @@ export default function BasicInformation() {
       <FormContainer
         step={step}
         form={form}
-        nextStep={() => form.handleSubmit(handleSubmit)()}
+        nextStep={nextStep}
         prevStep={prevStep}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
       />
     </>
-  );
+  )
+}
+
+export default function BasicInformationPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner fullPage />}>
+      <BasicInformationContent />
+    </Suspense>
+  )
 }

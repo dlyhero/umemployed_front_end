@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import baseUrl from '../app/api/baseUrl';
 import { useSession } from 'next-auth/react';
+import { useCallback } from 'react';
 
 export const useJobs = () => {
   const { data: session } = useSession();
@@ -58,14 +59,13 @@ export const useJobs = () => {
     return typeMap[type] || type;
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const api = axios.create({
         baseURL: baseUrl,
       });
-
-      // Fetch jobs without authorization
+  
       const jobsResponse = await api.get('/job/jobs/');
       const formattedJobs = jobsResponse.data.map(job => ({
         ...job,
@@ -76,11 +76,10 @@ export const useJobs = () => {
         postedDate: new Date(job.created_at).toLocaleDateString(),
         description: job.description.replace(/<[^>]*>/g, '')
       }));
-
+  
       setAllJobs(formattedJobs);
       setFilteredJobs(formattedJobs);
-
-      // Only fetch saved and applied jobs if user is authenticated
+  
       if (session?.accessToken) {
         const authApi = axios.create({
           baseURL: baseUrl,
@@ -88,19 +87,18 @@ export const useJobs = () => {
             Authorization: `Bearer ${session.accessToken}`
           }
         });
-
+  
         try {
           const savedResponse = await authApi.get('/job/saved-jobs/');
           setSavedJobs(savedResponse.data.map(job => job.id));
-
+  
           const appliedResponse = await authApi.get('/job/applied-jobs/');
           setAppliedJobs(appliedResponse.data.map(job => job.id));
         } catch (authError) {
           console.error('Error fetching protected data:', authError);
-          // Don't treat this as a fatal error - we still have jobs data
         }
       }
-
+  
       const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
         .filter(Boolean)
         .map(type => ({
@@ -108,7 +106,7 @@ export const useJobs = () => {
           label: formatLocationType(type),
           count: formattedJobs.filter(job => job.job_location_type === type).length
         }));
-
+  
       const experienceLevels = [...new Set(formattedJobs.map(job => job.experience_level))]
         .filter(Boolean)
         .map(level => ({
@@ -116,7 +114,7 @@ export const useJobs = () => {
           label: formatExperienceLevel(level),
           count: formattedJobs.filter(job => job.experience_level === level).length
         }));
-
+  
       const locations = [...new Set(formattedJobs.map(job => job.location))]
         .filter(Boolean)
         .map(location => ({
@@ -124,7 +122,7 @@ export const useJobs = () => {
           label: location,
           count: formattedJobs.filter(job => job.location === location).length
         }));
-
+  
       const salaryRanges = [
         {
           value: '0-50000', label: 'Under $50K', count: formattedJobs.filter(job => {
@@ -157,25 +155,26 @@ export const useJobs = () => {
           }).length
         }
       ];
-
+  
       setFilterOptions({
         employment_types: employmentTypes,
         experience_levels: experienceLevels,
         locations: locations,
         salary_ranges: salaryRanges
       });
-
+  
     } catch (err) {
       setError(err.response?.data?.message || err.message);
       toast.error('Failed to load jobs data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [ session, setAllJobs, setFilteredJobs, setSavedJobs, setAppliedJobs, setFilterOptions, setLoading, setError]);
+  
 
   useEffect(() => {
     fetchData();
-  }, [session]);
+  }, [session, fetchData]);
 
   const toggleSaveJob = async (jobId) => {
     if (!session?.accessToken) {
