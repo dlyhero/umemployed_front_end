@@ -13,8 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={`antialiased text-[15px] flex flex-col h-screen overflow-hidden`}
       >  
         <AuthProvider>
@@ -30,7 +29,6 @@ export default function RootLayout({ children }) {
         }}
       />
         </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

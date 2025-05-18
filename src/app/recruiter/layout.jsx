@@ -13,8 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={`antialiased text-[15px]`}
       >  
         <AuthProvider>
@@ -29,7 +28,6 @@ export default function RootLayout({ children }) {
       />
           <Footer />
         </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

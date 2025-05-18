@@ -31,8 +31,8 @@ export const metadata = {
 
 export default function UpdateLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+    
+      <div
         className={` antialiased text-[15px]`}
       > 
        <AuthProvider>
@@ -40,7 +40,6 @@ export default function UpdateLayout({ children }) {
        {children}                                     
        </AuthProvider>
        <Footer />
-      </body>
-    </html>
+      </div>
   );
 }

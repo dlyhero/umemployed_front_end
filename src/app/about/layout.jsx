@@ -13,8 +13,7 @@ export const metadata = {
 
 export default function ResumeLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <DivideSquare
         className={` antialiased text-[15px]`}
       > 
        <AuthProvider>
@@ -22,7 +21,6 @@ export default function ResumeLayout({ children }) {
        {children}  
        <Footer />
        </AuthProvider>
-      </body>
-    </html>
+      </DivideSquare>
   );
 }
