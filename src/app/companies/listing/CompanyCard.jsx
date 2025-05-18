@@ -15,11 +15,11 @@ const CompanyCard = ({ company: initialCompany, index }) => {
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
-    
+
       try {
         if (typeof window !== 'undefined') {
           const response = await axios.get(`${baseUrl}/company/company-details/${initialCompany.id}/`, {
-          
+
           });
           setCompany(response.data);
         }
@@ -33,7 +33,7 @@ const CompanyCard = ({ company: initialCompany, index }) => {
     };
 
     fetchCompanyDetails();
-  }, [initialCompany.id, ]);
+  }, [initialCompany.id,]);
 
   const getInitials = (name) => {
     if (!name) return '?';
@@ -111,7 +111,9 @@ const CompanyCard = ({ company: initialCompany, index }) => {
                 </div>
               </div>
             </div>
-            <p className="text-gray-600 mb-4 h-[3.4rem] overflow-hidden line-clamp-3">{company.description || 'No description available'}</p>
+            {company.description ?
+              <p className="text-gray-600 mb-4 h-[3.6rem] overflow-hidden line-clamp-3">{company.description}</p> :
+              <p className="text-gray-600 mb-4 h-[3.6rem] overflow-hidden line-clamp-3 flex justify-center items-center">No description available</p>}
           </div>
 
           <div className="bottom-company">

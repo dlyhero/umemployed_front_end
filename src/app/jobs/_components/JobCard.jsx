@@ -170,9 +170,9 @@ const JobCard = ({ job, onToggleSave, loading }) => {
       </div>
 
       <div className="flex-1 mb-2">
-        <p className="text-sm text-muted-foreground line-clamp-3 min-h-[3.6rem] my-auto">
-          {job?.description || "No description"}
-        </p>
+        {job?.description ? <p className="text-sm text-muted-foreground line-clamp-3 min-h-[3.6rem] my-auto">
+          {job?.description}
+        </p>: <p className="text-sm text-muted-foreground line-clamp-3 min-h-[3.6rem] my-auto flex justify-center items-center">No description</p>}
       </div>
 
       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
