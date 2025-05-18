@@ -161,8 +161,8 @@ const JobCard = ({ job, onToggleSave, loading }) => {
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         <span className={`px-2 py-1 rounded-md text-sm ${
-          job.job_location_type?.toLowerCase() === 'remote' ? 'bg-green-100 text-brand ' : 
-          job.job_location_type?.toLowerCase() === 'contract' ? 'bg-blue-50 text-brand' : 
+          job.job_location_type?.toLowerCase() === 'remote' ? ' text-brand ' : 
+          job.job_location_type?.toLowerCase() === 'contract' ? ' text-brand' : 
           'text-brand'
         }`}>
           {job?.job_location_type || 'Full-Time'}

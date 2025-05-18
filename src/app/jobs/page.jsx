@@ -34,7 +34,6 @@ function JobListingContent() {
     resetFilters
   } = useJobs();
 
-  console.log(allJobs)
 
   useEffect(() => {
     const tab = searchParams.get('tab') || 'jobs';
