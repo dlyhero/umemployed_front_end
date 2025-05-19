@@ -19,7 +19,7 @@ const JobDetailPage = () => {
   const jobId = params?.id
 
   const [job, setJob] = useState(null)
-  const [isJobSaved, setIsSaved] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const [similarJobs, setSimilarJobs] = useState([])
   const [activeTab, setActiveTab] = useState("details")
   const [isLoading, setIsLoading] = useState(true)
@@ -29,19 +29,32 @@ const JobDetailPage = () => {
   const [isApplied, setIsApplied] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
 
-  // RetakeModal component definition
+  // Component definitions after all state declarations
   const RetakeModal = () => {
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg p-6 max-w-md w-full">
-          <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
+          <RetakeRequestForm 
+            onClose={() => setShowRetakeModal(false)}
+            retakeReason={retakeReason}
+            setRetakeReason={setRetakeReason}
+            submitRetakeRequest={submitRetakeRequest}
+            isSaved={isSaved}
+            toggleSave={toggleSave}
+          />
         </div>
       </div>
     )
   }
 
-  // RetakeRequestForm component definition
-  const RetakeRequestForm = ({ onClose }) => {
+  const RetakeRequestForm = ({ 
+    onClose, 
+    retakeReason, 
+    setRetakeReason, 
+    submitRetakeRequest,
+    isSaved,
+    toggleSave
+  }) => {
     return (
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
@@ -68,11 +81,18 @@ const JobDetailPage = () => {
             Submit Request
           </Button>
         </div>
+
+        <Button
+          variant="outline"
+          className="w-full border-brand text-brand hover:border-brand hover:text-brand"
+          onClick={toggleSave}
+        >
+          {isSaved ? "Saved" : "Save for Later"}
+        </Button>
       </div>
     )
   }
 
-  // MobileRetakePage component definition
   const MobileRetakePage = () => {
     return (
       <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
@@ -86,7 +106,14 @@ const JobDetailPage = () => {
             Back to job
           </Button>
           <div className="max-w-md mx-auto">
-            <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
+            <RetakeRequestForm 
+              onClose={() => setShowRetakeModal(false)}
+              retakeReason={retakeReason}
+              setRetakeReason={setRetakeReason}
+              submitRetakeRequest={submitRetakeRequest}
+              isSaved={isSaved}
+              toggleSave={toggleSave}
+            />
           </div>
         </div>
       </div>
@@ -94,7 +121,6 @@ const JobDetailPage = () => {
   }
 
   useEffect(() => {
-    // Check if mobile view on component mount
     const checkIfMobile = () => {
       setIsMobileView(window.innerWidth < 768)
     }
@@ -121,7 +147,6 @@ const JobDetailPage = () => {
           baseURL: baseUrl,
         })
 
-        // Check cache first
         const cachedJob = localStorage.getItem(`job-${jobId}`)
         if (cachedJob) {
           const parsed = JSON.parse(cachedJob)
@@ -129,8 +154,10 @@ const JobDetailPage = () => {
           setIsSaved(parsed.isSaved)
           setSimilarJobs(parsed.similarJobs || [])
         }
-        // Fetch jobs without authorization
+
         const jobRes = await api.get(`/job/jobs/${jobId}/`)
+
+        console.log(jobRes);
 
         if (!jobRes.data) {
           toast.error("Job not found")
@@ -165,7 +192,6 @@ const JobDetailPage = () => {
             },
           })
 
-          // Fetch fresh data in background
           const [savedRes, appliedRes] = await Promise.all([
             authApi.get("/job/saved-jobs/").catch(() => ({ data: [] })),
             authApi.get("/job/applied-jobs/").catch(() => ({ data: [] })),
@@ -174,12 +200,9 @@ const JobDetailPage = () => {
           const isJobSaved = savedRes.data.some((job) => job.id == jobId)
           const isJobApplied = appliedRes.data.some((job) => job.id == jobId)
           setIsSaved(isJobSaved)
-
-          // Set application status
           setIsApplied(isJobApplied)
           setHasStarted(jobRes.data.has_started || false)
 
-          // Fetch similar jobs
           let similar = []
           try {
             const similarRes = await authApi.get("/job/job-options/")
@@ -196,24 +219,22 @@ const JobDetailPage = () => {
             similar = []
           }
         }
-        // Update state
+
         setJob(formattedJob)
 
         if (session?.accessToken) {
-          setIsSaved(isJobSaved)
-          setSimilarJobs(similar)
+          setIsSaved(isSaved)
+          setSimilarJobs(similarJobs)
 
-          // Cache data
           localStorage.setItem(
             `job-${jobId}`,
             JSON.stringify({
               job: formattedJob,
-              isSaved: isJobSaved,
-              similarJobs: similar,
+              isSaved: isSaved,
+              similarJobs: similarJobs,
             }),
           )
         } else {
-          // Cache data without saved status for non-authenticated users
           localStorage.setItem(
             `job-${jobId}`,
             JSON.stringify({
@@ -243,20 +264,18 @@ const JobDetailPage = () => {
   const cleanDescription = (html) => {
     if (!html || typeof html !== "string") return ""
 
-    // Create a temporary div to parse HTML
     const tmp = document.createElement("div")
     tmp.innerHTML = html
 
-    // Get text content and clean it
     const text = tmp.textContent || tmp.innerText || ""
 
     return text
-      .replace(/<[^>]*>/g, " ") // Remove any remaining HTML tags
-      .replace(/[*_-]/g, " ") // Remove *, _, and -
-      .replace(/&nbsp;/gi, " ") // Replace HTML non-breaking spaces
-      .replace(/[ \t\r\n]+/g, " ") // Replace multiple spaces/tabs/newlines
-      .replace(/^[ \t]+/g, "") // Remove leading spaces
-      .replace(/[ \t]+$/g, "") // Remove trailing spaces
+      .replace(/<[^>]*>/g, " ")
+      .replace(/[*_-]/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/[ \t\r\n]+/g, " ")
+      .replace(/^[ \t]+/g, "")
+      .replace(/[ \t]+$/g, "")
       .trim()
   }
 
@@ -269,11 +288,9 @@ const JobDetailPage = () => {
         },
       })
 
-      // Optimistic update
       const newSavedState = !isSaved
       setIsSaved(newSavedState)
 
-      // Update cache
       if (job) {
         const cachedJob = localStorage.getItem(`job-${jobId}`)
         if (cachedJob) {
@@ -288,12 +305,10 @@ const JobDetailPage = () => {
         }
       }
 
-      // Make API call
       await authApi.post(`/job/jobs/${jobId}/save/`)
 
       toast.success(newSavedState ? "Job saved successfully" : "Job unsaved successfully")
     } catch (err) {
-      // Revert on error
       setIsSaved(!isSaved)
       toast.error(err.response?.data?.message || "Failed to update saved status")
     }
@@ -332,6 +347,7 @@ const JobDetailPage = () => {
       toast.error(err.response?.data?.message || "Failed to submit retake request")
     }
   }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white pb-8 pt-2">
