@@ -122,8 +122,8 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         <span className={`px-2 py-1 rounded-md text-sm ${
-          job.job_location_type?.toLowerCase() === 'remote' ? 'bg-green-100 text-brand ' : 
-          job.job_location_type?.toLowerCase() === 'contract' ? 'bg-blue-50 text-brand' : 
+          job.job_location_type?.toLowerCase() === 'remote' ? ' text-brand ' : 
+          job.job_location_type?.toLowerCase() === 'contract' ? ' text-brand' : 
           'text-brand'
         }`}>
           {job?.job_location_type || 'Full-Time'}
@@ -131,9 +131,9 @@ const JobCard = ({ job, onToggleSave, isRecruiter = false }) => {
       </div>
 
       <div className="flex-1 mb-2">
-        <p className="text-sm text-muted-foreground line-clamp-3 my-auto">
-          {job?.description || "No description"}
-        </p>
+        {job?.description ? <p className="text-sm text-muted-foreground line-clamp-3 min-h-[3.6rem] my-auto">
+          {job?.description}
+        </p>: <p className="text-sm text-muted-foreground line-clamp-3 min-h-[3.6rem] my-auto flex justify-center items-center">No description</p>}
       </div>
 
       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
