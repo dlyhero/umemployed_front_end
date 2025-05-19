@@ -37,7 +37,7 @@ export default function RateCandidatePage() {
               transition={{ duration: 0.5 }}
               className="text-center flex flex-col items-center justify-center min-h-[60vh]"
             >
-              <h1 className="text-3xl font-semibold text-blue-600 mb-6">
+              <h1 className="text-3xl font-semibold text-brand mb-6">
                 Rate the Candidate
               </h1>
               <StarRating rating={rating} onRatingChange={handleRating} />
@@ -46,7 +46,7 @@ export default function RateCandidatePage() {
                 disabled={!rating}
                 className={`mt-6 py-3 px-6 rounded-full font-semibold transition-colors ${
                   rating
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    ? "bg-brand text-white"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
