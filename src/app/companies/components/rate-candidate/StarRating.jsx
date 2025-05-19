@@ -15,7 +15,7 @@ export default function StarRating({ rating, onRatingChange }) {
           <Star
             className={`w-10 h-10 cursor-pointer transition-colors ${
               rating && star <= rating
-                ? "text-brand/800 fill-blue-600"
+                ? "text-brand/800 fill-brand"
                 : "text-yellow-400"
             }`}
             onClick={() => onRatingChange(star)}

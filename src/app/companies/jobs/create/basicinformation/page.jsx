@@ -1,56 +1,47 @@
-"use client"
+'use client';
+import { useRouter, useParams } from 'next/navigation';
+import { Toaster, toast } from 'react-hot-toast';
+import { FormContainer } from '../../components/FormContainer';
+import { useJobForm } from '../../../../../hooks/useJobForm';
+import { Suspense } from 'react';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Toaster, toast } from "react-hot-toast"
-import { FormContainer } from "../../components/FormContainer"
-import { useJobForm } from "../../../../../hooks/useJobForm"
+function JobPostingContent() {
+  const router = useRouter();
+  const { companyId } = useParams();
+  const { step, form, onSubmit: handleSubmit, stepIsValid, nextStep, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills, isSubmittingStep1 } = useJobForm('basicinformation');
 
-export default function BasicInformationContent() {
-  const [loading, setLoading] = useState(false)
-  const [jobId, setJobId] = useState(null)
-  const router = useRouter()
-
-  // Get jobId from URL on client side only
-  useEffect(() => {
-    // This will only run in the browser
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search)
-      const urlJobId = urlParams.get("jobId")
-      if (urlJobId) {
-        setJobId(urlJobId)
-      }
-    }
-  }, [])
-
-  // Initialize the hook with jobId from URL
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions } = useJobForm("basicinformation", jobId)
-
-  const handleSubmit = async (data) => {
+  const onSubmit = async (data) => {
+    console.log('FormContainer handleSubmit called with data:', data);
     try {
-      const result = await onSubmit(data)
+      const result = await handleSubmit(data);
       if (result?.error) {
-        toast.error(result.error)
-        return result
+        console.error('Step 1 submission error:', result.error);
+        toast.error(result.error);
+        return { error: result.error };
       }
-      toast.success("Basic information saved successfully!")
-      if (result.id) {
-        setLoading(true) // Show loader during navigation
-        router.push(`/companies/jobs/create/requirements?jobId=${result.id}`)
+      if (!result?.id) {
+        console.error('No jobId in Step 1 response:', result);
+        toast.error('Failed to create job: No job ID returned');
+        return { error: 'No job ID returned' };
       }
-      return result
+      console.log('Step 1 submitted successfully with jobId:', result.id);
+      toast.success(`Step ${step} saved successfully!`);
+      await nextStep(result.id);
+      return { success: true, jobId: result.id };
     } catch (error) {
-      toast.error("Failed to save basic information")
-      return { error: error.message }
+      console.error('Step 1 submission failed:', error.message);
+      toast.error('Failed to submit step');
+      return { error: error.message };
     }
-  }
+  };
 
-  if (loading) {
+  if (isSubmittingStep1) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#1e90ff]"></div>
+        <p className="ml-4 text-white text-lg">Creating job...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -59,12 +50,29 @@ export default function BasicInformationContent() {
       <FormContainer
         step={step}
         form={form}
-        nextStep={() => form.handleSubmit(handleSubmit)()}
+        nextStep={() => form.handleSubmit(onSubmit)()}
         prevStep={prevStep}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
+        isLoadingSkills={isLoadingSkills}
+        isLoadingOptions={isLoadingOptions}
       />
     </>
-  )
+  );
+}
+
+export default function JobPostingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+        </div>
+      }
+    >
+      <JobPostingContent />
+    </Suspense>
+  );
 }

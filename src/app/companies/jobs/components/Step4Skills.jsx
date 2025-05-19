@@ -1,10 +1,23 @@
 'use client';
+import { useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Step4Skills = ({ form, extracted_skills, isLoadingSkills }) => {
   console.log('Step4Skills - extracted_skills:', extracted_skills, 'isLoadingSkills:', isLoadingSkills);
+
+  const selectedSkills = form.watch('requirements') || [];
+
+  // Show toast if more than 5 skills are selected
+  useEffect(() => {
+    if (selectedSkills.length > 5) {
+      toast.error('You can select only 5 skills');
+      // Remove the last selected skill
+      form.setValue('requirements', selectedSkills.slice(0, 5), { shouldValidate: true });
+    }
+  }, [selectedSkills, form]);
 
   return (
     <div className="space-y-4">
@@ -37,10 +50,12 @@ export const Step4Skills = ({ form, extracted_skills, isLoadingSkills }) => {
                           // Deselect the skill
                           const newValue = field.value.filter((id) => id !== skill.id);
                           field.onChange(newValue);
-                        } else {
-                          // Select the skill
+                        } else if (field.value.length < 5) {
+                          // Select the skill only if less than 5 are selected
                           const newValue = [...field.value, skill.id];
                           field.onChange(newValue);
+                        } else {
+                          toast.error('You can select only 5 skills');
                         }
                       }}
                     >
