@@ -70,8 +70,10 @@ export const authOptions = {
     error: "auth/error",
     OfflinePage: "/offline",
   },
+ // authOptions.j
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Initial sign in
       if (user) {
         token.role = user.role || 'none';
         token.accessToken = user.accessToken;
@@ -81,6 +83,15 @@ export const authOptions = {
         token.company_id = user.company_id;
         token.user_id = user.user_id;
       }
+      
+      // Update token when session is updated (e.g., after role selection)
+      if (trigger === "update" && session?.role) {
+        token.role = session.role;
+        token.has_resume = session.has_resume;
+        token.has_company = session.has_company;
+        token.company_id = session.company_id;
+      }
+      
       return token;
     },
     async session({ session, token }) {
@@ -96,9 +107,12 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : baseUrl;
+      // Handle callback URLs after login
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     }
-  },
+  },  
 };
 
 export default NextAuth(authOptions);

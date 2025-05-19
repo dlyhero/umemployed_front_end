@@ -19,6 +19,8 @@ export default function AuthButtons() {
   const [signingOut, setSigningOut] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
+  console.log(user);
+
   // Derived states
   const username = useMemo(() => userEmail.split('@')[0] || "", [userEmail]);
   const showSkeleton = isLoading || status === "loading";
@@ -56,13 +58,13 @@ export default function AuthButtons() {
     if (!session?.user) return "/";
 
     if (session.user.role === "job_seeker") {
-      return session.user.has_resume
+      return user.user.has_resume
         ? "/applicant/dashboard"
         : "/applicant/upload-resume";
     } else if (session.user.role === "recruiter") {
-      return session.user.has_company
+      return user.user.has_company
         ? `/companies/${session.user.company_id}/dashboard`
-        : "/company/create";
+        : "/companies/create";
     }
     return "/";
   };
