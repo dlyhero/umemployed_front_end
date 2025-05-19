@@ -29,13 +29,13 @@ export default function AuthButtons() {
     const loadSession = async () => {
       try {
         if (status === "authenticated") {
-          if (!session?.user?.email) {
+          if (!user?.user?.email) {
             const updated = await update();
             if (updated?.user?.email) {
               setUserEmail(updated.user.email);
             }
           } else {
-            setUserEmail(session.user.email);
+            setUserEmail(user.user.email);
           }
         }
       } finally {
@@ -61,7 +61,7 @@ export default function AuthButtons() {
       return user.user.has_resume
         ? "/applicant/dashboard"
         : "/applicant/upload-resume";
-    } else if (session.user.role === "recruiter") {
+    } else if (user.user.role === "recruiter") {
       return user.user.has_company
         ? `/companies/${session.user.company_id}/dashboard`
         : "/companies/create";
