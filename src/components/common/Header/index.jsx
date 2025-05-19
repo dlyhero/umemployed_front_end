@@ -10,6 +10,7 @@ import useScrollTop from "@/src/hooks/useScrollTop";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useIsMessagesPage } from "@/src/utils/path";
+import AuthenticatedNav from "./AuthenticatedNav";
 
 
 
@@ -26,7 +27,7 @@ export function Header() {
     <header
      className={
       cn(
-      "bg-white md:bg-transparent md:backdrop-blur-sm z-40  top-0 ",
+      "bg-white  z-40  top-0 ",
       scrolled && "",
       pathname === '/messages' ? "sticky lg:relative" : "sticky"
     )}>
@@ -48,7 +49,7 @@ export function Header() {
 
         {(pathname !== '/signup' && pathname !== '/login') && (
           <div className="flex items-center gap-4">
-            <AuthButtons className="hidden md:flex" />
+            {session ? <AuthenticatedNav /> : <AuthButtons />}
             <Menu />
           </div>
         )}

@@ -1,6 +1,7 @@
 'use client' // Add this at the top
 import { useEffect } from 'react'
 import OfflineLayout from './offline/layout'
+import { AuthProvider } from '../context/AuthContext'
 
 export default function RootLayout({
   children,
@@ -23,7 +24,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <OfflineLayout>
-          {children}
+          <AuthProvider>
+           {children}
+          </AuthProvider>
+         
         </OfflineLayout>
       </body>
     </html>
