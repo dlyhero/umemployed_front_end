@@ -1,4 +1,4 @@
-// middleware.js
+middleware.js
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
@@ -67,11 +67,13 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // If user is not authenticated, redirect to login with callbackUrl
+  // If user is not authenticated and trying to access a protected route,
+  // redirect to login with callbackUrl
   if (!token) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('callbackUrl', encodeURI(request.url));
-    return NextResponse.redirect(url);
+    const loginUrl = new URL('/login', request.url);
+    // Store the intended destination as a callback URL
+    loginUrl.searchParams.set('callbackUrl', request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Handle onboarding routes

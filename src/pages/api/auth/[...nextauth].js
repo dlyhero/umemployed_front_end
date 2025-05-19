@@ -5,7 +5,6 @@ import axios from "axios";
 import baseUrl from "@/src/app/api/baseUrl";
 
 export const authOptions = {
-
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -66,15 +65,16 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
-    signOut: "/logout",
-    error: "auth/error",
-    OfflinePage: "/offline",
+    signOut: "/",  // Redirect to homepage after logout
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request",
+    newUser: "/select-role", // Redirect to role selection for new users
   },
- // authOptions.j
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, account }) {
       // Initial sign in
-      if (user) {
+      if (account && user) {
+        // Add user details to token when logging in
         token.role = user.role || 'none';
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
@@ -83,18 +83,10 @@ export const authOptions = {
         token.company_id = user.company_id;
         token.user_id = user.user_id;
       }
-      
-      // Update token when session is updated (e.g., after role selection)
-      if (trigger === "update" && session?.role) {
-        token.role = session.role;
-        token.has_resume = session.has_resume;
-        token.has_company = session.has_company;
-        token.company_id = session.company_id;
-      }
-      
       return token;
     },
     async session({ session, token }) {
+      // Pass token info to the client-side session
       session.user.role = token.role;
       session.user.name = token.name || session.user.name;
       session.accessToken = token.accessToken;
@@ -107,12 +99,32 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Handle callback URLs after login
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
+      // Handle redirects after sign in
+      // Check if URL starts with baseUrl
+      if (url.startsWith(baseUrl)) {
+        // If there's a callbackUrl in the URL, use that for redirection
+        const urlObj = new URL(url);
+        const callbackUrl = urlObj.searchParams.get('callbackUrl');
+        
+        if (callbackUrl) {
+          // Make sure the callbackUrl is from the same origin
+          try {
+            const callbackUrlObj = new URL(callbackUrl);
+            if (callbackUrlObj.origin === baseUrl) {
+              return callbackUrl;
+            }
+          } catch (error) {
+            // Invalid URL, fall back to baseUrl
+            console.error("Invalid callback URL:", error);
+          }
+        }
+        
+        return url;
+      }
+      
       return baseUrl;
     }
-  },  
+  },
 };
 
 export default NextAuth(authOptions);

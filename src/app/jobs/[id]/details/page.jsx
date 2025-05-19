@@ -157,7 +157,6 @@ const JobDetailPage = () => {
 
         const jobRes = await api.get(`/job/jobs/${jobId}/`)
 
-        console.log(jobRes);
 
         if (!jobRes.data) {
           toast.error("Job not found")
