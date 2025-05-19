@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,11 +15,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useSession } from "next-auth/react";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import StarRating from "./StarRating";
 
 export default function EndorsementForm({ candidateId, stars }) {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     candidateName: "",
     professionalism: "",
@@ -44,10 +47,6 @@ export default function EndorsementForm({ candidateId, stars }) {
   useEffect(() => {
     const fetchCandidateName = async () => {
       if (!candidateId || !session?.accessToken) {
-        console.log("Missing candidateId or accessToken:", {
-          candidateId,
-          accessToken: session?.accessToken,
-        });
         setError("Missing candidate ID or authentication");
         setLoading(false);
         return;
@@ -73,7 +72,6 @@ export default function EndorsementForm({ candidateId, stars }) {
           candidateName: profile.contact_info?.name || "Unknown",
         }));
       } catch (err) {
-        console.error("Error fetching candidate name:", err);
         setError(`Failed to load candidate profile: ${err.message}`);
         toast.error(`Failed to load candidate profile: ${err.message}`);
       } finally {
@@ -137,17 +135,10 @@ export default function EndorsementForm({ candidateId, stars }) {
     }
 
     setSubmitting(true);
+    const toastId = toast.loading("Submitting endorsement..."); // Pre-submission toast
     try {
       const baseUrl = "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net";
       const endpoint = `${baseUrl}/api/company/rate-candidate/${candidateId}/`;
-      console.log("Submitting to endpoint:", endpoint);
-      console.log("Payload:", payload);
-      console.log("Headers:", {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
-      });
-      console.log("Access Token:", session.accessToken);
-
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -161,7 +152,6 @@ export default function EndorsementForm({ candidateId, stars }) {
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
-        console.error("Non-JSON response:", text);
         throw new Error(
           `Server returned non-JSON response: ${response.status} ${response.statusText}`
         );
@@ -169,15 +159,16 @@ export default function EndorsementForm({ candidateId, stars }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response:", errorData);
         throw new Error(
           `Failed to submit endorsement: ${response.status} - ${errorData.message || "Unknown error"}`
         );
       }
 
       const responseData = await response.json();
-      console.log("Success response:", responseData);
-      toast.success("Endorsement submitted successfully");
+      toast.dismiss(toastId); // Dismiss loading toast
+      toast.success("Endorsement submitted successfully", { duration: 3000 });
+
+      // Reset form data
       setFormData({
         candidateName: formData.candidateName,
         professionalism: "",
@@ -189,9 +180,19 @@ export default function EndorsementForm({ candidateId, stars }) {
         stars: 0,
       });
       setError(null);
+
+      // Redirect to company dashboard after 2 seconds
+      const companyId = session?.user?.company_id;
+      if (companyId) {
+        setTimeout(() => {
+          router.push(`/companies/${companyId}/dashboard`);
+        }, 2000);
+      } else {
+        toast.error("Company ID not found in session", { duration: 5000 });
+      }
     } catch (err) {
-      console.error("Error submitting endorsement:", err);
-      toast.error(err.message || "Failed to submit endorsement");
+      toast.dismiss(toastId); // Dismiss loading toast
+      toast.error(err.message || "Failed to submit endorsement", { duration: 5000 });
       setError(err.message || "Failed to submit endorsement");
     } finally {
       setSubmitting(false);
@@ -211,7 +212,7 @@ export default function EndorsementForm({ candidateId, stars }) {
       transition={{ duration: 0.5 }}
       className="flex-1 bg-white rounded-lg p-6 border border-gray-200"
     >
-      <h1 className="text-3xl font-semibold text-blue-600 text-center mb-6">
+      <h1 className="text-3xl font-semibold text-brand text-center mb-6">
         Endorse {formData.candidateName || "Candidate"}
       </h1>
       {loading ? (

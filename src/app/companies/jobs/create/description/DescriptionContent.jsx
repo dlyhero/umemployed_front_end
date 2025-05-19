@@ -1,18 +1,24 @@
 'use client';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
 
-export default function Description() {
+function DescriptionContent() {
   const currentStep = 'description';
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get('jobId');
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions } = useJobForm(currentStep);
-  const [loading, setLoading] = useState(false);
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills } = useJobForm(currentStep);
 
-  const router = useRouter();
+  useEffect(() => {
+    if (!jobId) {
+      console.warn('No jobId for description step, redirecting to basicinformation');
+      toast.error('Please complete the Basic Information step first.');
+      router.push('/companies/jobs/create/basicinformation');
+    }
+  }, [jobId, router]);
 
   const handleSubmit = async (data) => {
     try {
@@ -22,7 +28,6 @@ export default function Description() {
         return result;
       }
       toast.success('Description saved successfully!');
-      setLoading(true);
       router.push(`/companies/jobs/create/skills?jobId=${jobId}`);
       return result;
     } catch (error) {
@@ -31,12 +36,10 @@ export default function Description() {
     }
   };
 
-  if (!jobId) return <div className="text-center p-6">Please complete the previous step first.</div>;
-
-  if (loading) {
+  if (!jobId) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+      <div className="text-center p-6">
+        <p>Redirecting to Basic Information...</p>
       </div>
     );
   }
@@ -52,7 +55,18 @@ export default function Description() {
         onSubmit={handleSubmit}
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
+        isLoadingSkills={isLoadingSkills}
+        isLoadingOptions={isLoadingOptions}
       />
     </>
+  );
+}
+
+export default function Description() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading...</div>}>
+      <DescriptionContent />
+    </Suspense>
   );
 }
