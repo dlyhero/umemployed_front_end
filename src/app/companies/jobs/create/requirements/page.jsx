@@ -1,5 +1,5 @@
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
@@ -7,10 +7,18 @@ import { useJobForm } from '../../../../../hooks/useJobForm';
 
 function RequirementsInner() {
   const currentStep = 'requirements';
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get('jobId');
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills } = useJobForm(currentStep);
-  const router = useRouter();
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills } = useJobForm(currentStep);
+
+  useEffect(() => {
+    if (!jobId) {
+      console.warn('No jobId for requirements step, redirecting to basicinformation');
+      toast.error('Please complete the Basic Information step first.');
+      router.push('/companies/jobs/create/basicinformation');
+    }
+  }, [jobId, router]);
 
   const handleSubmit = async (data) => {
     try {
@@ -28,7 +36,13 @@ function RequirementsInner() {
     }
   };
 
-  if (!jobId) return <div className="text-center p-6">Please complete the previous step first.</div>;
+  if (!jobId) {
+    return (
+      <div className="text-center p-6">
+        <p>Redirecting to Basic Information...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -42,6 +56,8 @@ function RequirementsInner() {
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
         extractedSkills={extractedSkills}
+        isLoadingSkills={isLoadingSkills}
+        isLoadingOptions={isLoadingOptions}
       />
     </>
   );

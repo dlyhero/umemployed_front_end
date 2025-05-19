@@ -4,7 +4,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
-export const Step1BasicInfo = ({ form, jobOptions }) => {
+export const Step1BasicInfo = ({ form, jobOptions, isLoadingOptions }) => {
+  if (isLoadingOptions) {
+    return (
+      <div className="flex justify-center items-center p-6">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+        <p className="ml-2 text-gray-600">Loading job options...</p>
+      </div>
+    );
+  }
+
+  if (!jobOptions?.categories?.length && !Object.keys(jobOptions?.job_types || {}).length) {
+    return (
+      <div className="text-center p-6 text-red-500">
+        Failed to load job options. Please refresh the page or try again later.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 rounded-lg bg-white p-6 shadow-sm">
       <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
@@ -204,7 +221,7 @@ export const Step1BasicInfo = ({ form, jobOptions }) => {
               <FormLabel className="text-sm font-medium text-gray-700">Category</FormLabel>
               <Select
                 onValueChange={(value) => {
-                  field.onChange(parseInt(value, 10));
+                  field.onChange(parseInt(value, 10) || null); // Ensure number or null
                   form.trigger('category');
                 }}
                 defaultValue={field.value?.toString()}
