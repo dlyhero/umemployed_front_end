@@ -28,8 +28,9 @@ const JobDetailPage = () => {
   const [isMobileView, setIsMobileView] = useState(false)
   const [isApplied, setIsApplied] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  // Component definitions after all state declarations
+  // Component definitions
   const RetakeModal = () => {
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -41,6 +42,7 @@ const JobDetailPage = () => {
             submitRetakeRequest={submitRetakeRequest}
             isSaved={isSaved}
             toggleSave={toggleSave}
+            isSaving={isSaving}
           />
         </div>
       </div>
@@ -53,7 +55,8 @@ const JobDetailPage = () => {
     setRetakeReason, 
     submitRetakeRequest,
     isSaved,
-    toggleSave
+    toggleSave,
+    isSaving
   }) => {
     return (
       <div className="space-y-4">
@@ -86,8 +89,14 @@ const JobDetailPage = () => {
           variant="outline"
           className="w-full border-brand text-brand hover:border-brand hover:text-brand"
           onClick={toggleSave}
+          disabled={isSaving}
         >
-          {isSaved ? "Saved" : "Save for Later"}
+          {isSaving ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 border-2 border-gray-300 border-t-brand rounded-full animate-spin" />
+              {isSaved ? "Unsaving..." : "Saving..."}
+            </span>
+          ) : isSaved ? "Saved" : "Save for Later"}
         </Button>
       </div>
     )
@@ -113,6 +122,7 @@ const JobDetailPage = () => {
               submitRetakeRequest={submitRetakeRequest}
               isSaved={isSaved}
               toggleSave={toggleSave}
+              isSaving={isSaving}
             />
           </div>
         </div>
@@ -147,16 +157,7 @@ const JobDetailPage = () => {
           baseURL: baseUrl,
         })
 
-        const cachedJob = localStorage.getItem(`job-${jobId}`)
-        if (cachedJob) {
-          const parsed = JSON.parse(cachedJob)
-          setJob(parsed.job)
-          setIsSaved(parsed.isSaved)
-          setSimilarJobs(parsed.similarJobs || [])
-        }
-
         const jobRes = await api.get(`/job/jobs/${jobId}/`)
-
 
         if (!jobRes.data) {
           toast.error("Job not found")
@@ -182,6 +183,8 @@ const JobDetailPage = () => {
           weekly_ranges: jobRes.data.weekly_ranges || "",
           hire_number: jobRes.data.hire_number || 1,
         }
+
+        setJob(formattedJob)
 
         if (session?.accessToken) {
           const authApi = axios.create({
@@ -217,31 +220,7 @@ const JobDetailPage = () => {
           } catch {
             similar = []
           }
-        }
-
-        setJob(formattedJob)
-
-        if (session?.accessToken) {
-          setIsSaved(isSaved)
-          setSimilarJobs(similarJobs)
-
-          localStorage.setItem(
-            `job-${jobId}`,
-            JSON.stringify({
-              job: formattedJob,
-              isSaved: isSaved,
-              similarJobs: similarJobs,
-            }),
-          )
-        } else {
-          localStorage.setItem(
-            `job-${jobId}`,
-            JSON.stringify({
-              job: formattedJob,
-              isSaved: false,
-              similarJobs: [],
-            }),
-          )
+          setSimilarJobs(similar)
         }
       } catch (err) {
         console.error("Error fetching job:", err)
@@ -279,7 +258,13 @@ const JobDetailPage = () => {
   }
 
   const toggleSave = async () => {
+    if (!session?.accessToken) {
+      toast.error("Please login to save jobs")
+      return
+    }
+
     try {
+      setIsSaving(true)
       const authApi = axios.create({
         baseURL: baseUrl,
         headers: {
@@ -290,26 +275,23 @@ const JobDetailPage = () => {
       const newSavedState = !isSaved
       setIsSaved(newSavedState)
 
-      if (job) {
-        const cachedJob = localStorage.getItem(`job-${jobId}`)
-        if (cachedJob) {
-          const parsed = JSON.parse(cachedJob)
-          localStorage.setItem(
-            `job-${jobId}`,
-            JSON.stringify({
-              ...parsed,
-              isSaved: newSavedState,
-            }),
-          )
-        }
+      if (newSavedState) {
+        await authApi.post(`/job/jobs/${jobId}/save/`)
+        toast.success("Job saved successfully")
+      } else {
+        await authApi.delete(`/job/jobs/${jobId}/save/`)
+        toast.success("Job unsaved successfully")
       }
 
-      await authApi.post(`/job/jobs/${jobId}/save/`)
-
-      toast.success(newSavedState ? "Job saved successfully" : "Job unsaved successfully")
+      // Refresh the saved jobs list
+      const savedRes = await authApi.get("/job/saved-jobs/")
+      const isJobSaved = savedRes.data.some((job) => job.id == jobId)
+      setIsSaved(isJobSaved)
     } catch (err) {
       setIsSaved(!isSaved)
       toast.error(err.response?.data?.message || "Failed to update saved status")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -346,6 +328,9 @@ const JobDetailPage = () => {
       toast.error(err.response?.data?.message || "Failed to submit retake request")
     }
   }
+
+  // Loading and empty states remain the same as your original code
+  // ... [rest of your component code remains unchanged]
 
   if (isLoading) {
     return (
@@ -498,8 +483,11 @@ const JobDetailPage = () => {
                       size="icon"
                       onClick={toggleSave}
                       aria-label={isSaved ? "Unsave job" : "Save job"}
+                      disabled={isSaving}
                     >
-                      {isSaved ? (
+                      {isSaving ? (
+                        <span className="h-5 w-5 border-2 border-gray-300 border-t-brand rounded-full animate-spin" />
+                      ) : isSaved ? (
                         <BookmarkCheck className="h-5 w-5 text-brand fill-brand" />
                       ) : (
                         <Bookmark className="h-5 w-5 text-gray-400" />
@@ -508,6 +496,9 @@ const JobDetailPage = () => {
                   )}
                 </div>
               </CardHeader>
+
+              {/* Rest of your card content remains the same */}
+              {/* ... */}
 
               <CardContent>
                 <div className="border-t border-b py-6 mb-6 space-y-4">
@@ -716,6 +707,8 @@ const JobDetailPage = () => {
             </Card>
           </div>
 
+          {/* Similar jobs section remains the same */}
+          {/* ... */}
           <div className="lg:w-1/3">
             <Card className="sticky top-6">
               <CardHeader>

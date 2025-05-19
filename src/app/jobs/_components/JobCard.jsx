@@ -14,7 +14,7 @@ const JobCard = ({ job, onToggleSave, loading }) => {
   const router = useRouter();
   const user = useUser();
 
-  const isRecruiter = (session?.user?.role === 'recruiter' && user?.user.has_company)  && user.user?.company_id === company.id;
+  const isRecruiter = user?.user?.role === 'recruiter';
 
 
 

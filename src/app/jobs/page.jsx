@@ -59,6 +59,7 @@ function JobListingContent() {
 
   const jobs = getFilteredJobs();
 
+
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-[1395px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
