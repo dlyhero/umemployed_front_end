@@ -23,12 +23,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <OfflineLayout>
+      <OfflineLayout>
+
+        <AuthProvider>
           <AuthProvider>
            {children}
           </AuthProvider>
          
+        </AuthProvider>
         </OfflineLayout>
+
       </body>
     </html>
   )
