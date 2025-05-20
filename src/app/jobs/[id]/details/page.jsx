@@ -136,18 +136,18 @@ const JobDetailPage = () => {
           setSimilarJobs(parsed.similarJobs || []);
         }
 
+        const jobRes = axios.get(`/job/jobs/${jobId}/`, {
+          baseURL: baseUrl,
+         
+        })
+
         // Fetch fresh data in background
-        const [jobRes, savedRes, appliedRes] = await Promise.all([
-          api.get(`/job/jobs/${jobId}/`).catch(() => ({ data: null })),
+        const [savedRes, appliedRes] = await Promise.all([                                                                                                                                                                                                                                                                                                                                                                        
           api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
           api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
         ]);
 
-        if (!jobRes.data) {
-          toast.error('Job not found');
-          router.push('/jobs');
-          return;
-        }
+     
 
         const formattedJob = {
           ...jobRes.data,
@@ -167,7 +167,6 @@ const JobDetailPage = () => {
           weekly_ranges: jobRes.data.weekly_ranges || '',
           hire_number: jobRes.data.hire_number || 1
         };
-
         const isJobSaved = savedRes.data.some(job => job.id == jobId);
         const isJobApplied = appliedRes.data.some(job => job.id == jobId);
 
@@ -203,17 +202,16 @@ const JobDetailPage = () => {
         );
       } catch (err) {
         console.error('Error fetching job:', err);
-        toast.error(err.response?.data?.message || 'Failed to load job details');
-        router.push('/jobs');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (session) {
+    
       fetchJobData();
-    }
+    
   }, [session, jobId, router]);
+
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -302,6 +300,8 @@ const JobDetailPage = () => {
       toast.error(err.response?.data?.message || 'Failed to submit retake request');
     }
   };
+
+
 
   if (isLoading) {
     return (
@@ -449,7 +449,7 @@ const JobDetailPage = () => {
                       </p>
                     </div>
                   </div>
-                  <Button
+                 {session&& <Button
                     variant="ghost"
                     size="icon"
                     onClick={toggleSave}
@@ -460,7 +460,7 @@ const JobDetailPage = () => {
                     ) : (
                       <Bookmark className="h-5 w-5 text-gray-400" />
                     )}
-                  </Button>
+                  </Button>}
                 </div>
               </CardHeader>
 
@@ -605,7 +605,7 @@ const JobDetailPage = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                {session &&<div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -628,7 +628,7 @@ const JobDetailPage = () => {
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
                   </Button>
-                </div>
+                </div>}
               </CardContent>
             </Card>
           </div>

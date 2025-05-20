@@ -84,6 +84,8 @@ const JobCard = ({ job, onToggleSave, loading }) => {
     }
   };
 
+  
+
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm h-full flex flex-col mx-2">
@@ -135,7 +137,7 @@ const JobCard = ({ job, onToggleSave, loading }) => {
             <p className="text-sm font-medium truncate">{job.company?.name}</p>
             <div className="flex items-center text-xs text-gray-500">
               <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-              <span className="truncate">{job.location}</span>
+              <span className="truncate">{job.company?.location}, {job.company?.country_name}</span>
             </div>
           </div>
         </div>
@@ -144,14 +146,14 @@ const JobCard = ({ job, onToggleSave, loading }) => {
           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium  text-brand whitespace-nowrap">
             ${formatSalary(job.salary_range || job.formattedSalary)}/year
           </span>
-          {!isRecruiter && (
+          {session && (!isRecruiter && (
             <button 
               onClick={handleSave}
               className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
             >
               <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
             </button>
-          )}
+          ))}
         </div>
       </div>
 
