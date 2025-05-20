@@ -38,6 +38,7 @@ const CompanyJobListings = ({ companyName }) => {
           
         })
         setJobs(response.data)
+        console.log(response.data)
       } catch (err) {
         console.error("Error fetching jobs:", err.response || err.message)
         setError("Failed to load jobs. Please try again.")

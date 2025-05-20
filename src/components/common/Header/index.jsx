@@ -41,9 +41,7 @@ export function Header() {
         !feedBackPages.includes(pathname) && (
          <>
           <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
-            {session && (
               <SearchBar  />
-            )}
           </div>
         
 
