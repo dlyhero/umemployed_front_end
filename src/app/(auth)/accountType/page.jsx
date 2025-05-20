@@ -69,8 +69,6 @@ const CompanyCreationPage = () => {
     }
 
     const token = session?.user?.accessToken || session?.accessToken;
-    console.log('Token:', token);
-    console.log('Form Data:', Object.fromEntries(data));
 
     if (!token) {
       toast.error('No authentication token found. Please sign in again.');
@@ -89,7 +87,6 @@ const CompanyCreationPage = () => {
           },
         }
       );
-      console.log('Company created:', response.data);
       toast.success('Company created successfully!');
       router.push('/recruiter/dashboard');
     } catch (err) {

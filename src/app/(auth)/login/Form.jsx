@@ -29,7 +29,6 @@ export default function LoginForm() {
             // Add a small delay to ensure session is fully loaded
             const timer = setTimeout(() => {
                 const role = user?.user?.role;
-                console.log("Current session:", session);
                 
                 // If we have a valid callbackUrl that's not an auth route, use it
                 if (callbackUrl && callbackUrl !== '/' && !isAuthRoute(callbackUrl)) {
