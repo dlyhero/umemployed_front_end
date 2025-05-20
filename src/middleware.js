@@ -1,101 +1,170 @@
+middleware.js
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// Define route patterns
+const PUBLIC_ROUTES = [
+  '/',
+  '/jobs',
+  '/jobs/[id]/details',
+  '/companies/listing',
+  '/companies/[id]/details',
+  '/companies/joblisting/[id]',
+];
+
+const AUTH_ROUTES = [
+  '/login',
+  '/signup',
+  '/forgetPassword',
+  '/changePassword',
+  '/verify_email',
+  '/verify_email/failure',
+  '/verify_email/success',
+];
+
+const RECRUITER_ROUTES = [
+  '/companies',
+];
+
+const APPLICANT_ROUTES = [
+  '/applicant',
+];
+
+const ONBOARDING_ROUTES = [
+  '/select-role',
+  '/upload-resume',
+  '/company/create',
+];
+
+// Check if the path matches any pattern in the routes array
+const matchesPattern = (path, patterns) => {
+  return patterns.some(pattern => {
+    // Convert Next.js dynamic route syntax to regex
+    const regexPattern = pattern
+      .replace(/\[([^\]]+)\]/g, '[^/]+') // Replace [id] with regex for any character except /
+      .replace(/\//g, '\\/'); // Escape forward slashes
+    
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(path);
+  });
+};
+
 export async function middleware(request) {
-  const url = request.nextUrl.clone();
-  const path = url.pathname;
+  const { pathname } = request.nextUrl;
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-
-  // 1. Skip static files and API routes
-  if (path.startsWith('/_next') || path.startsWith('/api') || path.includes('.')) {
+  
+  // Public routes are accessible to everyone
+  if (matchesPattern(pathname, PUBLIC_ROUTES)) {
     return NextResponse.next();
   }
 
-  // 2. Define public routes and patterns
-  const publicRoutes = ['/', '/jobs', '/companies/listing', '/blog', '/about', '/contact', '/help', '/pricing'];
-  const publicPatterns = [
-    /^\/companies\/[^\/]+\/details$/,
-    /^\/companies\/[^\/]+\/joblisting$/,
-    /^\/jobs\/[^\/]+\/details$/
-  ];
-
-  if (publicRoutes.includes(path) || publicPatterns.some(pattern => pattern.test(path))) {
-    return NextResponse.next();
-  }
-
-  // 3. Handle auth routes (login, signup, etc.)
-  const authRoutes = ['/login', '/signup', '/forgot-password', '/verify-email', '/reset-password'];
-  if (authRoutes.includes(path)) {
+  // Authentication routes are only for non-authenticated users
+  if (matchesPattern(pathname, AUTH_ROUTES)) {
     if (token) {
-      url.pathname = token.role === 'none' ? '/select-role' : getDashboardPath(token);
-      return NextResponse.redirect(url);
+      // If user is already logged in, redirect based on their role and onboarding status
+      return handleAuthenticatedRedirect(token, request);
     }
     return NextResponse.next();
   }
 
-  // 4. Handle logout
-  if (path === '/logout') {
-    const response = NextResponse.redirect(new URL('/', url));
-    response.cookies.delete('next-auth.session-token');
-    return response;
-  }
-
-  // 5. Redirect unauthenticated users to login
+  // If user is not authenticated and trying to access a protected route,
+  // redirect to login with callbackUrl
   if (!token) {
-    url.pathname = '/login';
-    url.searchParams.set('callbackUrl', path);
-    return NextResponse.redirect(url);
+    const loginUrl = new URL('/login', request.url);
+    // Store the intended destination as a callback URL
+    loginUrl.searchParams.set('callbackUrl', request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // 6. Handle role selection flow
-  if (token.role === 'none') {
-    if (path !== '/select-role') {
-      url.pathname = '/select-role';
-      return NextResponse.redirect(url);
+  // Handle onboarding routes
+  if (matchesPattern(pathname, ONBOARDING_ROUTES)) {
+    // Check specific onboarding routes
+    if (pathname === '/select-role' || pathname.startsWith('/select-role/')) {
+      if (token.role !== 'none') {
+        return handleAuthenticatedRedirect(token, request);
+      }
+    } 
+    else if (pathname === '/upload-resume' || pathname.startsWith('/upload-resume/')) {
+      if (token.role !== 'job_seeker' || token.has_resume) {
+        return handleAuthenticatedRedirect(token, request);
+      }
+    }
+    else if (pathname === '/company/create' || pathname.startsWith('/company/create/')) {
+      if (token.role !== 'recruiter' || token.has_company) {
+        return handleAuthenticatedRedirect(token, request);
+      }
     }
     return NextResponse.next();
   }
 
-  // 7. Prevent access to select-role if role is already set
-  if (path === '/select-role') {
-    url.pathname = getDashboardPath(token);
-    return NextResponse.redirect(url);
+  // Role-based access control
+  if (pathname.startsWith('/companies/')) {
+    if (token.role !== 'recruiter') {
+      return redirectToDashboard(token, request);
+    }
   }
-
-  // 8. Role-based routing
-  const dashboardPath = getDashboardPath(token);
-  const allowedPaths = getAllowedPaths(token);
-
-  if (!allowedPaths.some(allowedPath => path.startsWith(allowedPath))) {
-    url.pathname = dashboardPath;
-    return NextResponse.redirect(url);
+  
+  if (pathname.startsWith('/applicant/')) {
+    if (token.role !== 'job_seeker') {
+      return redirectToDashboard(token, request);
+    }
   }
 
   return NextResponse.next();
 }
 
-function getDashboardPath(token) {
-  if (!token?.role) return '/';
+// Helper function to redirect user based on their state after authentication
+function handleAuthenticatedRedirect(token, request) {
+  // First-time login flow
+  if (token.role === 'none') {
+    return NextResponse.redirect(new URL('/select-role', request.url));
+  }
+  
   if (token.role === 'job_seeker') {
-    return token.has_resume ? '/applicant/dashboard' : '/upload-resume';
+    if (!token.has_resume) {
+      return NextResponse.redirect(new URL('/upload-resume', request.url));
+    }
+    return NextResponse.redirect(new URL('/applicant/dashboard', request.url));
   }
+  
   if (token.role === 'recruiter') {
-    return token.has_company ? `/companies/${token.company_id}/dashboard` : '/companies/create';
+    if (!token.has_company) {
+      return NextResponse.redirect(new URL('/company/create', request.url));
+    }
+    // Use the company_id if available
+    const companyId = token.company_id || 'default';
+    return NextResponse.redirect(new URL(`/companies/${companyId}/dashboard`, request.url));
   }
-  return '/';
+  
+  // Fallback to homepage
+  return NextResponse.redirect(new URL('/', request.url));
 }
 
-function getAllowedPaths(token) {
-  const basePaths = ['/settings', '/notifications', '/messages', '/profile'];
-  if (token?.role === 'job_seeker') {
-    return [...basePaths, '/applicant', '/jobs', '/companies/listing', '/upload-resume'];
+// Helper function to redirect to the appropriate dashboard
+function redirectToDashboard(token, request) {
+  if (token.role === 'job_seeker') {
+    return NextResponse.redirect(new URL('/applicant/dashboard', request.url));
   }
-  if (token?.role === 'recruiter') {
-    return [...basePaths, '/companies', '/jobs', '/applicants'];
+  
+  if (token.role === 'recruiter' && token.company_id) {
+    return NextResponse.redirect(new URL(`/companies/${token.company_id}/dashboard`, request.url));
   }
-  return [];
+  
+  // Fallback to homepage
+  return NextResponse.redirect(new URL('/', request.url));
 }
 
+// Configure which paths middleware will run on
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|public).*)'],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - images/* (image files stored in the public folder)
+     * - api/* (API routes)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|images|api).*)',
+  ],
 };

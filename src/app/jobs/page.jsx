@@ -34,7 +34,6 @@ function JobListingContent() {
     resetFilters
   } = useJobs();
 
-
   useEffect(() => {
     const tab = searchParams.get('tab') || 'jobs';
     setActiveTab(tab);
@@ -61,7 +60,7 @@ function JobListingContent() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-[1395px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Filters Button */}
         <div className="lg:hidden mb-6">
           <Button
@@ -124,22 +123,22 @@ function JobListingContent() {
                     <Briefcase className="w-4 h-4 mr-2" />
                     Jobs {activeTab === 'jobs' && `(${loading ? '' : jobs.length})`}
                   </TabsTrigger>
-                  {(session && session?.user.role !== "recruiter") && <TabsTrigger
+                  <TabsTrigger
                     value="saved"
                     className="whitespace-nowrap"
                     onClick={() => handleTabChange("saved")}
                   >
                     <Bookmark className="w-4 h-4 mr-2" />
                     Saved ({loading && activeTab === 'saved' ? '' : savedJobs.length})
-                  </TabsTrigger>}
-                  {(session && session?.user.role !== "recruiter") && <TabsTrigger
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="applied"
                     className="whitespace-nowrap"
                     onClick={() => handleTabChange("applied")}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Applied ({loading && activeTab === 'applied' ? '' : appliedJobs.length})
-                  </TabsTrigger>}
+                  </TabsTrigger>
                 </TabsList>
               </ScrollArea>
 

@@ -1,225 +1,39 @@
-'use client';
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useEffect, useMemo, useState } from "react";
+"use client";
+import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, User, Bell, MessageSquare, FileLock2Icon, File, MessageCircleHeart, MessageSquareMore, MessageSquareIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import Spinner from "../Spinner";
-import useUser from "@/src/hooks/useUser";
-import { FaBell, FaComment, FaCommentDots, FaFile } from "react-icons/fa";
+import { LogIn, UserPlus } from "lucide-react";
+import AuthButtonsSkeleton from "./AuthButtonSkeleton";
+import { useAuthContext } from "@/src/context/AuthContext";
 
 export default function AuthButtons() {
-  const pathname = usePathname();
-  const { data: session, status, update } = useSession();
-  const user = useUser();
-  const [userEmail, setUserEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [signingOut, setSigningOut] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+  const { data: session, status } = useSession();
+  const { showAuthButtons, isLoggingOut } = useAuthContext();
 
-  // Derived states
-  const username = useMemo(() => userEmail.split('@')[0] || "", [userEmail]);
-  const showSkeleton = isLoading || status === "loading";
+  if (status === "loading" || isLoggingOut) {
+    return <AuthButtonsSkeleton />;
+  }
 
-  useEffect(() => {
-    const loadSession = async () => {
-      try {
-        if (status === "authenticated") {
-          if (!session?.user?.email) {
-            const updated = await update();
-            if (updated?.user?.email) {
-              setUserEmail(updated.user.email);
-            }
-          } else {
-            setUserEmail(session.user.email);
-          }
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadSession();
-  }, [status, session, update]);
-
-  const handleSignOut = async () => {
-    setSigningOut(true);
-    try {
-      await signOut({ callbackUrl: '/logout' });
-    } finally {
-      setSigningOut(false);
-    }
-  };
-
-  const getNavigationPath = () => {
-    if (!session?.user) return "/";
-
-    if (session.user.role === "job_seeker") {
-      return session.user.has_resume
-        ? "/applicant/dashboard"
-        : "/applicant/upload-resume";
-    } else if (session.user.role === "recruiter") {
-      return session.user.has_company
-        ? `/companies/${session.user.company_id}/dashboard`
-        : "/company/create";
-    }
-    return "/";
-  };
-
-  // Check active links
-  const isResumeActive = pathname.startsWith("/applicant/upload-resume");
-  const isNotificationsActive = pathname.startsWith("/notifications");
-  const isMessagesActive = pathname.startsWith("/messages");
-  const isProfileActive = pathname === getNavigationPath();
-
-  const getInitials = (name) => {
-    if (!name) return '?';
-    
-    const words = name.split(' ');
-    let initials = words[0][0].toUpperCase();
-    
-    if (words.length > 1) {
-      initials += words[words.length - 1][0].toUpperCase();
-    }
-    
-    return initials;
-  };
-
-  const renderProfileImage = () => {
-    const DEFAULT_IMAGE = 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg';
-    
-    if (session?.user?.image && session.user.image !== DEFAULT_IMAGE) {
-      return (
-        <>
-          {imageLoading && (
-            <div className="absolute inset-0 flex flex-col p-0 items-center justify-center">
-              <Spinner size="sm" />
-            </div>
-          )}
-          <Image
-            src={session.user.image}
-            alt="Profile"
-            width={40}
-            height={40}
-            className={`object-cover rounded-full ${imageLoading ? 'opacity-0' : 'opacity-100'} group-hover:text-brand transition-colors`}
-            onLoadingComplete={() => setImageLoading(false)}
-            onError={() => setImageLoading(false)}
-          />
-        </>
-      );
-    }
-
-    const initials = getInitials(user.user?.username || session?.user?.name);
-    const colors = [
-      'bg-blue-500 text-white',
-      'bg-green-500 text-white',
-      'bg-purple-500 text-white',
-      'bg-brand text-white',
-      'bg-yellow-500 text-white',
-      'bg-indigo-500 text-white',
-      'bg-pink-500 text-white',
-      'bg-teal-500 text-white',
-    ];
-
-    const colorIndex = ((user.user?.email || session?.user?.name || '').charCodeAt(0) || 0) % colors.length;
-    const colorClass = colors[colorIndex];
-
+  if (!session && showAuthButtons) {
     return (
-      <div className={`w-full h-full rounded-full flex items-center justify-center ${colorClass} font-bold text-lg`}>
-        {initials}
-      </div>
-    );
-  };
-
-  if (showSkeleton) {
-    return (
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-          <div className="hidden sm:block">
-            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="w-20 h-9 flex items-center justify-center">
-          <Spinner size="sm" />
-        </div>
+      <div className="flex gap-4">
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={() => signIn()}
+        >
+          <UserPlus className="w-4 h-4" />
+          Sign Up
+        </Button>
+        <Button
+          className="gap-2 bg-brand text-white"
+          onClick={() => signIn()}
+        >
+          <LogIn className="w-4 h-4" />
+          Sign In
+        </Button>
       </div>
     );
   }
 
-  return (
-    <div className="flex items-center gap-10">
-      {status === "authenticated" ? (
-        <>
-          {session.user.role === 'job_seeker' && (
-            <Link 
-              href="/applicant/upload-resume" 
-              className={`flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm text-gray-700 group ${
-                isResumeActive ? 'rounded-none' : ''
-              }`}
-            >
-              <span className={`group-hover:text-brand transition-colors font-semibold ${
-                isResumeActive ? 'text-brand' : ''
-              }`}>Resume</span>
-            </Link>
-          )}
-          
-          <Link 
-            href="/notifications" 
-            className={`hidden lg:flex flex-col items-center gap-0 p-0 rounded-lg hover:bg-gray-50 text-sm group ${
-              isNotificationsActive ? 'rounded-none' : ''
-            }`}
-          >
-            <Bell className={`w-4 h-4 group-hover:text-brand transition-colors ${
-              isNotificationsActive ? 'text-brand' : 'text-gray-600'
-            }`} />
-          </Link>
-          
-          <Link
-            href={getNavigationPath()}
-            className={`flex items-center gap-2 group ${
-              isProfileActive ? 'rounded-none' : ''
-            }`}
-          >
-            <div className="relative w-10 h-10 rounded-full border border-gray-200 overflow-hidden">
-              {renderProfileImage()}
-            </div>
-            <span className={`hidden sm:block text-sm font-bold truncate max-w-[120px] group-hover:text-brand transition-colors ${
-              isProfileActive ? 'text-brand' : 'text-gray-700'
-            }`}>
-              {user.user?.username}
-            </span>
-          </Link>
-
-          <Button
-            variant={"outline"}
-            className={'text-brand border border-brand min-w-[85px] bg-white hover:bg-none hover:text-brand hidden lg:block"'}
-            size="sm"
-            onClick={handleSignOut}
-            disabled={signingOut}
-          >
-            {signingOut ? (
-              <Spinner size="sm" />
-            ) : (
-              <>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </>
-            )}
-          </Button>
-        </>
-      ) : (
-        <Button
-          variant="outline"
-          className={'text-brand border border-brand bg-transparent hover:bg-none hover:text-brand py-6 px-4'}
-          size="sm"
-          onClick={() => signIn(undefined, { callbackUrl: '/' })}
-        >
-          <LogIn className="w-4 h-4 mr-2" />
-          Sign In
-        </Button>
-      )}
-    </div>
-  );
+  return null;
 }

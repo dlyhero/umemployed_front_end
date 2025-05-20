@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MenuLinks } from './MenuLinks';
-import  MenuAuthButtons  from '../MenuAuthButtons/index';
+import  MenuAuthButtons  from '../SidebarAuthButtons/index';
 
 export function DesktopMenu({ isOpen, setIsOpen }) {
     const menuRef = useRef(null);

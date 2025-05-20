@@ -1,10 +1,12 @@
-'use client' // Add this at the top
+'use client'
 import { useEffect } from 'react'
 import OfflineLayout from './offline/layout'
+import { AuthProvider } from '../context/AuthContext'
+import { usePathname } from 'next/navigation'
 
-export default function RootLayout({
-  children,
-}) {
+export default function RootLayout({ children }) {
+  const pathname = usePathname()
+  
   useEffect(() => {
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       window.addEventListener('load', () => {
@@ -23,7 +25,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <OfflineLayout>
-          {children}
+          <AuthProvider>
+            {/* AuthModal will handle showing login prompt */}
+            {children}
+          </AuthProvider>
         </OfflineLayout>
       </body>
     </html>

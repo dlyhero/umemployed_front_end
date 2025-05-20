@@ -119,7 +119,7 @@ const CompanyDetails = () => {
     );
   };
 
-  const isRecruiter = (session?.user?.role === 'recruiter' && user?.user.has_company)  && user.user?.company_id === company.id;
+  const isRecruiter = session?.user?.role === 'recruiter' 
 
 
   if (loading) {
