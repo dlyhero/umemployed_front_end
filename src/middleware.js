@@ -29,7 +29,7 @@ const PROTECTED_ROUTES = [
 const ONBOARDING_ROUTES = [
   '/select-role',
   '/upload-resume',
-  '/company/create',
+  '/companies/create',
 ];
 
 // Improved pattern matching function
@@ -129,7 +129,7 @@ function handleOnboardingRoutes(token, request) {
     return handleAuthenticatedRedirect(token, request);
   }
   
-  if (pathname === '/company/create' && 
+  if (pathname === '/companies/create' && 
       (token.role !== 'recruiter' || token.has_company)) {
     return handleAuthenticatedRedirect(token, request);
   }
@@ -172,7 +172,7 @@ function handleAuthenticatedRedirect(token, request) {
   
   if (token.role === 'recruiter') {
     if (!token.has_company) {
-      return NextResponse.redirect(new URL('/company/create', request.url));
+      return NextResponse.redirect(new URL('/companies/create', request.url));
     }
     const companyId = token.company_id || 'default';
     return NextResponse.redirect(new URL(`/companies/${companyId}/dashboard`, request.url));
