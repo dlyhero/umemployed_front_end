@@ -199,11 +199,11 @@ export const useJobs = () => {
         toast.error('Please login to save jobs');
         return;
       }
-
+  
       const api = getAuthApi();
       const jobToUpdate = allJobs.find(job => job.id === jobId);
       const isCurrentlySaved = jobToUpdate?.is_saved;
-
+  
       // Optimistic update
       setAllJobs(prev => prev.map(job => 
         job.id === jobId ? { ...job, is_saved: !job.is_saved } : job
@@ -216,35 +216,30 @@ export const useJobs = () => {
           ? prev.filter(id => id !== jobId) 
           : [...prev, jobId]
       );
-
-      // API call
-      if (isCurrentlySaved) {
-        await api.delete(`/job/jobs/${jobId}/save/`);
-        toast.success('Job unsaved successfully');
-      } else {
-        await api.post(`/job/jobs/${jobId}/save/`);
-        toast.success('Job saved successfully');
-      }
-
-      // Refresh data to ensure sync with server
-      await fetchData();
+  
+      // API call - always POST since it's a toggle endpoint
+      await api.post(`/job/jobs/${jobId}/save/`);
+      toast.success(`Job ${isCurrentlySaved ? 'unsaved' : 'saved'} successfully`);
+  
+      // Removed the fetchData() call to prevent full refresh
+      // The optimistic update already handles the UI change
+  
     } catch (err) {
       // Revert optimistic update
       setAllJobs(prev => prev.map(job => 
-        job.id === jobId ? { ...job, is_saved: job.is_saved } : job
+        job.id === jobId ? { ...job, is_saved: !job.is_saved } : job // Toggle back
       ));
       setFilteredJobs(prev => prev.map(job => 
-        job.id === jobId ? { ...job, is_saved: job.is_saved } : job
+        job.id === jobId ? { ...job, is_saved: !job.is_saved } : job // Toggle back
       ));
       setSavedJobs(prev => 
-        allJobs.find(job => job.id === jobId)?.is_saved 
-          ? [...prev, jobId] 
-          : prev.filter(id => id !== jobId)
+        isCurrentlySaved 
+          ? [...prev, jobId] // Add back if we were unsaving
+          : prev.filter(id => id !== jobId) // Remove if we were saving
       );
       toast.error(err.response?.data?.message || 'Failed to update saved status');
     }
   };
-
   const applyFilters = (filters) => {
     let filtered = [...allJobs];
 

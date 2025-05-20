@@ -149,21 +149,22 @@ const JobDetailPage = () => {
       router.push("/jobs")
       return
     }
-
     const fetchJobData = async () => {
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const api = axios.create({
           baseURL: baseUrl,
-        })
-
-        const jobRes = await api.get(`/job/jobs/${jobId}/`)
-
+        });
+    
+        const jobRes = await api.get(`/job/jobs/${jobId}/`);
+    
         if (!jobRes.data) {
-          toast.error("Job not found")
-          router.push("/jobs")
-          return
+          toast.error("Job not found");
+          router.push("/jobs");
+          return;
         }
+    
+        // ... (your existing job formatting code)
 
         const formattedJob = {
           ...jobRes.data,
@@ -183,28 +184,29 @@ const JobDetailPage = () => {
           weekly_ranges: jobRes.data.weekly_ranges || "",
           hire_number: jobRes.data.hire_number || 1,
         }
-
-        setJob(formattedJob)
-
+    
+        setJob(formattedJob);
+    
         if (session?.accessToken) {
           const authApi = axios.create({
             baseURL: baseUrl,
             headers: {
               Authorization: `Bearer ${session?.accessToken}`,
             },
-          })
-
+          });
+    
           const [savedRes, appliedRes] = await Promise.all([
             authApi.get("/job/saved-jobs/").catch(() => ({ data: [] })),
             authApi.get("/job/applied-jobs/").catch(() => ({ data: [] })),
-          ])
-
-          const isJobSaved = savedRes.data.some((job) => job.id == jobId)
-          const isJobApplied = appliedRes.data.some((job) => job.id == jobId)
-          setIsSaved(isJobSaved)
-          setIsApplied(isJobApplied)
-          setHasStarted(jobRes.data.has_started || false)
-
+          ]);
+    
+          // This is the critical part for saved state
+          const isJobSaved = savedRes.data.some((job) => job.id == jobId);
+          setIsSaved(isJobSaved);
+          setIsApplied(appliedRes.data.some((job) => job.id == jobId));
+          setHasStarted(jobRes.data.has_started || false);
+    
+          // ... (rest of your code)
           let similar = []
           try {
             const similarRes = await authApi.get("/job/job-options/")
@@ -223,12 +225,14 @@ const JobDetailPage = () => {
           setSimilarJobs(similar)
         }
       } catch (err) {
-        console.error("Error fetching job:", err)
-        toast.error(err.response?.data?.message || "Failed to load job details")
+        console.error("Error fetching job:", err);
+        toast.error(err.response?.data?.message || "Failed to load job details");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
+
+    
 
     fetchJobData()
   }, [session, jobId, router])
@@ -259,42 +263,40 @@ const JobDetailPage = () => {
 
   const toggleSave = async () => {
     if (!session?.accessToken) {
-      toast.error("Please login to save jobs")
-      return
+      toast.error("Please login to save jobs");
+      return;
     }
-
+  
     try {
-      setIsSaving(true)
+      setIsSaving(true);
       const authApi = axios.create({
         baseURL: baseUrl,
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
         },
-      })
-
-      const newSavedState = !isSaved
-      setIsSaved(newSavedState)
-
-      if (newSavedState) {
-        await authApi.post(`/job/jobs/${jobId}/save/`)
-        toast.success("Job saved successfully")
-      } else {
-        await authApi.delete(`/job/jobs/${jobId}/save/`)
-        toast.success("Job unsaved successfully")
-      }
-
-      // Refresh the saved jobs list
-      const savedRes = await authApi.get("/job/saved-jobs/")
-      const isJobSaved = savedRes.data.some((job) => job.id == jobId)
-      setIsSaved(isJobSaved)
+      });
+  
+      // Optimistic update
+      const newSavedState = !isSaved;
+      setIsSaved(newSavedState);
+  
+      // API call - always POST since it's a toggle endpoint
+      await authApi.post(`/job/jobs/${jobId}/save/`);
+      toast.success(`Job ${newSavedState ? 'saved' : 'unsaved'} successfully`);
+  
+      // Update the saved jobs list without full refresh
+      const savedRes = await authApi.get("/job/saved-jobs/");
+      const isJobSaved = savedRes.data.some((job) => job.id == jobId);
+      setIsSaved(isJobSaved);
     } catch (err) {
-      setIsSaved(!isSaved)
-      toast.error(err.response?.data?.message || "Failed to update saved status")
+      // Revert optimistic update
+      setIsSaved(!isSaved);
+      toast.error(err.response?.data?.message || "Failed to update saved status");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
-
+  };
+  
   const handleApply = async () => {
     router.push(`/jobs/${jobId}/assessment`)
   }
@@ -478,21 +480,17 @@ const JobDetailPage = () => {
                     </div>
                   </div>
                   {session && session?.user.role !== "recruiter" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleSave}
-                      aria-label={isSaved ? "Unsave job" : "Save job"}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? (
-                        <span className="h-5 w-5 border-2 border-gray-300 border-t-brand rounded-full animate-spin" />
-                      ) : isSaved ? (
-                        <BookmarkCheck className="h-5 w-5 text-brand fill-brand" />
-                      ) : (
-                        <Bookmark className="h-5 w-5 text-gray-400" />
-                      )}
-                    </Button>
+                   <Button
+                   variant="ghost"
+                   size="icon"
+                   onClick={toggleSave}
+                 >
+                   {isSaved ? (
+                     <BookmarkCheck className="h-5 w-5 text-brand fill-brand" />
+                   ) : (
+                     <Bookmark className="h-5 w-5 text-gray-400" />
+                   )}
+                 </Button>
                   )}
                 </div>
               </CardHeader>

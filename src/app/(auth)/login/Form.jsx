@@ -16,8 +16,12 @@ export default function LoginForm() {
     const [loading, setLoading] = useState(false);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const user = useUser();
 
+    // Get callbackUrl from query parameters or default to dashboard
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
+    
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     useEffect(() => {
@@ -26,22 +30,25 @@ export default function LoginForm() {
             const timer = setTimeout(() => {
                 const role = user?.user?.role;
                 console.log("Current session:", session);
-        
+                
+                // If we have a valid callbackUrl that's not an auth route, use it
+                if (callbackUrl && callbackUrl !== '/' && !isAuthRoute(callbackUrl)) {
+                    router.replace(callbackUrl);
+                    return;
+                }
 
-                // Handle redirects based on role and status
+                // Handle default redirects based on role and status
                 switch(role) {
                     case 'job_seeker':
                         if (session?.user?.has_resume) {
                             router.replace('/applicant/dashboard');
                         } else {
-                            router.replace('applicant/upload-resume');
+                            router.replace('/applicant/upload-resume');
                         }
                         break;
                     case 'recruiter':
-                        if (session?.user?.has_company) {
-                        if (session?.user?.has_company && session?.user?.company_id){
+                        if (session?.user?.has_company && session?.user?.company_id) {
                             router.replace(`/companies/${session.user.company_id}/dashboard`);
-                        }
                         } else {
                             router.replace('/companies/create');
                         }
@@ -54,7 +61,7 @@ export default function LoginForm() {
 
             return () => clearTimeout(timer);
         }
-    }, [status, session, router]);
+    }, [status, session, router, callbackUrl]);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -64,7 +71,8 @@ export default function LoginForm() {
             const result = await signIn("credentials", {
                 email: data.email,
                 password: data.password,
-                redirect: false
+                redirect: false,
+                callbackUrl: callbackUrl // Pass the callbackUrl to signIn
             });
 
             if (result?.error === "EMAIL_NOT_VERIFIED") {
@@ -78,11 +86,26 @@ export default function LoginForm() {
                 throw new Error("Please make sure you are connected to the internet");
             }
             
+            // If no error, the session change will trigger the redirect
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Helper function to check if a route is an authentication route
+    const isAuthRoute = (path) => {
+        const authRoutes = [
+            '/login',
+            '/signup',
+            '/forgetPassword',
+            '/changePassword',
+            '/verify_email',
+            '/verify_email/failure',
+            '/verify_email/success'
+        ];
+        return authRoutes.some(route => path.startsWith(route));
     };
 
     return (
@@ -98,7 +121,7 @@ export default function LoginForm() {
                     Email
                 </label>
                 <div className="relative">
-                        <Mail className="h-4 w-4  absolute left-3 top-1/2 -translate-y-1/2 h text-gray-400" />
+                    <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         {...register("email", { 
                             required: "Email is required",
@@ -124,7 +147,7 @@ export default function LoginForm() {
                     Password
                 </label>
                 <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         {...register("password", { 
                             required: "Password is required",
