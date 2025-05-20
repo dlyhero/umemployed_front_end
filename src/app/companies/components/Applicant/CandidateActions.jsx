@@ -222,7 +222,7 @@ const CandidateActions = ({
               View Details
             </Button>
             <Button
-              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              className="flex-1 bg-brand text-white  cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
               onClick={() => handleGiveEndorsement(userId)}
               disabled={!isAuthenticated}
             >

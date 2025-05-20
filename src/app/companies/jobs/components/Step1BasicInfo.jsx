@@ -17,7 +17,7 @@ export const Step1BasicInfo = ({ form, jobOptions, isLoadingOptions }) => {
   if (!jobOptions?.categories?.length && !Object.keys(jobOptions?.job_types || {}).length) {
     return (
       <div className="text-center p-6 text-red-500">
-        Failed to load job options. Please refresh the page or try again later.
+        Failed to load job options. Please refresh the page.
       </div>
     );
   }
