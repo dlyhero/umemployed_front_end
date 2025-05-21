@@ -1,4 +1,4 @@
-const baseUrl = "https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api";
+const baseUrl = "https://server.umemployed.com/api";
 
 export default baseUrl;
 

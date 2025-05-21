@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
@@ -8,18 +8,51 @@ import { toast } from 'sonner';
 import useUser from '@/src/hooks/useUser';
 import baseUrl from '../../api/baseUrl';
 import { useSession } from 'next-auth/react';
+import { Spinner } from '@/components/ui/Spinner';
 
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
+  const [roleSelected, setRoleSelected] = useState(false);
   const {data: session} = useSession();
   const router = useRouter();
-  const { user, mutateUser, loading: userLoading, refetch } = useUser();
+  const { user, mutateUser, loading: userLoading } = useUser();
+
+  // More reliable back navigation prevention
+  useEffect(() => {
+    if (!roleSelected) return;
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = 'You cannot go back after selecting a role';
+      return e.returnValue;
+    };
+
+    const handlePopState = (e) => {
+      if (roleSelected) {
+        toast.info("You cannot go back after selecting a role");
+        // Push a new state to prevent back navigation
+        window.history.pushState(null, '', window.location.pathname);
+      }
+    };
+
+    // Set initial history state
+    window.history.replaceState(null, '', window.location.pathname);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [roleSelected]);
 
   // Redirect if user already has a role
-  if (!userLoading && user?.role && user.role !== 'none') {
-    router.replace('/');
-    return null;
-  }
+  useEffect(() => {
+    if (!userLoading && user?.role && user.role !== 'none') {
+      router.replace('/');
+    }
+  }, [user, userLoading, router]);
 
   const handleRoleSelect = async (role) => {
     if (!['recruiter', 'job_seeker'].includes(role)) {
@@ -29,6 +62,9 @@ export default function SelectRolePage() {
 
     setLoading(true);
     try {
+      // Mark that role has been selected to prevent navigation
+      setRoleSelected(true);
+      
       // Update role via API
       const response = await axios.post(
         `${baseUrl}/users/choose-account-type/`,
@@ -40,43 +76,44 @@ export default function SelectRolePage() {
           }
         }
       );
+
+      // Update local user data
+      await mutateUser({ role: response.data.state });
       
-      // Instead of optimistically updating, refetch the user data completely
-      await refetch();
+      // Show toast and ensure it's visible before navigation
+      toast.success(response.data.message || 'Account type updated successfully');
       
-      // Double-check that the role was actually updated by comparing with API response
-      if (response.data?.role === role || response.data?.account_type === role) {
-        // Redirect based on selected role
-        if (role === 'recruiter') {
-          router.push('/company/create');
-        } else {
-          router.push('/applicant/upload-resume');
-        }
-        
-        toast.success('Account type updated successfully');
+      // Use setTimeout to ensure toast is displayed
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Redirect based on selected role
+      if (role === 'recruiter') {
+        router.push('/companies/create');
       } else {
-        // If API response doesn't contain updated role, show an error
-        toast.error('Role was not updated correctly');
+        router.push('/applicant/upload-resume');
       }
+
     } catch (error) {
       console.error('Role selection error:', error);
+      
+      // Revert state if error occurs
+      await mutateUser({ role: 'none' });
+      setRoleSelected(false);
+      
       toast.error(
         error.response?.data?.message || 
         error.message || 
         'Failed to update account type'
       );
-      
-      // Ensure user data is consistent with backend
-      await refetch();
     } finally {
       setLoading(false);
     }
   };
 
-  if (userLoading) {
+  if (userLoading || (user?.role && user.role !== 'none')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -95,7 +132,7 @@ export default function SelectRolePage() {
           <Button
             variant="outline"
             onClick={() => handleRoleSelect('job_seeker')}
-            disabled={loading}
+            disabled={loading || roleSelected}
             className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-blue-50 transition-colors"
           >
             <User className="h-8 w-8 text-blue-600" />
@@ -108,7 +145,7 @@ export default function SelectRolePage() {
           <Button
             variant="outline"
             onClick={() => handleRoleSelect('recruiter')}
-            disabled={loading}
+            disabled={loading || roleSelected}
             className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-green-50 transition-colors"
           >
             <Briefcase className="h-8 w-8 text-green-600" />

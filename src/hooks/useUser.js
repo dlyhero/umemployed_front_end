@@ -4,7 +4,7 @@ import axios from "axios";
 import baseUrl from "../app/api/baseUrl";
 
 export default function useUser() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const [userData, setUserData] = useState({});
   const [userError, setUserError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,22 +18,8 @@ export default function useUser() {
       const response = await axios.get(`${baseUrl}/users/profile/`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      
-      // Update both local state and session
       setUserData(response.data);
       setUserError(null);
-      
-      // Sync with NextAuth session
-      if (response.data?.role && session?.user?.role !== response.data.role) {
-        await update({
-          ...session,
-          user: {
-            ...session.user,
-            ...response.data
-          }
-        });
-      }
-      
       return response.data;
     } catch (error) {
       console.error("User fetch error:", error);
@@ -42,34 +28,26 @@ export default function useUser() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, session, update]);
+  }, [accessToken]);
 
   const mutateUser = useCallback(async (newData) => {
     try {
-      // Complete state replacement rather than merging
-      setUserData(prev => ({
-        ...prev,
-        ...newData
-      }));
-      
-      // Update session as well
-      if (session) {
-        await update({
-          ...session,
-          user: {
-            ...session.user,
-            ...newData
-          }
-        });
+      // Optimistic update
+      if (newData) {
+        setUserData(prev => ({
+          ...prev,
+          ...newData,
+          personalInfo: { ...prev.personalInfo, ...newData.personalInfo }
+        }));
       }
       
-      // Refetch to ensure consistency with backend
+      // Always refetch to ensure consistency
       return await fetchUserProfile();
     } catch (error) {
       console.error("Mutation error:", error);
       throw error;
     }
-  }, [fetchUserProfile, session, update]);
+  }, [fetchUserProfile]);
 
   useEffect(() => {
     fetchUserProfile();
