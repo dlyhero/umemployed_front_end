@@ -159,7 +159,7 @@ const CompanyDetails = () => {
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left column - Main content */}
           <div className="lg:col-span-2">
@@ -168,7 +168,7 @@ const CompanyDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="border-b-2 p-6 mb-8"
+              className="border-b-2  px-6 pb-6 mb-8"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 <div className="w-24 h-24 rounded-lg bg-gray-50 flex items-center justify-center p-3 border border-gray-200">
@@ -263,7 +263,7 @@ const CompanyDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
-              className="bg-white p-6 border rounded-lg"
+              className="bg-white p-6"
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Open Positions at {company.name}</h2>

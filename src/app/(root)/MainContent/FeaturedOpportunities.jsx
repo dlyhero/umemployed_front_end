@@ -66,7 +66,7 @@ const FeaturedOpportunities = () => {
         {displayJobs.length > 0 ? (
           <div className="relative">
             <Slider {...settings}>
-              {displayJobs.slice(0, 8).map((job) => (
+              {displayJobs.slice(0, 6).map((job) => (
                 <div key={job.id} className="focus:outline-none px-2">
                   <JobCard
                         key={job.id}
