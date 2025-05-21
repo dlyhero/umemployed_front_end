@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Bookmark, BookmarkCheck, ChevronLeft, MapPin } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +10,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Suitcase } from '@phosphor-icons/react';
+import { Suitcase } from '@phosphor-icons/react';
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -136,18 +135,18 @@ const JobDetailPage = () => {
           setSimilarJobs(parsed.similarJobs || []);
         }
 
-        const jobRes = await axios.get(`/job/jobs/${jobId}/`, {
-          baseURL: baseUrl,
-         
-        })
-
         // Fetch fresh data in background
-        const [savedRes, appliedRes] = await Promise.all([                                                                                                                                                                                                                                                                                                                                                                        
+        const [jobRes, savedRes, appliedRes] = await Promise.all([
+          api.get(`/job/jobs/${jobId}/`).catch(() => ({ data: null })),
           api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
           api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
         ]);
 
-     
+        if (!jobRes.data) {
+          toast.error('Job not found');
+          router.push('/jobs');
+          return;
+        }
 
         const formattedJob = {
           ...jobRes.data,
@@ -167,6 +166,7 @@ const JobDetailPage = () => {
           weekly_ranges: jobRes.data.weekly_ranges || '',
           hire_number: jobRes.data.hire_number || 1
         };
+
         const isJobSaved = savedRes.data.some(job => job.id == jobId);
         const isJobApplied = appliedRes.data.some(job => job.id == jobId);
 
@@ -202,16 +202,17 @@ const JobDetailPage = () => {
         );
       } catch (err) {
         console.error('Error fetching job:', err);
+        toast.error(err.response?.data?.message || 'Failed to load job details');
+        router.push('/jobs');
       } finally {
         setIsLoading(false);
       }
     };
 
-    
+    if (session) {
       fetchJobData();
-    
+    }
   }, [session, jobId, router]);
-
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -301,18 +302,16 @@ const JobDetailPage = () => {
     }
   };
 
-
-
-
+ 
 
   if (!job) {
     return (
       <div className="min-h-screen bg-white py-8">
-        <div className="container max-w-7xl mx-auto px-4">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             variant="ghost"
             className="mb-6 gap-1.5 px-0 hover:bg-transparent"
-            onClick={() => router.push("/jobs")}
+            onClick={() => router.push('/jobs')}
           >
             <ChevronLeft className="h-5 w-5" />
             Back to jobs
@@ -322,7 +321,7 @@ const JobDetailPage = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -337,14 +336,14 @@ const JobDetailPage = () => {
           className="md:mb-6 gap-1.5 px-0 hover:bg-transparent"
           onClick={() => router.push(`/jobs`)}
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
           Back to jobs
         </Button>
 
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-2/3">
-            <Card className={`border-none`}>
-              <CardHeader>
+            <Card  className={`border-none`}>
+            <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
                   <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
@@ -372,7 +371,7 @@ const JobDetailPage = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className={`border rounded-lg pb-6`}>
+              <CardContent className={`border pb-6 rounded-lg `}>
                 <div className="py-6 mb-6 space-y-4">
                   <h1 className="text-2xl md:text-3xl font-bold">
                     {job.title || 'Job Title'}
@@ -407,7 +406,9 @@ const JobDetailPage = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xl font-semibold text-brand">${job.salary_range || "Salary not specified"}/year</p>
+                  <p className="text-xl font-semibold">
+                    ${job.salary_range || 'Salary not specified'}/year
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Posted {job.created_at || 'Date not available'}
                   </p>
@@ -517,7 +518,7 @@ const JobDetailPage = () => {
                   )}
                 </div>
 
-                {session &&<div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -540,7 +541,7 @@ const JobDetailPage = () => {
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
                   </Button>
-                </div>}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -579,4 +580,4 @@ const JobDetailPage = () => {
   );
 };
 
-export default JobDetailPage;
+export default JobDetailPage; 
