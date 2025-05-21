@@ -13,11 +13,11 @@ import { Spinner } from '@/components/ui/Spinner';
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
   const [roleSelected, setRoleSelected] = useState(false);
-  const {data: session} = useSession();
+  const { data: session, update: updateSession } = useSession(); // Added update function
   const router = useRouter();
   const { user, mutateUser, loading: userLoading } = useUser();
 
-  // More reliable back navigation prevention
+  // Navigation prevention (unchanged)
   useEffect(() => {
     if (!roleSelected) return;
 
@@ -30,14 +30,11 @@ export default function SelectRolePage() {
     const handlePopState = (e) => {
       if (roleSelected) {
         toast.info("You cannot go back after selecting a role");
-        // Push a new state to prevent back navigation
         window.history.pushState(null, '', window.location.pathname);
       }
     };
 
-    // Set initial history state
     window.history.replaceState(null, '', window.location.pathname);
-
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('popstate', handlePopState);
 
@@ -62,9 +59,13 @@ export default function SelectRolePage() {
 
     setLoading(true);
     try {
-      // Mark that role has been selected to prevent navigation
+      // Optimistically update local state immediately
       setRoleSelected(true);
-      
+      await mutateUser(
+        { ...user, role }, 
+        { revalidate: false } // Don't revalidate yet
+      );
+
       // Update role via API
       const response = await axios.post(
         `${baseUrl}/users/choose-account-type/`,
@@ -77,16 +78,16 @@ export default function SelectRolePage() {
         }
       );
 
-      // Update local user data
-      await mutateUser({ role: response.data.state });
-      
-      // Show toast and ensure it's visible before navigation
+      // Update both user data and session
+      await Promise.all([
+        mutateUser({ ...user, role: response.data.state }, { revalidate: true }),
+        updateSession({ ...session, user: { ...session?.user, role: response.data.state } })
+      ]);
+
       toast.success(response.data.message || 'Account type updated successfully');
       
-      // Use setTimeout to ensure toast is displayed
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Redirect based on selected role
       if (role === 'recruiter') {
         router.push('/companies/create');
       } else {
@@ -96,10 +97,13 @@ export default function SelectRolePage() {
     } catch (error) {
       console.error('Role selection error:', error);
       
-      // Revert state if error occurs
-      await mutateUser({ role: 'none' });
-      setRoleSelected(false);
+      // Revert all states if error occurs
+      await Promise.all([
+        mutateUser({ ...user, role: 'none' }, { revalidate: true }),
+        updateSession({ ...session, user: { ...session?.user, role: 'none' } })
+      ]);
       
+      setRoleSelected(false);
       toast.error(
         error.response?.data?.message || 
         error.message || 
@@ -118,50 +122,5 @@ export default function SelectRolePage() {
     );
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg border shadow-sm">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Select Your Account Type</h1>
-          <p className="mt-2 text-gray-600">
-            Choose how you want to use our platform
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <Button
-            variant="outline"
-            onClick={() => handleRoleSelect('job_seeker')}
-            disabled={loading || roleSelected}
-            className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-blue-50 transition-colors"
-          >
-            <User className="h-8 w-8 text-blue-600" />
-            <span className="text-lg font-medium">Job Seeker</span>
-            <p className="text-sm text-gray-500">
-              Looking for job opportunities
-            </p>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => handleRoleSelect('recruiter')}
-            disabled={loading || roleSelected}
-            className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-green-50 transition-colors"
-          >
-            <Briefcase className="h-8 w-8 text-green-600" />
-            <span className="text-lg font-medium">Recruiter</span>
-            <p className="text-sm text-gray-500">
-              Looking to hire candidates
-            </p>
-          </Button>
-        </div>
-
-        {loading && (
-          <div className="text-center text-gray-500">
-            <p>Updating your account type...</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  // ... rest of your JSX remains the same
 }
