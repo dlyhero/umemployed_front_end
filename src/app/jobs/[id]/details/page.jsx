@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Bookmark, BookmarkCheck, ChevronLeft, MapPin } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +10,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Suitcase } from '@phosphor-icons/react';
+import { Suitcase } from '@phosphor-icons/react';
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -47,23 +46,23 @@ const JobDetailPage = () => {
         <p className="text-muted-foreground">
           Please explain why you need to retake this assessment. We'll review your request and get back to you.
         </p>
-        
+
         <textarea
           className="w-full border rounded-lg p-4 min-h-[200px]"
           value={retakeReason}
           onChange={(e) => setRetakeReason(e.target.value)}
           placeholder="Enter your reasons here..."
         />
-        
+
         <div className="flex gap-4">
-          <Button 
+          <Button
             className="border-brand text-brand hover:text-brand flex-1"
-            variant="outline" 
+            variant="outline"
             onClick={onClose}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             className="flex-1 bg-brand hover:bg-brand/80 text-white"
             onClick={submitRetakeRequest}
             disabled={!retakeReason.trim()}
@@ -136,18 +135,18 @@ const JobDetailPage = () => {
           setSimilarJobs(parsed.similarJobs || []);
         }
 
-        const jobRes = await axios.get(`/job/jobs/${jobId}/`, {
-          baseURL: baseUrl,
-         
-        })
-
         // Fetch fresh data in background
-        const [savedRes, appliedRes] = await Promise.all([                                                                                                                                                                                                                                                                                                                                                                        
+        const [jobRes, savedRes, appliedRes] = await Promise.all([
+          api.get(`/job/jobs/${jobId}/`).catch(() => ({ data: null })),
           api.get('/job/saved-jobs/').catch(() => ({ data: [] })),
           api.get('/job/applied-jobs/').catch(() => ({ data: [] }))
         ]);
 
-     
+        if (!jobRes.data) {
+          toast.error('Job not found');
+          router.push('/jobs');
+          return;
+        }
 
         const formattedJob = {
           ...jobRes.data,
@@ -167,6 +166,7 @@ const JobDetailPage = () => {
           weekly_ranges: jobRes.data.weekly_ranges || '',
           hire_number: jobRes.data.hire_number || 1
         };
+
         const isJobSaved = savedRes.data.some(job => job.id == jobId);
         const isJobApplied = appliedRes.data.some(job => job.id == jobId);
 
@@ -202,16 +202,17 @@ const JobDetailPage = () => {
         );
       } catch (err) {
         console.error('Error fetching job:', err);
+        toast.error(err.response?.data?.message || 'Failed to load job details');
+        router.push('/jobs');
       } finally {
         setIsLoading(false);
       }
     };
 
-    
+    if (session) {
       fetchJobData();
-    
+    }
   }, [session, jobId, router]);
-
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -302,29 +303,6 @@ const JobDetailPage = () => {
   };
 
 
-
-
-
-  if (!job) {
-    return (
-      <div className="min-h-screen bg-white py-8">
-        <div className="container max-w-7xl mx-auto px-4">
-          <Button
-            variant="ghost"
-            className="mb-6 gap-1.5 px-0 hover:bg-transparent"
-            onClick={() => router.push("/jobs")}
-          >
-            <ChevronLeft className="h-5 w-5" />
-            Back to jobs
-          </Button>
-          <div className="text-center py-12">
-            <p className="text-gray-500">Job not found</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
       {showRetakeModal && (
@@ -337,7 +315,7 @@ const JobDetailPage = () => {
           className="md:mb-6 gap-1.5 px-0 hover:bg-transparent"
           onClick={() => router.push(`/jobs`)}
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
           Back to jobs
         </Button>
 
@@ -347,7 +325,7 @@ const JobDetailPage = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                  <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
+                    <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
                       <Suitcase className="w-24 h-24 text-brand" />
                     </div>
                     <div>
@@ -357,7 +335,7 @@ const JobDetailPage = () => {
                       </p>
                     </div>
                   </div>
-                 {session&& <Button
+                  {session && <Button
                     variant="ghost"
                     size="icon"
                     onClick={toggleSave}
@@ -372,18 +350,18 @@ const JobDetailPage = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className={`border rounded-lg pb-6`}>
+              <CardContent className={`border rounded-lg pb-4`}>
                 <div className="py-6 mb-6 space-y-4">
                   <h1 className="text-2xl md:text-3xl font-bold">
                     {job.title || 'Job Title'}
                   </h1>
                   <div className="flex flex-wrap gap-2">
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                       <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />   
+                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
                       {job.job_location_type || "Location not specified"}
                     </div>
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                    <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />  
+                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
                       {job.location || "Remote"}
                     </div>
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
@@ -392,12 +370,12 @@ const JobDetailPage = () => {
                     </div>
                     {job.job_type && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                        <img  src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`}/>
                         {job.job_type}
                       </div>
                     )}
                     {job.weekly_ranges && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                        <img src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`} />
                         {job.weekly_ranges}
                       </div>
                     )}
@@ -407,7 +385,9 @@ const JobDetailPage = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xl font-semibold text-brand">${job.salary_range || "Salary not specified"}/year</p>
+                  <p className="text-xl font-semibold">
+                    ${job.salary_range || 'Salary not specified'}/year
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Posted {job.created_at || 'Date not available'}
                   </p>
@@ -517,7 +497,7 @@ const JobDetailPage = () => {
                   )}
                 </div>
 
-                {session &&<div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -540,7 +520,7 @@ const JobDetailPage = () => {
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
                   </Button>
-                </div>}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -579,4 +559,4 @@ const JobDetailPage = () => {
   );
 };
 
-export default JobDetailPage;
+export default JobDetailPage; 
