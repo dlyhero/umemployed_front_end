@@ -30,8 +30,6 @@ const Dashboard = ({ companyId, companyData }) => {
     { title: 'Tip 1', content: 'Optimize your job postings.' },
     { title: 'Tip 2', content: 'Respond to candidates quickly.' },
     { title: 'Tip 3', content: 'Use clear job descriptions.' },
-    { title: 'Tip 4', content: 'Provide feedback to candidates.' },
-    { title: 'Tip 5', content: 'Engage with top talent early.' },
   ];
 
   useEffect(() => {
