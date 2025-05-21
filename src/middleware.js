@@ -165,6 +165,8 @@ export const config = {
      * - images/* (image files stored in the public folder)
      * - api/* (API routes)
      */
-    '/((?!_next/static|_next/image|favicon.ico|images|api).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images|api/.*|login).*)',
+    '/compamies',
+    '/applicant'
   ],
 };

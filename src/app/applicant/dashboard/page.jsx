@@ -12,6 +12,7 @@ import { WelcomeSection } from './components/WelcomeSection'
 import { Sidebar } from './components/Sidebar'
 import { MobileMenu } from './components/MobileMenu'
 import { RecommendedJobs } from './components/RecommendedJobs'
+import { useJobs } from '@/src/hooks/useJob'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -26,45 +27,6 @@ const applicantDashBoard = () => {
       );
     };
   
-    const jobs = [
-      {
-        id: 1,
-        title: "Senior UI Developer",
-        company: { name: "PixelCraft Studios" },
-        job_location_type: "Remote Job",
-        location: "Remote • United States",
-        salary_range: "120/hr",
-        created_at: "24 March 2024",
-        is_saved: savedJobs.includes(1),
-        is_applied: false,
-        description: "Lead the design system implementation for our flagship product with a focus on accessibility."
-      },
-      {
-        id: 2,
-        title: "Senior Backend Engineer",
-        company: { name: "CloudNova Technologies" },
-        job_location_type: "Full-Time",
-        location: "San Francisco, CA",
-        salary_range: "125-145/hr",
-        created_at: "28 March 2024",
-        is_saved: savedJobs.includes(2),
-        is_applied: false,
-        description: "Architect and scale our distributed systems to handle millions of concurrent users."
-      },
-      {
-        id: 3,
-        title: "UX/UI Designer",
-        company: { name: "MAGIC UNICORN" },
-        job_location_type: "Remote Job",
-        location: "SSTONA, TALIAN",
-        salary_range: "250/hr",
-        created_at: "24 March 2024",
-        is_saved: savedJobs.includes(3),
-        is_applied: false,
-        description: "Create beautiful interfaces that delight users and drive business metrics."
-      }
-    ];
-
   // Mock data
   const [stats] = useState([
     { id: 1, name: 'Profile Views', value: '1.2K', change: '+12%', icon: <User className="w-5 h-5" /> },
