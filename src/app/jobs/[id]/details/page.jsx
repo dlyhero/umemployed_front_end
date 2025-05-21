@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Bookmark, BookmarkCheck, ChevronLeft } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronLeft, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Suitcase } from '@phosphor-icons/react';
+import { ArrowLeft, Suitcase } from '@phosphor-icons/react';
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -136,7 +136,7 @@ const JobDetailPage = () => {
           setSimilarJobs(parsed.similarJobs || []);
         }
 
-        const jobRes = axios.get(`/job/jobs/${jobId}/`, {
+        const jobRes = await axios.get(`/job/jobs/${jobId}/`, {
           baseURL: baseUrl,
          
         })
@@ -303,104 +303,12 @@ const JobDetailPage = () => {
 
 
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white pb-8 pt-2">
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Skeleton className="w-32 h-4 mb-6" />
 
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-2/3 space-y-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-4">
-                      <Skeleton className="w-14 h-14 rounded-lg" />
-                      <div>
-                        <Skeleton className="w-40 h-4 mb-2" />
-                        <Skeleton className="w-52 h-3" />
-                      </div>
-                    </div>
-                    <Skeleton className="w-10 h-10 rounded-full" />
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-6">
-                  <div className="border-t border-b py-6 mb-6 space-y-4">
-                    <Skeleton className="w-3/4 h-6" />
-                    <div className="flex flex-wrap gap-2">
-                      {[...Array(4)].map((_, i) => (
-                        <Skeleton key={i} className="h-6 w-28 rounded" />
-                      ))}
-                    </div>
-                    <Skeleton className="w-1/2 h-5" />
-                    <Skeleton className="w-1/3 h-3" />
-                  </div>
-
-                  <div>
-                    <div className="flex border-b mb-6">
-                      <Skeleton className="h-10 w-24 mr-2" />
-                      <Skeleton className="h-10 w-24" />
-                    </div>
-
-                    <div className="space-y-4">
-                      <Skeleton className="w-40 h-5" />
-                      <Skeleton className="w-full h-20 rounded" />
-                      <Skeleton className="w-32 h-5 mt-6" />
-                      <ul className="space-y-2 pl-5">
-                        {[...Array(3)].map((_, i) => (
-                          <Skeleton key={i} className="h-3 w-64" />
-                        ))}
-                      </ul>
-                      <Skeleton className="w-32 h-5 mt-6" />
-                      <ul className="space-y-2 pl-5">
-                        {[...Array(3)].map((_, i) => (
-                          <Skeleton key={i} className="h-3 w-64" />
-                        ))}
-                      </ul>
-                      <Skeleton className="w-32 h-5 mt-6" />
-                      <ul className="space-y-2 pl-5">
-                        {[...Array(3)].map((_, i) => (
-                          <Skeleton key={i} className="h-3 w-64" />
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Skeleton className="h-10 w-full sm:w-1/2 rounded" />
-                    <Skeleton className="h-10 w-full sm:w-1/2 rounded" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="lg:w-1/3">
-              <Card className="sticky top-6">
-                <CardHeader>
-                  <Skeleton className="w-40 h-6" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-2 border p-4 rounded-lg">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-2/3" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   if (!job) {
     return (
       <div className="min-h-screen bg-white py-8">
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container max-w-7xl mx-auto px-4">
           <Button
             variant="ghost"
             className="mb-6 gap-1.5 px-0 hover:bg-transparent"
@@ -429,18 +337,18 @@ const JobDetailPage = () => {
           className="md:mb-6 gap-1.5 px-0 hover:bg-transparent"
           onClick={() => router.push(`/jobs`)}
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" />
           Back to jobs
         </Button>
 
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-2/3">
-            <Card>
+            <Card className={`border-none`}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
-                      <Suitcase className="w-10 h-10 text-brand" />
+                  <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
+                      <Suitcase className="w-24 h-24 text-brand" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>
@@ -464,35 +372,39 @@ const JobDetailPage = () => {
                 </div>
               </CardHeader>
 
-              <CardContent>
-                <div className="border-t border-b py-6 mb-6 space-y-4">
+              <CardContent className={`border rounded-lg pb-6`}>
+                <div className="py-6 mb-6 space-y-4">
                   <h1 className="text-2xl md:text-3xl font-bold">
                     {job.title || 'Job Title'}
                   </h1>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className={` text-brand text-md`}>
+                    <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                       <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />   
                       {job.job_location_type || "Location not specified"}
-                    </Badge>
-                    <Badge variant="secondary" className={` text-brand text-md`}>
+                    </div>
+                    <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                    <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />  
                       {job.location || "Remote"}
-                    </Badge>
-                    <Badge variant="secondary" className={` text-brand text-md`}>
+                    </div>
+                    <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e265f9155c51188092_reports.svg" alt="" />
                       {job.experience_level || "Experience not specified"}
-                    </Badge>
-                    {job.level && (
-                      <Badge variant="secondary" className={` text-brand text-md`}>
-                        {job.level}
-                      </Badge>
+                    </div>
+                    {job.job_type && (
+                      <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                        <img  src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`}/>
+                        {job.job_type}
+                      </div>
                     )}
                     {job.weekly_ranges && (
-                      <Badge variant="secondary" className={` text-brand text-md`}>
+                      <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
                         {job.weekly_ranges}
-                      </Badge>
+                      </div>
                     )}
                     {job.hire_number > 1 && (
-                      <Badge variant="secondary" className={` text-brand text-md`}>
+                      <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
                         Hiring {job.hire_number} people
-                      </Badge>
+                      </div>
                     )}
                   </div>
                   <p className="text-xl font-semibold text-brand">${job.salary_range || "Salary not specified"}/year</p>
