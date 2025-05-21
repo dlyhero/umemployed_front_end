@@ -21,7 +21,7 @@ export function Header() {
   const pathname = usePathname();
   const {data: session} = useSession();
  
-  const feedBackPages = ["/verify_email", "/reset_password",];
+  const feedBackPages = ["/verify_email", "/reset_password", "/login"];
 
   return (
     <header
