@@ -24,17 +24,14 @@ export default function LoginForm() {
     
     const { register, handleSubmit, formState: { errors } } = useForm();
 
+
     useEffect(() => {
         if (status === "authenticated") {
             // Add a small delay to ensure session is fully loaded
             const timer = setTimeout(() => {
                 const role = user?.user?.role;
-                
-                // If we have a valid callbackUrl that's not an auth route, use it
-                if (callbackUrl && callbackUrl !== '/' && !isAuthRoute(callbackUrl)) {
-                    router.replace(callbackUrl);
-                    return;
-                }
+                console.log(role)
+             
 
                 // Handle default redirects based on role and status
                 switch(role) {
@@ -56,7 +53,7 @@ export default function LoginForm() {
                     default:
                         router.replace('/select-role');
                 }
-            }, 100);
+            }, 3000);
 
             return () => clearTimeout(timer);
         }
