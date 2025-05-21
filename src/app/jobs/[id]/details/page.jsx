@@ -46,23 +46,23 @@ const JobDetailPage = () => {
         <p className="text-muted-foreground">
           Please explain why you need to retake this assessment. We'll review your request and get back to you.
         </p>
-
+        
         <textarea
           className="w-full border rounded-lg p-4 min-h-[200px]"
           value={retakeReason}
           onChange={(e) => setRetakeReason(e.target.value)}
           placeholder="Enter your reasons here..."
         />
-
+        
         <div className="flex gap-4">
-          <Button
+          <Button 
             className="border-brand text-brand hover:text-brand flex-1"
-            variant="outline"
+            variant="outline" 
             onClick={onClose}
           >
             Cancel
           </Button>
-          <Button
+          <Button 
             className="flex-1 bg-brand hover:bg-brand/80 text-white"
             onClick={submitRetakeRequest}
             disabled={!retakeReason.trim()}
@@ -302,6 +302,27 @@ const JobDetailPage = () => {
     }
   };
 
+ 
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-white py-8">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Button
+            variant="ghost"
+            className="mb-6 gap-1.5 px-0 hover:bg-transparent"
+            onClick={() => router.push('/jobs')}
+          >
+            <ChevronLeft className="h-5 w-5" />
+            Back to jobs
+          </Button>
+          <div className="text-center py-12">
+            <p className="text-gray-500">Job not found</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
@@ -321,11 +342,11 @@ const JobDetailPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-2/3">
-            <Card className={`border-none`}>
-              <CardHeader>
+            <Card  className={`border-none`}>
+            <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                    <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
+                  <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
                       <Suitcase className="w-24 h-24 text-brand" />
                     </div>
                     <div>
@@ -335,7 +356,7 @@ const JobDetailPage = () => {
                       </p>
                     </div>
                   </div>
-                  {session && <Button
+                 {session&& <Button
                     variant="ghost"
                     size="icon"
                     onClick={toggleSave}
@@ -350,18 +371,18 @@ const JobDetailPage = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className={`border rounded-lg pb-4`}>
+              <CardContent className={`border pb-6 rounded-lg `}>
                 <div className="py-6 mb-6 space-y-4">
                   <h1 className="text-2xl md:text-3xl font-bold">
                     {job.title || 'Job Title'}
                   </h1>
                   <div className="flex flex-wrap gap-2">
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
+                       <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />   
                       {job.job_location_type || "Location not specified"}
                     </div>
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
+                    <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />  
                       {job.location || "Remote"}
                     </div>
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
@@ -370,12 +391,12 @@ const JobDetailPage = () => {
                     </div>
                     {job.job_type && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
+                        <img  src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`}/>
                         {job.job_type}
                       </div>
                     )}
                     {job.weekly_ranges && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                        <img src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`} />
                         {job.weekly_ranges}
                       </div>
                     )}
