@@ -46,69 +46,6 @@ const matchesPattern = (path, patterns) => {
   });
 };
 
-export async function middleware(request) {
-  const { pathname } = request.nextUrl;
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  
-  console.log('Middleware - Path:', pathname);
-  console.log('Middleware - Token:', token);
-
-  // Public routes are accessible to everyone
-  if (matchesPattern(pathname, PUBLIC_ROUTES)) {
-    return NextResponse.next();
-  }
-
-  // Authentication routes are only for non-authenticated users
-  if (matchesPattern(pathname, AUTH_ROUTES)) {
-    if (token) {
-      return handleAuthenticatedRedirect(token, request);
-    }
-    return NextResponse.next();
-  }
-
-  // If user is not authenticated and trying to access a protected route
-  if (!token) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Handle onboarding routes
-  if (matchesPattern(pathname, ONBOARDING_ROUTES)) {
-    if (pathname === '/select-role' || pathname.startsWith('/select-role/')) {
-      if (token.role && token.role !== 'none') {
-        return handleAuthenticatedRedirect(token, request);
-      }
-    } 
-    else if (pathname === '/upload-resume' || pathname.startsWith('/upload-resume/')) {
-      if (token.role !== 'job_seeker' || token.has_resume) {
-        return handleAuthenticatedRedirect(token, request);
-      }
-    }
-    else if (pathname === '/company/create' || pathname.startsWith('/company/create/')) {
-      if (token.role !== 'recruiter' || token.has_company) {
-        return handleAuthenticatedRedirect(token, request);
-      }
-    }
-    return NextResponse.next();
-  }
-
-  // Role-based access control
-  if (pathname.startsWith('/companies/')) {
-    if (token.role !== 'recruiter') {
-      return redirectToDashboard(token, request);
-    }
-  }
-  
-  if (pathname.startsWith('/applicant/')) {
-    if (token.role !== 'job_seeker') {
-      return redirectToDashboard(token, request);
-    }
-  }
-
-  return NextResponse.next();
-}
-
 // Helper function to redirect user based on their state
 function handleAuthenticatedRedirect(token, request) {
   // First-time login flow
@@ -146,6 +83,76 @@ function redirectToDashboard(token, request) {
   }
     
   return NextResponse.redirect(new URL('/', request.url));
+}
+
+export async function middleware(request) {
+  const { pathname } = request.nextUrl;
+  
+  try {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    
+    console.log('Middleware - Path:', pathname);
+    console.log('Middleware - Token:', token);
+
+    // Public routes are accessible to everyone
+    if (matchesPattern(pathname, PUBLIC_ROUTES)) {
+      return NextResponse.next();
+    }
+
+    // Authentication routes are only for non-authenticated users
+    if (matchesPattern(pathname, AUTH_ROUTES)) {
+      if (token) {
+        return handleAuthenticatedRedirect(token, request);
+      }
+      return NextResponse.next();
+    }
+
+    // If user is not authenticated and trying to access a protected route
+    if (!token) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Handle onboarding routes
+    if (matchesPattern(pathname, ONBOARDING_ROUTES)) {
+      if (pathname === '/select-role' || pathname.startsWith('/select-role/')) {
+        if (token.role && token.role !== 'none') {
+          return handleAuthenticatedRedirect(token, request);
+        }
+      } 
+      else if (pathname === '/upload-resume' || pathname.startsWith('/upload-resume/')) {
+        if (token.role !== 'job_seeker' || token.has_resume) {
+          return handleAuthenticatedRedirect(token, request);
+        }
+      }
+      else if (pathname === '/company/create' || pathname.startsWith('/company/create/')) {
+        if (token.role !== 'recruiter' || token.has_company) {
+          return handleAuthenticatedRedirect(token, request);
+        }
+      }
+      return NextResponse.next();
+    }
+
+    // Role-based access control
+    if (pathname.startsWith('/companies/')) {
+      if (token.role !== 'recruiter') {
+        return redirectToDashboard(token, request);
+      }
+    }
+    
+    if (pathname.startsWith('/applicant/')) {
+      if (token.role !== 'job_seeker') {
+        return redirectToDashboard(token, request);
+      }
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    // Redirect to homepage on any error (including session expiration or server issues)
+    return NextResponse.redirect(new URL('/', request.url));
+  }
 }
 
 export const config = {
