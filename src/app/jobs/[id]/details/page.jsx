@@ -13,6 +13,46 @@ import baseUrl from '@/src/app/api/baseUrl';
 import { Suitcase } from '@phosphor-icons/react';
 import { Spinner } from '@/components/ui/Spinner';
 
+
+
+
+  // Format experience levels
+  const experienceLevelsMap = {
+    'under1Year': 'Under 1 year',
+    '1to2Years': '1-2 years',
+    '2to5Years': '2-5 years',
+    '5to10Years': '5-10 years',
+    'over10Years': '10+ years'
+  };
+
+  // Format job levels
+  const levelMap = {
+    'Entry': 'Entry Level',
+    'Mid': 'Mid Level',
+    'Senior': 'Senior Level',
+    'Lead': 'Lead',
+    'Executive': 'Executive'
+  };
+
+  // Format shifts
+  const shiftMap = {
+    'fourHourShift': '4-hour shift',
+    'eightHourShift': '8-hour shift',
+    'twelveHourShift': '12-hour shift',
+    'flexibleShift': 'Flexible hours',
+    'nightShift': 'Night shift'
+  };
+
+  // Format weekly ranges
+  const weeklyRangesMap = {
+    'mondayToFriday': 'Monday to Friday',
+    'weekends': 'Weekends',
+    'flexibleDays': 'Flexible days',
+    'rotational': 'Rotational schedule',
+    'any5Days': 'Any 5 days/week'
+  };
+
+
 const JobDetailPage = () => {
   const router = useRouter();
   const params = useParams();
@@ -117,7 +157,7 @@ const JobDetailPage = () => {
       return;
     }
 
-    const fetchPublicDaetail =  async() => {
+    const fetchPublicDaetail = async () => {
       try {
         setIsLoading(true);
         const cachedJob = localStorage.getItem(`job-${jobId}`);
@@ -126,10 +166,10 @@ const JobDetailPage = () => {
           setJob(parsed.job);
           setIsSaved(parsed.isSaved);
           setSimilarJobs(parsed.similarJobs || []);
-  
+
         }
-        
-        const jobRes =  await axios.get(`/job/jobs/${jobId}/`, {
+
+        const jobRes = await axios.get(`/job/jobs/${jobId}/`, {
           baseURL: baseUrl,
         })
         if (!jobRes.data) {
@@ -137,7 +177,7 @@ const JobDetailPage = () => {
           router.push('/jobs');
           return;
         }
-  
+
         const formattedJob = {
           ...jobRes.data,
           created_at: formatDate(jobRes.data.created_at),
@@ -151,30 +191,30 @@ const JobDetailPage = () => {
           benefits: jobRes.data.benefits
             ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean)
             : [],
-          level: jobRes.data.level || '',
-          experience_level: jobRes.data.experience_levels || jobRes.data.level || '',
-          weekly_ranges: jobRes.data.weekly_ranges || '',
+          level: levelMap[jobRes.data.level] || '',
+          experience_level: experienceLevelsMap[jobRes.data.experience_levels] || jobRes.data.level || '',
+          weekly_ranges: weeklyRangesMap[jobRes.data.weekly_ranges]|| '',
           hire_number: jobRes.data.hire_number || 1
         };
-  
+
         setJob(formattedJob);
-          // Cache data
-          localStorage.setItem(
-            `job-${jobId}`,
-            JSON.stringify({
-              job: formattedJob,
-           
-            })
-          );
-  
-        
+        // Cache data
+        localStorage.setItem(
+          `job-${jobId}`,
+          JSON.stringify({
+            job: formattedJob,
+
+          })
+        );
+
+
       } catch (err) {
         console.error('Error fetching job:', err);
       } finally {
         setIsLoading(false);
       }
-      }
-  
+    }
+
 
     const fetchJobData = async () => {
       try {
@@ -221,9 +261,9 @@ const JobDetailPage = () => {
           benefits: jobRes.data.benefits
             ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean)
             : [],
-          level: jobRes.data.level || '',
-          experience_level: jobRes.data.experience_levels || jobRes.data.level || '',
-          weekly_ranges: jobRes.data.weekly_ranges || '',
+          level: levelMap[jobRes.data.level]|| '',
+          experience_level: experienceLevelsMap[jobRes.data.experience_levels] || jobRes.data.level || '',
+          weekly_ranges: weeklyRangesMap[jobRes.data.weekly_ranges] || '',
           hire_number: jobRes.data.hire_number || 1
         };
 
@@ -362,9 +402,20 @@ const JobDetailPage = () => {
     }
   };
 
-if(isLoading){
-  <div></div>
-}
+  const getInitials = (name) => {
+    if (!name) return '?';
+
+    const words = name.split(' ');
+    let initials = words[0][0].toUpperCase();
+
+    if (words.length > 1) {
+      initials += words[words.length - 1][0].toUpperCase();
+    }
+
+    return initials;
+  };
+
+
 
   if (!job) {
     return (
@@ -385,6 +436,41 @@ if(isLoading){
       </div>
     );
   }
+
+
+  const renderLogo = () => {
+    if (job.company?.logo && job.company.logo !== 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg') {
+      return (
+        <img
+          src={job.company.logo}
+          alt={`${job.company.name} Logo`}
+          className="w-full h-full object-contain"
+        />
+      );
+    }
+
+    const initials = getInitials(job.company?.name);
+    const colors = [
+      'bg-blue-500 text-white',
+      'bg-green-500 text-white',
+      'bg-purple-500 text-white',
+      'bg-red-500 text-white',
+      'bg-yellow-500 text-white',
+      'bg-indigo-500 text-white',
+      'bg-pink-500 text-white',
+      'bg-teal-500 text-white',
+    ];
+
+    const colorIndex = (job.company.name.charCodeAt(0) || 0) % colors.length;
+    const colorClass = colors[colorIndex];
+
+    return (
+      <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass} font-bold text-2xl`}>
+        {initials}
+      </div>
+    );
+  };
+
 
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
@@ -408,8 +494,8 @@ if(isLoading){
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                    <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
-                      <Suitcase className="w-24 h-24 text-brand" />
+                    <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100  p-3 flex items-center justify-center">
+                      {renderLogo()}
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>
@@ -440,15 +526,10 @@ if(isLoading){
                   </h1>
                   <div className="flex flex-wrap gap-2">
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
                       {job.job_location_type || "Location not specified"}
                     </div>
+                  
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
-                      {job.location || "Remote"}
-                    </div>
-                    <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e265f9155c51188092_reports.svg" alt="" />
                       {job.experience_level || "Experience not specified"}
                     </div>
                     {job.job_type && (
@@ -458,7 +539,6 @@ if(isLoading){
                     )}
                     {job.weekly_ranges && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                        <img src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`} />
                         {job.weekly_ranges}
                       </div>
                     )}
@@ -514,21 +594,24 @@ if(isLoading){
                         </div>
                       )}
 
-                      {Array.isArray(job.requirements) ? (
-                        <div>
+
+
+                      {job.requirements.length > 0 ?
+                        (
+                          <div>
+                            <h3 className="text-lg font-bold mb-3">Requirements</h3>
+                            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                              {job.requirements.map((item, index) => (
+                                <li key={item.id}>{item.name}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : <div>
                           <h3 className="text-lg font-bold mb-3">Requirements</h3>
                           <p className='text-muted-foreground'>No Requirements</p>
-                        </div>
-                      ) : job.requirements && job.requirements.length > 0 ? (
-                        <div>
-                          <h3 className="text-lg font-bold mb-3">Requirements</h3>
-                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                            {job.requirements.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : null}
+                        </div>}
+
+
 
                       {job.benefits && job.benefits.length > 0 && (
                         <div>
@@ -580,7 +663,7 @@ if(isLoading){
                   )}
                 </div>
 
-               {session && (isLoading ? <Spinner/> :   <div className="flex flex-col sm:flex-row gap-4">
+                {session && (isLoading ? <Spinner /> : <div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -608,7 +691,7 @@ if(isLoading){
             </Card>
           </div>
 
-          {session &&<div className="lg:w-1/3">
+          {session && <div className="lg:w-1/3">
             <Card className="sticky top-6">
               <CardHeader>
                 <h2 className="text-xl font-bold">Similar Jobs</h2>

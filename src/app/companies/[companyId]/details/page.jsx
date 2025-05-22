@@ -145,7 +145,7 @@ const CompanyDetails = () => {
   return (
     <div className="min-h-screen">
       {/* Header with back button */}
-      <header className="bg-white mt-10">
+      <header className="bg-white mt-4">
         <div className="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex items-center">
           <Button
             variant="ghost"
@@ -171,7 +171,7 @@ const CompanyDetails = () => {
               className="border-b-2  px-6 pb-6 mb-8"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                <div className="w-24 h-24 rounded-lg bg-gray-50 flex items-center justify-center p-3 border border-gray-200">
+                <div className="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center p-3 border border-gray-200">
                   {renderLogo()}
                 </div>
                 <div>
@@ -181,13 +181,13 @@ const CompanyDetails = () => {
                     <span>{company.industry || 'Not specified'}</span>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-brand/70 text-sm">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-brand/70 font-semibold text-sm">
                       <Star className="w-4 h-4 mr-1 fill-brand text-brand/90" />
                       {company.rating || 'N/A'} Rating
                     </span>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">
+                    <span className="inline-flex items-center px-3 py-1 rounded-lg border text-gray-700 text-sm">
                       <Briefcase className="w-4 h-4 mr-1" />
-                      {jobs.length} open positions
+                      {jobs.length > 0 ? `${jobs.length } open positions` : "No open position"}
                     </span>
                   </div>
                 </div>
@@ -404,7 +404,7 @@ const CompanyDetails = () => {
 
               {/* Call to action */}
               {jobs.length > 0 && (
-                <div className="bg-brand/5 rounded-xl shadow-sm p-6 border border-brand/10">
+                <div className="bg-brand/5 rounded-xl p-6 border border-brand/10">
                   <h2 className="text-xl font-bold text-gray-900 mb-3">Interested in joining?</h2>
                   <p className="text-gray-700 mb-4">
                     Explore all {jobs.length} open positions at {company.name} and find your perfect fit.
