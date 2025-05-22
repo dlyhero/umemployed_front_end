@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suitcase } from "@phosphor-icons/react";
 import useUser from "@/src/hooks/useUser";
+import { CompanyLogo, formatRelativeTime, formatSalary } from "@/src/utils/jobFormater";
 
 const JobCard = ({ job, onToggleSave, loading }) => {
   const { data: session } = useSession();
@@ -18,55 +19,6 @@ const JobCard = ({ job, onToggleSave, loading }) => {
 
 
 
-  const formatRelativeTime = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
-
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
-
-    interval = Math.floor(seconds / 604800);
-    if (interval >= 1) return `${interval} week${interval === 1 ? '' : 's'} ago`;
-
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
-
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
-
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
-
-    return 'Just now';
-  };
-
-  const formatSalary = (salaryRange) => {
-    if (!salaryRange || typeof salaryRange !== 'string') return 'N/A';
-
-    if (salaryRange.includes('$')) {
-      return salaryRange.split('/')[0];
-    }
-
-    if (!salaryRange.includes('-')) return salaryRange;
-
-    const [minStr, maxStr] = salaryRange.split('-');
-    const min = parseInt(minStr);
-    const max = maxStr ? parseInt(maxStr) : null;
-
-    if (isNaN(min)) return 'N/A';
-
-    const format = (value) => {
-      if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-      if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-      return value.toLocaleString();
-    };
-
-    return max && !isNaN(max) ? `${format(min)}-${format(max)}` : format(min);
-  };
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -130,8 +82,8 @@ const JobCard = ({ job, onToggleSave, loading }) => {
     >
       <div className="flex justify-between items-start gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="flex-shrink-0 w-14 h-14 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
-            <Suitcase  className="w-10 h-10 text-brand"/>
+          <div className="flex-shrink-0 w-14 h-14 p-1 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
+            {CompanyLogo(job.company)}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium truncate">{job.company?.name}</p>

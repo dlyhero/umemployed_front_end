@@ -11,6 +11,9 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
 import { Suitcase } from '@phosphor-icons/react';
+import { Spinner } from '@/components/ui/Spinner';
+import { levelMap, experienceLevelsMap, weeklyRangesMap, cleanDescription, getInitials, CompanyLogo, formatDate } from '@/src/utils/jobFormater';
+
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -116,6 +119,65 @@ const JobDetailPage = () => {
       return;
     }
 
+    const fetchPublicDaetail = async () => {
+      try {
+        setIsLoading(true);
+        const cachedJob = localStorage.getItem(`job-${jobId}`);
+        if (cachedJob) {
+          const parsed = JSON.parse(cachedJob);
+          setJob(parsed.job);
+          setIsSaved(parsed.isSaved);
+          setSimilarJobs(parsed.similarJobs || []);
+
+        }
+
+        const jobRes = await axios.get(`/job/jobs/${jobId}/`, {
+          baseURL: baseUrl,
+        })
+        if (!jobRes.data) {
+          toast.error('Job not found');
+          router.push('/jobs');
+          return;
+        }
+
+        const formattedJob = {
+          ...jobRes.data,
+          created_at: formatDate(jobRes.data.created_at),
+          description: cleanDescription(jobRes.data.description || ''),
+          responsibilities: jobRes.data.responsibilities
+            ? cleanDescription(jobRes.data.responsibilities).split('. ').filter(Boolean)
+            : [],
+          requirements: Array.isArray(jobRes.data.requirements)
+            ? jobRes.data.requirements
+            : cleanDescription(jobRes.data.requirements || '').split('. ').filter(Boolean),
+          benefits: jobRes.data.benefits
+            ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean)
+            : [],
+          level: levelMap[jobRes.data.level] || '',
+          experience_level: experienceLevelsMap[jobRes.data.experience_levels] || jobRes.data.level || '',
+          weekly_ranges: weeklyRangesMap[jobRes.data.weekly_ranges]|| '',
+          hire_number: jobRes.data.hire_number || 1
+        };
+
+        setJob(formattedJob);
+        // Cache data
+        localStorage.setItem(
+          `job-${jobId}`,
+          JSON.stringify({
+            job: formattedJob,
+
+          })
+        );
+
+
+      } catch (err) {
+        console.error('Error fetching job:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+
     const fetchJobData = async () => {
       try {
         setIsLoading(true);
@@ -161,9 +223,9 @@ const JobDetailPage = () => {
           benefits: jobRes.data.benefits
             ? cleanDescription(jobRes.data.benefits).split('. ').filter(Boolean)
             : [],
-          level: jobRes.data.level || '',
-          experience_level: jobRes.data.experience_levels || jobRes.data.level || '',
-          weekly_ranges: jobRes.data.weekly_ranges || '',
+          level: levelMap[jobRes.data.level]|| '',
+          experience_level: experienceLevelsMap[jobRes.data.experience_levels] || jobRes.data.level || '',
+          weekly_ranges: weeklyRangesMap[jobRes.data.weekly_ranges] || '',
           hire_number: jobRes.data.hire_number || 1
         };
 
@@ -202,7 +264,6 @@ const JobDetailPage = () => {
         );
       } catch (err) {
         console.error('Error fetching job:', err);
-        toast.error(err.response?.data?.message || 'Failed to load job details');
         router.push('/jobs');
       } finally {
         setIsLoading(false);
@@ -212,22 +273,10 @@ const JobDetailPage = () => {
     if (session) {
       fetchJobData();
     }
+    else fetchPublicDaetail()
   }, [session, jobId, router]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-
-  const cleanDescription = (html) => {
-    if (!html || typeof html !== 'string') return '';
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
+ 
 
   const toggleSave = async () => {
     try {
@@ -304,6 +353,7 @@ const JobDetailPage = () => {
 
 
 
+
   if (!job) {
     return (
       <div className="min-h-screen bg-white py-8">
@@ -323,6 +373,10 @@ const JobDetailPage = () => {
       </div>
     );
   }
+
+
+
+
 
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
@@ -346,8 +400,8 @@ const JobDetailPage = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
-                    <div className="w-26 h-26 relative rounded-lg overflow-hidden bg-blue-100 flex items-center justify-center">
-                      <Suitcase className="w-24 h-24 text-brand" />
+                    <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100  p-3 flex items-center justify-center">
+                      {CompanyLogo(job.company)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>
@@ -378,15 +432,10 @@ const JobDetailPage = () => {
                   </h1>
                   <div className="flex flex-wrap gap-2">
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
                       {job.job_location_type || "Location not specified"}
                     </div>
+                  
                     <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e2f811d17b68bc490a_pin-alt.svg" alt="" />
-                      {job.location || "Remote"}
-                    </div>
-                    <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                      <img src="https://cdn.prod.website-files.com/6512953992109a992418c648/651394e265f9155c51188092_reports.svg" alt="" />
                       {job.experience_level || "Experience not specified"}
                     </div>
                     {job.job_type && (
@@ -396,7 +445,6 @@ const JobDetailPage = () => {
                     )}
                     {job.weekly_ranges && (
                       <div variant="secondary" className={` flex items-center gap-2 text-gray-800 border p-2 rounded-lg py-1 text-md`}>
-                        <img src={`https://cdn.prod.website-files.com/6512953992109a992418c648/6513d6e33f60c8b95886424c_clock.svg`} />
                         {job.weekly_ranges}
                       </div>
                     )}
@@ -452,21 +500,24 @@ const JobDetailPage = () => {
                         </div>
                       )}
 
-                      {Array.isArray(job.requirements) ? (
-                        <div>
+
+
+                      {job.requirements.length > 0 ?
+                        (
+                          <div>
+                            <h3 className="text-lg font-bold mb-3">Requirements</h3>
+                            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                              {job.requirements.map((item, index) => (
+                                <li key={item.id}>{item.name}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : <div>
                           <h3 className="text-lg font-bold mb-3">Requirements</h3>
                           <p className='text-muted-foreground'>No Requirements</p>
-                        </div>
-                      ) : job.requirements && job.requirements.length > 0 ? (
-                        <div>
-                          <h3 className="text-lg font-bold mb-3">Requirements</h3>
-                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                            {job.requirements.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : null}
+                        </div>}
+
+
 
                       {job.benefits && job.benefits.length > 0 && (
                         <div>
@@ -518,7 +569,7 @@ const JobDetailPage = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                {session && (isLoading ? <Spinner /> : <div className="flex flex-col sm:flex-row gap-4">
                   {job.has_started ? (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
@@ -526,7 +577,7 @@ const JobDetailPage = () => {
                     >
                       Request Retake
                     </Button>
-                  ) : job.is_applied ? null : (
+                  ) : job.is_applied ? isLoading : (
                     <Button
                       className="flex-1 text-white bg-brand hover:bg-brand hover:text-white"
                       onClick={handleApply}
@@ -541,12 +592,12 @@ const JobDetailPage = () => {
                   >
                     {isSaved ? 'Saved' : 'Save for Later'}
                   </Button>
-                </div>
+                </div>)}
               </CardContent>
             </Card>
           </div>
 
-          <div className="lg:w-1/3">
+          {session && <div className="lg:w-1/3">
             <Card className="sticky top-6">
               <CardHeader>
                 <h2 className="text-xl font-bold">Similar Jobs</h2>
@@ -573,7 +624,7 @@ const JobDetailPage = () => {
                 )}
               </CardContent>
             </Card>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

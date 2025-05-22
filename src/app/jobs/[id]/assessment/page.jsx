@@ -233,14 +233,7 @@ const AssessmentFlow = () => {
           <CardContent>
             <p className="text-gray-600">Could not load assessment questions.</p>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button 
-              onClick={() => router.push(`/jobs/${jobId}`)}
-              className="bg-brand hover:bg-brand/90 text-white px-6 py-3 rounded-full"
-            >
-              Return to Job
-            </Button>
-          </CardFooter>
+       
         </Card>
       </div>
     );
@@ -514,13 +507,7 @@ const AssessmentFlow = () => {
               </CardContent>
 
               <CardFooter className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/jobs/${jobId}`)}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3"
-                >
-                  Return to Job Posting
-                </Button>
+               
                 <Button
                   onClick={() => router.push('/jobs')}
                   className="bg-brand hover:bg-brand/90 text-white px-6 py-3"
