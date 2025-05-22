@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useJobs } from "@/src/hooks/useJob";
 import useUser from "@/src/hooks/useUser";
 import { cleanDescription, CompanyLogo } from "@/src/utils/jobFormater";
-import Loader from "@/components/ui/Loader";
+import Loader from "@/src/components/common/Loader/Loader";
 
 const CompanyDetails = () => {
   const params = useParams();

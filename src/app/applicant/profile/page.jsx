@@ -9,7 +9,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import baseUrl from "../../api/baseUrl";
-import Loader from "@/components/ui/Loader";
+import Loader from "@/src/components/common/Loader/Loader";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
