@@ -12,45 +12,7 @@ import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
 import { Suitcase } from '@phosphor-icons/react';
 import { Spinner } from '@/components/ui/Spinner';
-
-
-
-
-  // Format experience levels
-  const experienceLevelsMap = {
-    'under1Year': 'Under 1 year',
-    '1to2Years': '1-2 years',
-    '2to5Years': '2-5 years',
-    '5to10Years': '5-10 years',
-    'over10Years': '10+ years'
-  };
-
-  // Format job levels
-  const levelMap = {
-    'Entry': 'Entry Level',
-    'Mid': 'Mid Level',
-    'Senior': 'Senior Level',
-    'Lead': 'Lead',
-    'Executive': 'Executive'
-  };
-
-  // Format shifts
-  const shiftMap = {
-    'fourHourShift': '4-hour shift',
-    'eightHourShift': '8-hour shift',
-    'twelveHourShift': '12-hour shift',
-    'flexibleShift': 'Flexible hours',
-    'nightShift': 'Night shift'
-  };
-
-  // Format weekly ranges
-  const weeklyRangesMap = {
-    'mondayToFriday': 'Monday to Friday',
-    'weekends': 'Weekends',
-    'flexibleDays': 'Flexible days',
-    'rotational': 'Rotational schedule',
-    'any5Days': 'Any 5 days/week'
-  };
+import { levelMap, experienceLevelsMap, weeklyRangesMap, cleanDescription, getInitials, CompanyLogo, formatDate } from '@/src/utils/jobFormater';
 
 
 const JobDetailPage = () => {
@@ -314,20 +276,7 @@ const JobDetailPage = () => {
     else fetchPublicDaetail()
   }, [session, jobId, router]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-
-  const cleanDescription = (html) => {
-    if (!html || typeof html !== 'string') return '';
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
+ 
 
   const toggleSave = async () => {
     try {
@@ -402,18 +351,6 @@ const JobDetailPage = () => {
     }
   };
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-
-    const words = name.split(' ');
-    let initials = words[0][0].toUpperCase();
-
-    if (words.length > 1) {
-      initials += words[words.length - 1][0].toUpperCase();
-    }
-
-    return initials;
-  };
 
 
 
@@ -438,38 +375,7 @@ const JobDetailPage = () => {
   }
 
 
-  const renderLogo = () => {
-    if (job.company?.logo && job.company.logo !== 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg') {
-      return (
-        <img
-          src={job.company.logo}
-          alt={`${job.company.name} Logo`}
-          className="w-full h-full object-contain"
-        />
-      );
-    }
 
-    const initials = getInitials(job.company?.name);
-    const colors = [
-      'bg-blue-500 text-white',
-      'bg-green-500 text-white',
-      'bg-purple-500 text-white',
-      'bg-red-500 text-white',
-      'bg-yellow-500 text-white',
-      'bg-indigo-500 text-white',
-      'bg-pink-500 text-white',
-      'bg-teal-500 text-white',
-    ];
-
-    const colorIndex = (job.company.name.charCodeAt(0) || 0) % colors.length;
-    const colorClass = colors[colorIndex];
-
-    return (
-      <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass} font-bold text-2xl`}>
-        {initials}
-      </div>
-    );
-  };
 
 
   return (
@@ -495,7 +401,7 @@ const JobDetailPage = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
                     <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100  p-3 flex items-center justify-center">
-                      {renderLogo()}
+                      {CompanyLogo(job.company)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{job.company?.name || 'Company'}</h3>

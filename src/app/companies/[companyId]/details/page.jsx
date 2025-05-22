@@ -7,11 +7,12 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
-import Loader from "@/src/components/common/Loader/Loader";
 import baseUrl from "@/src/app/api/baseUrl";
 import Link from "next/link";
 import { useJobs } from "@/src/hooks/useJob";
 import useUser from "@/src/hooks/useUser";
+import { cleanDescription, CompanyLogo } from "@/src/utils/jobFormater";
+import Loader from "@/components/ui/Loader";
 
 const CompanyDetails = () => {
   const params = useParams();
@@ -54,71 +55,9 @@ const CompanyDetails = () => {
     
   }, [params.companyId]);
 
-  const cleanDescription = (html) => {
-    if (!html || typeof html !== 'string') return '';
-    
-    // Create a temporary div to parse HTML
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    
-    // Get text content and clean it
-    let text = tmp.textContent || tmp.innerText || '';
-    
-    return text
-      .replace(/<[^>]*>/g, ' ')          // Remove any remaining HTML tags
-      .replace(/[*_\-]/g, ' ')           // Remove *, _, and -
-      .replace(/&nbsp;/gi, ' ')          // Replace HTML non-breaking spaces
-      .replace(/[ \t\r\n]+/g, ' ')       // Replace multiple spaces/tabs/newlines
-      .replace(/^[ \t]+/g, '')           // Remove leading spaces
-      .replace(/[ \t]+$/g, '')           // Remove trailing spaces
-      .trim();
-  };
-  const getInitials = (name) => {
-    if (!name) return '?';
 
-    const words = name.split(' ');
-    let initials = words[0][0].toUpperCase();
-
-    if (words.length > 1) {
-      initials += words[words.length - 1][0].toUpperCase();
-    }
-
-    return initials;
-  };
-
-  const renderLogo = () => {
-    if (company?.logo && company.logo !== 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg') {
-      return (
-        <img
-          src={company.logo}
-          alt={`${company.name} Logo`}
-          className="w-full h-full object-contain"
-        />
-      );
-    }
-
-    const initials = getInitials(company?.name);
-    const colors = [
-      'bg-blue-500 text-white',
-      'bg-green-500 text-white',
-      'bg-purple-500 text-white',
-      'bg-red-500 text-white',
-      'bg-yellow-500 text-white',
-      'bg-indigo-500 text-white',
-      'bg-pink-500 text-white',
-      'bg-teal-500 text-white',
-    ];
-
-    const colorIndex = (company.name.charCodeAt(0) || 0) % colors.length;
-    const colorClass = colors[colorIndex];
-
-    return (
-      <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass} font-bold text-2xl`}>
-        {initials}
-      </div>
-    );
-  };
-
+  
+ 
   const isRecruiter = session?.user?.role === 'recruiter' 
 
 
@@ -172,7 +111,7 @@ const CompanyDetails = () => {
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 <div className="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center p-3 border border-gray-200">
-                  {renderLogo()}
+                  {CompanyLogo(company)}
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mt-4">{company.name}</h1>
