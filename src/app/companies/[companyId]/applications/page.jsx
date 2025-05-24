@@ -10,7 +10,7 @@ import { Menu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchCompanyJobs } from '../../../api/companies/job_listing';
 import { JobListContainer } from '../jobs/listing/components/JobListContainer';
-import { MobileMenu } from '../dashboard/MobileMenu';
+// import { MobileMenu } from '../dashboard/MobileMenu';
 import { Sideba } from '../dashboard/recruiter/Sideba';
 import { MobileSearch } from '../jobs/listing/components/MobileSearch';
 
@@ -81,21 +81,21 @@ export default function CompanyApplications() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <header className="flex justify-between items-center md:hidden mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Select a Job to View the applications</h1>
-          <Button
+          {/* <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="w-6 h-6" />
-          </Button>
+          </Button> */}
         </header>
-        <MobileMenu
+        {/* <MobileMenu
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           companyId={companyId}
-        />
+        /> */}
         <div className="md:hidden mb-6">
           <MobileSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
