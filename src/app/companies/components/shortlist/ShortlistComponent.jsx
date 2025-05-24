@@ -14,7 +14,7 @@ import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
-import  ShortlistFetch  from './ShortlistFetch';
+import ShortlistFetch from './ShortlistFetch';
 
 const ShortlistComponent = () => {
   const { companyId, jobId } = useParams();
@@ -72,6 +72,11 @@ const ShortlistComponent = () => {
     }
     setSelectedCandidate(candidate);
     setIsModalOpen(true);
+  };
+
+  const handleUnshortlist = (candidateId) => {
+    console.log('Unshortlisting candidate:', candidateId);
+    setShortlisted((prev) => prev.filter((app) => app.user_id !== candidateId));
   };
 
   const closeModal = () => {
@@ -177,8 +182,12 @@ const ShortlistComponent = () => {
                             handleViewDetails={handleViewDetails}
                             handleEndorse={handleEndorse}
                             handleSchedule={handleSchedule}
+                            handleUnshortlist={handleUnshortlist}
                             activeTab={activeTab}
                             isShortlisted={true}
+                            jobId={jobId}
+                            companyId={companyId}
+                            accessToken={session?.accessToken}
                           />
                         ))
                       ) : (

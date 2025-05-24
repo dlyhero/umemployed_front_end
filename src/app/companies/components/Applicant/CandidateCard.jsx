@@ -25,6 +25,9 @@ const CandidateCard = ({
   isShortlistLoading = false,
   isUnshortlistLoading = false,
   isScheduleLoading = false,
+  jobId = '',
+  companyId = '',
+  accessToken = '',
 }) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [candidateId, setCandidateId] = useState(null);
@@ -33,8 +36,7 @@ const CandidateCard = ({
   const [isGiveEndorsementLoading, setIsGiveEndorsementLoading] = useState(false);
   const [stripeLoaded, setStripeLoaded] = useState(false);
   const router = useRouter();
-  const { companyId } = useParams();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   useEffect(() => {
     console.log('CandidateCard: Mounted, candidate:', candidate.user_id, 'path:', window.location.pathname);
@@ -56,15 +58,15 @@ const CandidateCard = ({
       return;
     }
 
-    console.log('onEndorse: Starting for candidateId:', id, 'accessToken:', session.accessToken);
+    console.log('onEndorse: Starting for candidateId:', id, 'accessToken:', accessToken);
     setIsEndorseLoading(true);
     try {
       console.log('onEndorse: Checking payment status for candidateId:', id);
-      const { has_paid } = await checkPaymentStatus(id, session.accessToken);
+      const { has_paid } = await checkPaymentStatus(id, accessToken);
       console.log('onEndorse: Payment status received:', has_paid, 'for candidateId:', id);
       if (has_paid) {
         console.log('onEndorse: Payment verified, fetching endorsements for candidateId:', id);
-        const endorsements = await getEndorsements(id, session.accessToken);
+        const endorsements = await getEndorsements(id, accessToken);
         console.log('onEndorse: Endorsements fetched:', endorsements, 'for candidateId:', id);
         router.push(`/companies/candidate/${id}/endorsements`);
       } else {
@@ -102,8 +104,8 @@ const CandidateCard = ({
 
     console.log('handlePayment: Initiating Stripe payment for candidateId:', candidateId);
     try {
-      console.log('handlePayment: Calling initiateStripePayment with accessToken:', session.accessToken);
-      const { session_id } = await initiateStripePayment(candidateId, session.accessToken);
+      console.log('handlePayment: Calling initiateStripePayment with accessToken:', accessToken);
+      const { session_id } = await initiateStripePayment(candidateId, accessToken);
       console.log('handlePayment: Received Stripe session_id:', session_id, 'for candidateId:', candidateId);
 
       const stripe = window.Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
@@ -195,6 +197,9 @@ const CandidateCard = ({
                   isGiveEndorsementLoading={isGiveEndorsementLoading}
                   isMessageLoading={isMessageLoading}
                   isAuthenticated={status === 'authenticated'}
+                  jobId={jobId}
+                  companyId={companyId}
+                  accessToken={accessToken}
                 />
               </div>
             </div>
