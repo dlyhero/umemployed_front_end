@@ -122,5 +122,50 @@ export default function SelectRolePage() {
     );
   }
 
-  // ... rest of your JSX remains the same
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg border shadow-sm">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Select Your Account Type</h1>
+          <p className="mt-2 text-gray-600">
+            Choose how you want to use our platform
+          </p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4">
+          <Button
+            variant="outline"
+            onClick={() => handleRoleSelect('job_seeker')}
+            disabled={loading || roleSelected}
+            className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-blue-50 transition-colors"
+          >
+            <User className="h-8 w-8 text-blue-600" />
+            <span className="text-lg font-medium">Job Seeker</span>
+            <p className="text-sm text-gray-500">
+              Looking for job opportunities
+            </p>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => handleRoleSelect('recruiter')}
+            disabled={loading || roleSelected}
+            className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-green-50 transition-colors"
+          >
+            <Briefcase className="h-8 w-8 text-green-600" />
+            <span className="text-lg font-medium">Recruiter</span>
+            <p className="text-sm text-gray-500">
+              Looking to hire candidates
+            </p>
+          </Button>
+        </div>
+
+        {loading && (
+          <div className="text-center text-gray-500">
+            <p>Updating your account type...</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
