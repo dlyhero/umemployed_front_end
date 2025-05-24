@@ -10,7 +10,7 @@ import Loader from '@/src/components/common/Loader/Loader';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Sideba } from '../dashboard/recruiter/Sideba';
-import { MobileMenu } from '../dashboard/MobileMenu';
+// import { MobileMenu } from '../dashboard/MobileMenu';
 import { Menu } from 'lucide-react';
 
 const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
@@ -155,21 +155,21 @@ const CompanyUpdatePage = () => {
       <div className="flex-1">
         <header className="flex justify-between items-center md:hidden mb-6">
           <h1 className="text-xl font-semibold text-gray-900">Update Company</h1>
-          <Button
+          {/* <Button
             variant="ghost"
             className="p-2 text-gray-900"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="w-6 h-6" />
-          </Button>
+          </Button> */}
         </header>
-        <MobileMenu
+        {/* <MobileMenu
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           companyId={companyId}
-        />
+        /> */}
         <main className="bg-white rounded-lg shadow-md p-4">
           <div className="mb-4">
             <img

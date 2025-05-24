@@ -4,14 +4,18 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { 
+  BarChart2,
   Building2, 
   Briefcase, 
+  FileText,
+  Home,
   PlusCircle, 
   Mail,
   Bell,
   MessageSquare,
   Settings,
   ThumbsUp,
+  Users,
   Receipt,
   Loader2
 } from "lucide-react";
@@ -25,7 +29,7 @@ export function MenuLinks() {
   const pathname = usePathname();
 
   const isActive = (path) => {
-    return pathname.startsWith(path);
+    return pathname === path || pathname.startsWith(path.split('/listing')[0]);
   };
 
   const handleEndorsementClick = () => {
@@ -57,10 +61,43 @@ export function MenuLinks() {
   );
 
   if (role === "recruiter") {
+    const companyId = session?.user?.company_id; // Assume companyId is available in session
+    const recruiterLinks = [
+      { icon: <Home className="w-5 h-5" />, label: 'Dashboard', path: `/companies/${companyId}/dashboard` },
+      { icon: <Users className="w-5 h-5" />, label: 'Candidates', path: `/companies/${companyId}/candidates` },
+      { icon: <Briefcase className="w-5 h-5" />, label: 'Jobs', path: `/companies/${companyId}/jobs/listing` },
+      { icon: <FileText className="w-5 h-5" />, label: 'Applications', path: `/companies/${companyId}/applications` },
+      { icon: <BarChart2 className="w-5 h-5" />, label: 'Analytics', path: `/companies/${companyId}/analytics` },
+      { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/update` },
+    ];
+
     return (
       <div className="flex flex-col gap-2 mb-6">
         <CommonLinks />
+        {/* Recruiter-specific links for mobile only */}
+        {recruiterLinks.map((item, index) => (
+          <Link
+            key={index}
+            href={item.path}
+            className={`md:hidden flex items-center gap-3 p-2 rounded-lg ${
+              isActive(item.path) ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+            }`}
+          >
+            {item.icon}
+            <span className="font-semibold">{item.label}</span>
+          </Link>
+
+        ))}
         <Link 
+          href="/post-job" 
+          className={`flex items-center gap-3 p-2 rounded-lg ${
+            isActive('/post-job') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
+        >
+          <PlusCircle className="w-5 h-5" />
+          <span className="font-semibold">Post a Job</span>
+        </Link>
+        {/* <Link 
           href="/settings" 
           className={`flex items-center gap-3 p-2 rounded-lg ${
             isActive('/settings') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
@@ -68,7 +105,7 @@ export function MenuLinks() {
         >
           <Settings className="w-5 h-5" />
           <span className="font-semibold">Settings</span>
-        </Link>
+        </Link> */}
         <button
           onClick={handleEndorsementClick}
           className={`flex items-center gap-3 p-2 rounded-lg ${
@@ -91,15 +128,8 @@ export function MenuLinks() {
           <Receipt className="w-5 h-5" />
           <span className="font-semibold">Transaction History</span>
         </Link>
-        <Link 
-          href="/post-job" 
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/post-job') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          }`}
-        >
-          <PlusCircle className="w-5 h-5" />
-          <span className="font-semibold">Post a Job</span>
-        </Link>
+        
+        
       </div>
     );
   }
