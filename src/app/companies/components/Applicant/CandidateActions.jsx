@@ -1,7 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Archive, Bookmark, MessageSquare, Star, Calendar, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 const CandidateActions = ({
   candidate = {},
@@ -13,18 +17,69 @@ const CandidateActions = ({
   handleEndorse = () => {},
   handleSchedule = () => {},
   handleGiveEndorsement = () => {},
-  isShortlistLoading = false, // New prop for Shortlist button
-  isUnshortlistLoading = false, // New prop for Unshortlist button
-  isEndorseLoading = false, // Renamed from 'loading' for clarity
-  isScheduleLoading = false, // New prop for Schedule button
-  isGiveEndorsementLoading = false, // New prop for Give Endorsement button
-  isMessageLoading = false, // New prop for Message button
+  isShortlistLoading = false,
+  isUnshortlistLoading = false,
+  isEndorseLoading = false,
+  isScheduleLoading = false,
+  isGiveEndorsementLoading = false,
+  isMessageLoading = false,
   isAuthenticated = false,
+  jobId = '',
+  companyId = '',
+  accessToken = '', // Kept as fallback, though session.accessToken is preferred
 }) => {
+  const { data: session, status: sessionStatus } = useSession();
   const userId = candidate.user_id || '';
+  const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api';
+  const [isUnshortlistButtonLoading, setIsUnshortlistButtonLoading] = useState(false);
+
+  const handleUnshortlistAction = async (userId) => {
+    if (!companyId || !jobId || !userId) {
+      toast.error('Missing company, job, or user information');
+      return;
+    }
+
+    if (sessionStatus !== 'authenticated' || !session?.accessToken) {
+      toast.error('Please sign in to unshortlist a candidate');
+      return;
+    }
+
+    setIsUnshortlistButtonLoading(true);
+    try {
+      console.log('Unshortlist request:', { companyId, jobId, candidate_id: userId, accessToken: session.accessToken });
+      const response = await fetch(`${baseUrl}/company/company/${companyId}/job/${jobId}/unshortlist/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify({ candidate_id: userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          throw new Error(errorData.message || 'Invalid request. Please check the candidate or job details.');
+        } else if (response.status === 404) {
+          throw new Error(errorData.message || 'Job or candidate not found.');
+        } else {
+          throw new Error(errorData.message || `Failed to unshortlist candidate: ${response.status}`);
+        }
+      }
+
+      toast.success('Candidate unshortlisted successfully');
+      handleUnshortlist(userId);
+    } catch (error) {
+      console.error('Error unshortlisting candidate:', error);
+      toast.error(error.message || 'Failed to unshortlist candidate. Please try again.');
+    } finally {
+      setIsUnshortlistButtonLoading(false);
+    }
+  };
 
   return (
     <>
+      <Toaster />
       <div className="flex md:hidden flex-row flex-nowrap gap-2 w-full">
         <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
           <Archive className="w-5 h-5" />
@@ -73,10 +128,10 @@ const CandidateActions = ({
             </Button>
             <Button
               className="flex-1 bg-red-500 text-white hover:bg-red-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleUnshortlist(userId)}
-              disabled={isUnshortlistLoading || !isAuthenticated}
+              onClick={() => handleUnshortlistAction(userId)}
+              disabled={isUnshortlistLoading || isUnshortlistButtonLoading || !isAuthenticated}
             >
-              {isUnshortlistLoading ? (
+              {isUnshortlistButtonLoading ? (
                 <Loader2 className="w-5 h-5 mr-1 animate-spin" />
               ) : (
                 'Unshortlist'
@@ -118,7 +173,7 @@ const CandidateActions = ({
               </Button>
             ) : (
               <Button
-                className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+                className="flex-1 bg-green-500 text-white hover:bg-green-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
                 onClick={() => handleShortlist(userId)}
                 disabled={isShortlistLoading || !isAuthenticated}
               >
@@ -197,10 +252,10 @@ const CandidateActions = ({
             </Button>
             <Button
               className="flex-1 bg-red-500 text-white hover:bg-red-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleUnshortlist(userId)}
-              disabled={isUnshortlistLoading || !isAuthenticated}
+              onClick={() => handleUnshortlistAction(userId)}
+              disabled={isUnshortlistLoading || isUnshortlistButtonLoading || !isAuthenticated}
             >
-              {isUnshortlistLoading ? (
+              {isUnshortlistButtonLoading ? (
                 <Loader2 className="w-5 h-5 mr-1 animate-spin" />
               ) : (
                 'Unshortlist'
@@ -242,7 +297,7 @@ const CandidateActions = ({
               </Button>
             ) : (
               <Button
-                className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+                className="flex-1 bg-green-500 text-white hover:bg-green-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
                 onClick={() => handleShortlist(userId)}
                 disabled={isShortlistLoading || !isAuthenticated}
               >

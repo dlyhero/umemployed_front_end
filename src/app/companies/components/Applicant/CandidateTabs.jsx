@@ -10,7 +10,7 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
           value="candidates"
           className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'candidates'
-              ? 'bg-brand/50 text-white shadow-md'
+              ? 'bg-brand text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
@@ -20,7 +20,7 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
           value="shortlist"
           className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'shortlist'
-              ? 'bg-brand/50 text-white shadow-md'
+              ? 'bg-brand text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
@@ -30,7 +30,7 @@ const CandidateTabs = ({ activeTab, setActiveTab, companyId, jobId, children }) 
           value="archived"
           className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors text-sm sm:text-base ${
             activeTab === 'archived'
-              ? 'bg-brand/50 text-white shadow-md'
+              ? 'bg-brand text-white shadow-md'
               : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800'
           }`}
         >
