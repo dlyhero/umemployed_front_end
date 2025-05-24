@@ -6,7 +6,7 @@ export const WelcomeSection = ({ companyName = '' }) => {
   const router = useRouter();
 
   const handlePostJobClick = () => {
-    router.push('/companies/jobs');
+    router.push('/companies/jobs/create/basicinformation'); // Updated route
   };
 
   return (
@@ -33,3 +33,5 @@ export const WelcomeSection = ({ companyName = '' }) => {
     </motion.section>
   );
 };
+
+export default WelcomeSection;

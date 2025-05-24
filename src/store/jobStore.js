@@ -1,10 +1,14 @@
-import {create} from "zustand"
+// src/store/jobStore.js
+import { create } from 'zustand';
 
 export const useJobStore = create((set, get) => ({
   formData: {},
+  jobId: null,
   extractedSkills: [],
   isSubmittingStep1: false,
   setFormData: (data) => set((state) => ({ formData: { ...state.formData, ...data } })),
+  setJobId: (jobId) => set({ jobId }),
+  getJobId: () => get().jobId,
   setExtractedSkills: (skills) =>
     set((state) => {
       console.log('Setting extractedSkills:', skills);
@@ -15,6 +19,7 @@ export const useJobStore = create((set, get) => ({
   clearStore: () =>
     set({
       formData: {},
+      jobId: null,
       extractedSkills: [],
       isSubmittingStep1: false,
     }),
