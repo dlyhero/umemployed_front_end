@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Archive, Bookmark, MessageSquare, Star, Calendar, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 const CandidateActions = ({
   candidate = {},
@@ -78,6 +79,7 @@ const CandidateActions = ({
 
   return (
     <>
+      <Toaster />
       <div className="flex md:hidden flex-row flex-nowrap gap-2 w-full">
         <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
           <Archive className="w-5 h-5" />

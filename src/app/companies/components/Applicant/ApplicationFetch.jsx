@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 const ApplicationFetch = ({
   companyId,
@@ -152,7 +153,7 @@ const ApplicationFetch = ({
     }
   }, [companyId, jobId, session, status, setApplications, setLoading, setError]);
 
-  return null;
+  return <Toaster />;
 };
 
 export default ApplicationFetch;
