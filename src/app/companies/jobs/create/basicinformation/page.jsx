@@ -4,12 +4,15 @@ import { useRouter, useParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
+import { SubscriptionModal } from '../../../../../components/common/SubscriptionModal';
 
 function JobPostingContent() {
   const router = useRouter();
   const { companyId } = useParams();
   const { step, form, onSubmit: handleSubmit, stepIsValid, nextStep, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills, isSubmittingStep1 } = useJobForm('basicinformation');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalErrorMessage, setModalErrorMessage] = useState('');
 
   const onSubmit = async (data) => {
     console.log('FormContainer handleSubmit called with data:', data);
@@ -17,7 +20,12 @@ function JobPostingContent() {
       const result = await handleSubmit(data);
       if (result?.error) {
         console.error('Step 1 submission error:', result.error);
-        toast.error(result.error);
+        if (result.error.includes('No active recruiter subscription found')) {
+          setModalErrorMessage('No active recruiter subscription found. Please upgrade to continue.');
+          setIsModalOpen(true);
+        } else {
+          toast.error(result.error);
+        }
         return { error: result.error };
       }
       if (!result?.id) {
@@ -27,11 +35,16 @@ function JobPostingContent() {
       }
       console.log('Step 1 submitted successfully with jobId:', result.id);
       toast.success(`Step ${step} saved successfully!`);
-      await nextStep(result.id); // Pass the jobId directly
+      await nextStep(result.id);
       return { success: true, jobId: result.id };
     } catch (error) {
       console.error('Step 1 submission failed:', error.message);
-      toast.error('Failed to submit step');
+      if (error.message.includes('No active recruiter subscription found')) {
+        setModalErrorMessage('No active recruiter subscription found. Please upgrade to continue.');
+        setIsModalOpen(true);
+      } else {
+        toast.error('Failed to submit step');
+      }
       return { error: error.message };
     }
   };
@@ -48,6 +61,11 @@ function JobPostingContent() {
   return (
     <>
       <Toaster position="top-right" />
+      <SubscriptionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        errorMessage={modalErrorMessage}
+      />
       <FormContainer
         step={step}
         form={form}
