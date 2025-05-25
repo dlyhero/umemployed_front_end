@@ -1,3 +1,4 @@
+// src/app/companies/jobs/create/basicinformation/page.jsx
 'use client';
 import { useRouter, useParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
@@ -26,7 +27,7 @@ function JobPostingContent() {
       }
       console.log('Step 1 submitted successfully with jobId:', result.id);
       toast.success(`Step ${step} saved successfully!`);
-      await nextStep(result.id);
+      await nextStep(result.id); // Pass the jobId directly
       return { success: true, jobId: result.id };
     } catch (error) {
       console.error('Step 1 submission failed:', error.message);

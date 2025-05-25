@@ -1,3 +1,4 @@
+// src/app/companies/jobs/create/requirements/page.jsx
 'use client';
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -9,8 +10,7 @@ function RequirementsInner() {
   const currentStep = 'requirements';
   const router = useRouter();
   const searchParams = useSearchParams();
-  const jobId = searchParams.get('jobId');
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills } = useJobForm(currentStep);
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills, jobId } = useJobForm(currentStep);
 
   useEffect(() => {
     if (!jobId) {

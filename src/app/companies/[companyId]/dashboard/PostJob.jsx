@@ -6,7 +6,7 @@ const PostJob = () => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push('/companies/jobs');
+    router.push('/companies/jobs/create/basicinformation'); // Updated route
   };
 
   return (

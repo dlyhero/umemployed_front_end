@@ -1,4 +1,4 @@
-
+// src/hooks/useJobForm.js
 'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -13,7 +13,18 @@ export const useJobForm = (currentStep) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { formData, setFormData, extractedSkills, setExtractedSkills, getExtractedSkills, isSubmittingStep1, setIsSubmittingStep1, clearStore } = useJobStore();
+  const {
+    formData,
+    setFormData,
+    jobId: storedJobId,
+    setJobId,
+    extractedSkills,
+    setExtractedSkills,
+    getExtractedSkills,
+    isSubmittingStep1,
+    setIsSubmittingStep1,
+    clearStore,
+  } = useJobStore();
   const [jobOptions, setJobOptions] = useState({
     categories: [],
     salary_ranges: {},
@@ -26,8 +37,9 @@ export const useJobForm = (currentStep) => {
   });
   const [isLoadingSkills, setIsLoadingSkills] = useState(false);
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-  const jobId = currentStep !== 'basicinformation' ? searchParams.get('jobId') : null;
+  const jobId = searchParams.get('jobId') || storedJobId;
 
   const stepSchemas = {
     basicinformation: step1Schema,
@@ -76,7 +88,7 @@ export const useJobForm = (currentStep) => {
         if (session?.accessToken || session?.token) {
           headers['Authorization'] = `Bearer ${session.accessToken || session.token}`;
         }
-        const response = await fetch('https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/job-options/', {
+        const response = await fetch('https://server.umemployed.com/api/job/job-options/', {
           method: 'GET',
           headers,
         });
@@ -85,7 +97,6 @@ export const useJobForm = (currentStep) => {
           throw new Error(`Failed to fetch job options: ${response.status} ${errorText}`);
         }
         const data = await response.json();
-        console.log('fetchJobOptions response:', data);
         setJobOptions({
           categories: Array.isArray(data.categories) ? data.categories : [],
           salary_ranges: data.salary_ranges && typeof data.salary_ranges === 'object' ? data.salary_ranges : {},
@@ -119,7 +130,6 @@ export const useJobForm = (currentStep) => {
         setIsLoadingSkills(true);
         try {
           const skills = await fetchExtractedSkills(jobId);
-          console.log('Fetched skills for jobId:', jobId, 'Skills:', skills);
           setExtractedSkills(skills);
           if (skills.length === 0) {
             form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
@@ -134,13 +144,16 @@ export const useJobForm = (currentStep) => {
         }
       };
       loadSkills();
+    } else if (!jobId && currentStep !== 'basicinformation') {
+      toast.error('No job ID found. Please complete the Basic Information step first.');
+      router.push('/companies/jobs/create/basicinformation');
     }
-  }, [currentStep, jobId, form, setExtractedSkills, clearStore]);
+  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router]);
 
   const fetchExtractedSkills = async (jobId) => {
     console.log('fetchExtractedSkills called with jobId:', jobId);
     try {
-      const response = await fetch(`https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${jobId}/extracted-skills/`, {
+      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -161,35 +174,86 @@ export const useJobForm = (currentStep) => {
     }
   };
 
-  const verifyJob = async (jobId) => {
+  const verifyJob = async (jobId, retries = 3, delay = 1000) => {
     console.log('Verifying job with jobId:', jobId);
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to verify job: ${response.status} ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('Job verification response:', data);
+        const verifiedJobId = data.id || data.job_id || null;
+        if (!verifiedJobId) {
+          throw new Error('No job ID found in verification response');
+        }
+        return verifiedJobId;
+      } catch (error) {
+        console.error('Error verifying job:', error.message);
+        if (i < retries - 1) {
+          console.warn(`Retrying job verification (${i + 1}/${retries})...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const generateTailoredDescription = async (skills) => {
+    if (!jobId) {
+      throw new Error('No job ID available for generating tailored description.');
+    }
+    setIsGeneratingDescription(true);
     try {
-      const response = await fetch(`https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${jobId}/`, {
-        method: 'GET',
+      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/tailored-description/`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.accessToken || session?.token}`,
         },
+        body: JSON.stringify({
+          skills: skills, // Updated key from required_skills to skills
+        }),
       });
+
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to verify job: ${response.status} ${errorText}`);
+        throw new Error(`Failed to generate tailored description: ${response.status} ${errorText}`);
       }
-      const data = await response.json();
-      console.log('Job verification response:', data);
-      const verifiedJobId = data.id || data.job_id || null;
-      if (!verifiedJobId) {
-        throw new Error('No job ID found in verification response');
-      }
-      return verifiedJobId;
-    } catch (error) {
-      console.error('Error verifying job:', error.message);
-      return null;
+
+      const result = await response.json();
+      console.log('Tailored description response:', result);
+
+      // Update form fields with the response
+      form.setValue('description', result.description || '', { shouldValidate: true });
+      form.setValue('responsibilities', result.responsibilities || '', { shouldValidate: true });
+      form.setValue('benefits', result.benefits || '', { shouldValidate: true });
+
+      // Update store
+      setFormData({
+        description: result.description,
+        responsibilities: result.responsibilities,
+        benefits: result.benefits,
+      });
+
+      return result;
+    } finally {
+      setIsGeneratingDescription(false);
     }
   };
 
   const onSubmit = async (data) => {
-    const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api';
+    const baseUrl = 'https://server.umemployed.com/api';
     console.log('onSubmit called with data:', data);
 
     if (status === 'loading') return { error: 'Session is still loading' };
@@ -236,10 +300,11 @@ export const useJobForm = (currentStep) => {
 
         const verifiedJobId = await verifyJob(newJobId);
         if (!verifiedJobId) {
-          throw new Error('Job verification failed');
+          throw new Error('Job verification failed. Please try again.');
         }
 
         setFormData(step1Data);
+        setJobId(verifiedJobId);
         form.reset({ ...form.getValues(), ...step1Data });
         return { ...result, id: verifiedJobId };
       } else if (currentStep === 'requirements' && jobId) {
@@ -292,7 +357,6 @@ export const useJobForm = (currentStep) => {
         };
         console.log('Submitting Step 4 data:', step4Data);
 
-        // Show toast and redirect immediately
         toast.success('Good! Your job will be posted in 03 minutes');
         const companyId = session?.user?.company_id || session?.companyid;
         if (companyId) {
@@ -302,7 +366,6 @@ export const useJobForm = (currentStep) => {
           form.setError('root', { message: 'Failed to redirect: Company ID not found.' });
         }
 
-        // Submit Step 4 data in the background
         fetch(`${baseUrl}/job/${jobId}/create-step4/`, {
           method: 'PATCH',
           headers: {
@@ -323,7 +386,6 @@ export const useJobForm = (currentStep) => {
           })
           .catch((error) => {
             console.error('Background API error:', error.message);
-            // Optionally notify user of failure via another toast
             toast.error('Failed to post job. Please try again later.');
           });
 
@@ -366,7 +428,7 @@ export const useJobForm = (currentStep) => {
     return false;
   };
 
-  const nextStep = (newJobId) => {
+  const nextStep = async (newJobId) => {
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
@@ -374,14 +436,24 @@ export const useJobForm = (currentStep) => {
         console.log('Waiting for skills to load before navigating to Step 4...');
         return;
       }
-      if (currentStep !== 'basicinformation' && !newJobId && !jobId) {
+      const effectiveJobId = newJobId || storedJobId;
+      if (!effectiveJobId) {
         console.error('Cannot navigate to next step: No jobId available');
-        form.setError('root', { message: 'Please complete the Basic Information step first.' });
+        form.setError('root', { message: 'Failed to create job. Please try again.' });
+        toast.error('Failed to create job. Please try again.');
         router.push('/companies/jobs/create/basicinformation');
         return;
       }
-      const nextPath = `/companies/jobs/create/${steps[currentIndex + 1]}${newJobId ? `?jobId=${newJobId}` : jobId ? `?jobId=${jobId}` : ''}`;
-      console.log('Navigating to next step:', steps[currentIndex + 1], 'with jobId:', newJobId || jobId);
+      const verifiedJobId = await verifyJob(effectiveJobId);
+      if (!verifiedJobId) {
+        console.error('Job verification failed for jobId:', effectiveJobId);
+        form.setError('root', { message: 'Failed to verify job. Please try again.' });
+        toast.error('Failed to verify job. Please try again.');
+        return;
+      }
+      setJobId(verifiedJobId);
+      const nextPath = `/companies/jobs/create/${steps[currentIndex + 1]}?jobId=${verifiedJobId}`;
+      console.log('Navigating to next step:', steps[currentIndex + 1], 'with jobId:', verifiedJobId);
       router.push(nextPath);
     }
   };
@@ -411,5 +483,7 @@ export const useJobForm = (currentStep) => {
     isLoadingSkills,
     isLoadingOptions,
     isSubmittingStep1,
+    generateTailoredDescription,
+    isGeneratingDescription,
   };
 };
