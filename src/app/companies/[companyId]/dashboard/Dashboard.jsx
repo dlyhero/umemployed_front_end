@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'react-hot-toast'; // Changed from sonner to react-hot-toast
 import QuickActions from './QuickActions';
 import { RecruiterTips } from './RecruiterTips';
 import PostJob from './PostJob';
@@ -17,7 +17,6 @@ const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebs
 const Dashboard = ({ companyId, companyData }) => {
   const [jobData, setJobData] = useState([]);
   const [applicationData, setApplicationData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState(`/companies/${companyId}/dashboard`);
@@ -31,7 +30,6 @@ const Dashboard = ({ companyId, companyData }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         if (!session?.accessToken) throw new Error('Not authenticated');
         const headers = {
           'Content-Type': 'application/json',
@@ -57,9 +55,7 @@ const Dashboard = ({ companyId, companyData }) => {
         setApplicationData(applications);
       } catch (err) {
         setError(err.message);
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
+        toast.error(err.message); // Using react-hot-toast's toast.error
       }
     };
 
@@ -75,16 +71,13 @@ const Dashboard = ({ companyId, companyData }) => {
 
   const applicationCount = applicationData.length;
 
-  if (loading) {
-    return <div className="text-center p-6">Loading...</div>;
-  }
-
   if (error) {
     return <div className="text-center p-6 text-red-500">Error: {error}</div>;
   }
 
   return (
     <div className="max-w-6xl mx-auto p-6 flex gap-6">
+      <Toaster /> {/* Added Toaster component for react-hot-toast */}
       <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
       <div className="flex-1">
         <main className="space-y-6">

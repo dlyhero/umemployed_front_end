@@ -1,60 +1,79 @@
-// src/components/common/Loader/Loader.jsx
-import { motion } from "framer-motion";
+import React from 'react';
+import styled from 'styled-components';
 
-export default function Loader() {
-  // Variants for the circular spinner (rotating animation)
-  const circleVariants = {
-    animate: {
-      rotate: 360,
-      transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        ease: "linear",
-      },
-    },
-  };
-
-  // Variants for the "UE" text (pulsing animation)
-  const textVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.8, 1, 0.8],
-      transition: {
-        duration: 1,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
+const Loader = () => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Background with blur effect */}
-      <motion.div
-        className="absolute inset-0 background-brightness-200  bg-black/30"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />
-
-      {/* Circular Loader */}
-      <div className="relative flex items-center justify-center">
-        {/* Rotating Circle */}
-        <motion.div
-          className="w-24 h-24 rounded-full border-4 border-t-transparent border-brand"
-          variants={circleVariants}
-          animate="animate"
-        />
-
-        {/* "UE" Text in the Center */}
-        <motion.div
-          className="absolute text-4xl font-bold text-brand"
-          variants={textVariants}
-          animate="animate"
-        >
-          UE
-        </motion.div>
-      </div>
-    </div>
+    <StyledWrapper>
+      <div className="loader" />
+    </StyledWrapper>
   );
 }
+
+const StyledWrapper = styled.div`
+  .loader {
+    width: 48px;
+    height: 48px;
+    margin: auto;
+    position: relative;
+  }
+
+  .loader:before {
+    content: '';
+    width: 48px;
+    height: 5px;
+    background: #999;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    border-radius: 50%;
+    animation: shadow324 0.5s linear infinite;
+  }
+
+  .loader:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background: rgb(61, 106, 255);
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 4px;
+    animation: jump7456 0.5s linear infinite;
+  }
+
+  @keyframes jump7456 {
+    15% {
+      border-bottom-right-radius: 3px;
+    }
+
+    25% {
+      transform: translateY(9px) rotate(22.5deg);
+    }
+
+    50% {
+      transform: translateY(18px) scale(1, .9) rotate(45deg);
+      border-bottom-right-radius: 40px;
+    }
+
+    75% {
+      transform: translateY(9px) rotate(67.5deg);
+    }
+
+    100% {
+      transform: translateY(0) rotate(90deg);
+    }
+  }
+
+  @keyframes shadow324 {
+
+    0%,
+      100% {
+      transform: scale(1, 1);
+    }
+
+    50% {
+      transform: scale(1.2, 1);
+    }
+  }`;
+
+export default Loader;
