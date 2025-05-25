@@ -40,7 +40,7 @@ export const TailoredDescriptionModal = ({ isOpen, onClose, jobId, onSubmitSkill
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-yellow-500">⚡️</span>
+            <span className="text-brand">⚡️</span>
             Generate AI-Powered Job Description
           </DialogTitle>
         </DialogHeader>
@@ -64,7 +64,7 @@ export const TailoredDescriptionModal = ({ isOpen, onClose, jobId, onSubmitSkill
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+            <Button type="submit" disabled={isLoading} className="bg-brand hover:bg-brand-600 text-white">
               {isLoading ? 'Generating...' : 'Generate Description'}
             </Button>
           </DialogFooter>
