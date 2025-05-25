@@ -37,6 +37,7 @@ export const useJobForm = (currentStep) => {
   });
   const [isLoadingSkills, setIsLoadingSkills] = useState(false);
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const jobId = searchParams.get('jobId') || storedJobId;
 
@@ -208,6 +209,49 @@ export const useJobForm = (currentStep) => {
     return null;
   };
 
+  const generateTailoredDescription = async (skills) => {
+    if (!jobId) {
+      throw new Error('No job ID available for generating tailored description.');
+    }
+    setIsGeneratingDescription(true);
+    try {
+      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/tailored-description/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+        },
+        body: JSON.stringify({
+          skills: skills, // Updated key from required_skills to skills
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to generate tailored description: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Tailored description response:', result);
+
+      // Update form fields with the response
+      form.setValue('description', result.description || '', { shouldValidate: true });
+      form.setValue('responsibilities', result.responsibilities || '', { shouldValidate: true });
+      form.setValue('benefits', result.benefits || '', { shouldValidate: true });
+
+      // Update store
+      setFormData({
+        description: result.description,
+        responsibilities: result.responsibilities,
+        benefits: result.benefits,
+      });
+
+      return result;
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   const onSubmit = async (data) => {
     const baseUrl = 'https://server.umemployed.com/api';
     console.log('onSubmit called with data:', data);
@@ -262,7 +306,7 @@ export const useJobForm = (currentStep) => {
         setFormData(step1Data);
         setJobId(verifiedJobId);
         form.reset({ ...form.getValues(), ...step1Data });
-        return { ...result, id: verifiedJobId }; // Return the verified jobId
+        return { ...result, id: verifiedJobId };
       } else if (currentStep === 'requirements' && jobId) {
         const step2Data = step2Schema.parse(data);
         console.log('Submitting Step 2 data:', step2Data);
@@ -392,7 +436,6 @@ export const useJobForm = (currentStep) => {
         console.log('Waiting for skills to load before navigating to Step 4...');
         return;
       }
-      // Use newJobId directly if provided, otherwise fallback to stored jobId
       const effectiveJobId = newJobId || storedJobId;
       if (!effectiveJobId) {
         console.error('Cannot navigate to next step: No jobId available');
@@ -401,7 +444,6 @@ export const useJobForm = (currentStep) => {
         router.push('/companies/jobs/create/basicinformation');
         return;
       }
-      // Verify jobId before navigating
       const verifiedJobId = await verifyJob(effectiveJobId);
       if (!verifiedJobId) {
         console.error('Job verification failed for jobId:', effectiveJobId);
@@ -409,7 +451,7 @@ export const useJobForm = (currentStep) => {
         toast.error('Failed to verify job. Please try again.');
         return;
       }
-      setJobId(verifiedJobId); // Ensure jobId is stored
+      setJobId(verifiedJobId);
       const nextPath = `/companies/jobs/create/${steps[currentIndex + 1]}?jobId=${verifiedJobId}`;
       console.log('Navigating to next step:', steps[currentIndex + 1], 'with jobId:', verifiedJobId);
       router.push(nextPath);
@@ -441,5 +483,7 @@ export const useJobForm = (currentStep) => {
     isLoadingSkills,
     isLoadingOptions,
     isSubmittingStep1,
+    generateTailoredDescription,
+    isGeneratingDescription,
   };
 };
