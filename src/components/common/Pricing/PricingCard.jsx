@@ -6,11 +6,9 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const PricingCard = ({ isYearly, title, monthlyPrice, yearlyPrice, description, features, actionLabel, popular, exclusive, userType }) => {
-  const price = isYearly && yearlyPrice ? yearlyPrice : monthlyPrice;
-  const period = isYearly ? '/year' : monthlyPrice !== undefined ? '/month' : '';
+const PricingCard = ({ title, monthlyPrice, description, features, actionLabel, popular, exclusive, userType, onAction, isLoading, isActive }) => {
+  const period = monthlyPrice !== undefined ? '/month' : '';
 
-  // Framer Motion variants for desktop only
   const cardVariants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -24,10 +22,10 @@ const PricingCard = ({ isYearly, title, monthlyPrice, yearlyPrice, description, 
       animate="animate"
       whileHover="hover"
       transition={{ duration: 0.5 }}
-      className="relative flex-shrink-0 sm:motion-safe" // Apply motion only on sm and above
+      className="relative flex-shrink-0 sm:motion-safe"
     >
       {(popular || exclusive) && (
-        <div className="absolute  -top-3 left-1/2 transform -translate-x-1/2 mt-3 sm:mt-0 z-10  ">
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 mt-3 sm:mt-0 z-10">
           <div className={cn(
             'px-3 py-1 text-white text-xs font-bold rounded-full shadow flex items-center',
             popular ? 'bg-brand' : 'bg-brand'
@@ -54,9 +52,9 @@ const PricingCard = ({ isYearly, title, monthlyPrice, yearlyPrice, description, 
             </CardTitle>
             <div className="flex justify-center items-baseline mt-4">
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {price !== undefined ? `$${price}` : 'Custom'}
+                {monthlyPrice !== undefined ? `$${monthlyPrice}` : 'Custom'}
               </h3>
-              {price !== undefined && (
+              {monthlyPrice !== undefined && (
                 <span className="text-sm text-brand ml-1">{period}</span>
               )}
             </div>
@@ -87,9 +85,14 @@ const PricingCard = ({ isYearly, title, monthlyPrice, yearlyPrice, description, 
         </div>
         <CardFooter className="mt-4 p-6 pt-0">
           <Button
-            className="w-full h-10 text-base font-medium rounded-lg bg-brand text-white focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            className={cn(
+              'w-full h-10 text-base font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2',
+              isActive ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand'
+            )}
+            onClick={onAction}
+            disabled={isLoading || isActive}
           >
-            {actionLabel}
+            {isLoading ? 'Processing...' : isActive ? 'Active Plan' : actionLabel}
           </Button>
         </CardFooter>
       </Card>
@@ -98,10 +101,8 @@ const PricingCard = ({ isYearly, title, monthlyPrice, yearlyPrice, description, 
 };
 
 PricingCard.propTypes = {
-  isYearly: PropTypes.bool,
   title: PropTypes.string.isRequired,
   monthlyPrice: PropTypes.number,
-  yearlyPrice: PropTypes.number,
   description: PropTypes.string.isRequired,
   features: PropTypes.arrayOf(
     PropTypes.shape({
@@ -113,6 +114,9 @@ PricingCard.propTypes = {
   popular: PropTypes.bool,
   exclusive: PropTypes.bool,
   userType: PropTypes.oneOf(['User', 'Recruiter']).isRequired,
+  onAction: PropTypes.func,
+  isLoading: PropTypes.bool,
+  isActive: PropTypes.bool,
 };
 
 export default PricingCard;
