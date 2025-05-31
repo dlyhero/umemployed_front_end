@@ -89,7 +89,7 @@ export const experienceLevelsMap = {
   
     if (company?.logo && company.logo !== 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg') {
       return (
-        <Image
+        <img
           src={company.logo}
           alt={`${company.name} Logo`}
           className="w-full h-full object-contain"

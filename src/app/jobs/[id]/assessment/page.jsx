@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video, ChevronLeft } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video, ChevronLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -14,6 +14,14 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const AssessmentFlow = () => {
   const router = useRouter();
@@ -34,6 +42,7 @@ const AssessmentFlow = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [skillIdMap, setSkillIdMap] = useState({});
   const [timerInterval, setTimerInterval] = useState(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Check if desktop
   useEffect(() => {
@@ -72,9 +81,10 @@ const AssessmentFlow = () => {
         });
         setSkillIdMap(skillIds);
       } catch (err) {
-        console.error('Error fetching assessment:', err);
-        toast.error('Failed to load assessment');
-        router.push(`/jobs/${jobId}`);
+        console.error('Error fetching assessment:', err.response?.data.message);
+        if (err.response?.data?.message === "No active user subscription found.") {
+          setShowSubscriptionModal(true);
+        } 
       } finally {
         setIsLoading(false);
       }
@@ -196,7 +206,9 @@ const AssessmentFlow = () => {
       toast.success('Assessment submitted successfully!');
     } catch (err) {
       console.error('Submission error:', err);
-      toast.error('Failed to submit assessment');
+      if (err.response?.data?.message === "No active user subscription found.") {
+        setShowSubscriptionModal(true);
+      }
     }
   };
 
@@ -226,21 +238,124 @@ const AssessmentFlow = () => {
   if (!assessment) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Card className="w-full max-w-md text-center border-0 ">
-          <CardHeader>
-            <CardTitle>Assessment Unavailable</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Could not load assessment questions.</p>
-          </CardContent>
-       
-        </Card>
+
+        {/* Subscription Modal */}
+        <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl">Upgrade Required</DialogTitle>
+              <DialogDescription className="text-center">
+                You've reached the application limit for free users
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col items-center text-center space-y-2">
+                <AlertCircle className="h-12 w-12 text-yellow-500" />
+                <p className="text-gray-700">
+                  To apply for more jobs and access premium features, please upgrade your account.
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <h4 className="font-medium text-center">Premium Benefits:</h4>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Unlimited job applications
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Priority application review
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Advanced analytics
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Direct recruiter messaging
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter className="flex flex-col gap-2">
+              <Button 
+                onClick={() => router.push('/subscription')}
+                className="flex-1 bg-brand hover:bg-brand/90 text-white"
+              >
+                View Subscription Plans
+              </Button>
+              <Button 
+                variant="outline"   
+                onClick={() => router.push('/jobs')}
+                className="flex-1"
+              >
+                Browse Jobs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Subscription Modal */}
+      <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">Upgrade Required</DialogTitle>
+            <DialogDescription className="text-center">
+              You've reached the application limit for free users
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <AlertCircle className="h-12 w-12 text-yellow-500" />
+              <p className="text-gray-700">
+                To apply for more jobs and access premium features, please upgrade your account.
+              </p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <h4 className="font-medium text-center">Premium Benefits:</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Unlimited job applications
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Priority application review
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Advanced analytics
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Direct recruiter messaging
+                </li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col gap-2">
+            <Button 
+              onClick={() => router.push('/subscription')}
+              className="w-full bg-brand hover:bg-brand/90"
+            >
+              View Subscription Plans
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => router.push('/jobs')}
+              className="w-full"
+            >
+              Browse Jobs
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Floating desktop camera */}
       {isDesktop && showCamera && step === 'assessment' && (
         <div className="fixed bottom-6 right-6 w-64 h-48 rounded-lg overflow-hidden border border-gray-200 z-50 bg-black">
@@ -258,6 +373,7 @@ const AssessmentFlow = () => {
         </div>
       )}
 
+      {/* Rest of your existing component code remains the same */}
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Intro Step */}
         {step === 'intro' && (
@@ -507,7 +623,6 @@ const AssessmentFlow = () => {
               </CardContent>
 
               <CardFooter className="flex flex-col sm:flex-row justify-center gap-4">
-               
                 <Button
                   onClick={() => router.push('/jobs')}
                   className="bg-brand hover:bg-brand/90 text-white px-6 py-3"
