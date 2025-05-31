@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import Loader from '../../../components/common/Loader/Loader';
 
 const FailurePage = () => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const FailurePage = () => {
   };
 
   if (status === 'loading') {
-    return <div className="text-center py-8">Loading...</div>;
+    return <Loader />;
   }
 
   return (

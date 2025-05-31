@@ -3,14 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { checkSubscriptionStatus } from '@/lib/api/recruiter_subscribe';
+import Loader from '../../../components/common/Loader/Loader';
 
 const SuccessPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { companyId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
@@ -51,11 +53,11 @@ const SuccessPage = () => {
 
   const handleGoToDashboard = () => {
     setIsLoading(true);
-    router.push('/dashboard');
+    router.push(`/companies/${companyId}/dashboard`);
   };
 
   if (status === 'loading') {
-    return <div className="text-center py-8">Loading...</div>;
+    return <Loader />;
   }
 
   return (
@@ -83,7 +85,7 @@ const SuccessPage = () => {
         </p>
         <Button
           onClick={handleGoToDashboard}
-          disabled={isLoading}
+          disabled={isLoading || !companyId}
           className="bg-brand text-white hover:bg-brand-dark"
         >
           {isLoading ? 'Loading...' : 'Go to Dashboard'}
