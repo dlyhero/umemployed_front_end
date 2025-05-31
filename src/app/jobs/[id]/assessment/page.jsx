@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video, ChevronLeft, X } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChevronRight, RotateCw, Monitor, Video, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -81,7 +81,7 @@ const AssessmentFlow = () => {
         });
         setSkillIdMap(skillIds);
       } catch (err) {
-        console.error('Error fetching assessment:', err.response?.data.message);
+        console.error('Error fetching assessment:', err.response?.data);
         if (err.response?.data?.message === "No active user subscription found.") {
           setShowSubscriptionModal(true);
         } 
@@ -238,9 +238,8 @@ const AssessmentFlow = () => {
   if (!assessment) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-
-        {/* Subscription Modal */}
-        <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+        {/* Subscription Modal - non-removable */}
+        <Dialog open={showSubscriptionModal} onOpenChange={() => {}}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle className="text-center text-2xl">Upgrade Required</DialogTitle>
@@ -286,10 +285,10 @@ const AssessmentFlow = () => {
               </Button>
               <Button 
                 variant="outline"   
-                onClick={() => router.push('/jobs')}
+                onClick={() => router.back()}
                 className="flex-1"
               >
-                Browse Jobs
+                Go Back
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -300,8 +299,8 @@ const AssessmentFlow = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Subscription Modal */}
-      <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+      {/* Subscription Modal - non-removable */}
+      <Dialog open={showSubscriptionModal} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl">Upgrade Required</DialogTitle>
@@ -347,10 +346,10 @@ const AssessmentFlow = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => router.push('/jobs')}
+              onClick={() => router.back()}
               className="w-full"
             >
-              Browse Jobs
+              Go Back
             </Button>
           </DialogFooter>
         </DialogContent>
