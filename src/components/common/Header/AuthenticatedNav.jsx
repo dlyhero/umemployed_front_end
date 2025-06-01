@@ -1,3 +1,4 @@
+
 "use client";
 import { useSession } from "next-auth/react";
 import useUser from "@/src/hooks/useUser";
@@ -14,11 +15,11 @@ export default function AuthenticatedNav() {
 
   const getNavigationPath = () => {
     if (!session?.user) return "/";
-    if (session.user.is_applicant) {
+    if (session.user.role === "job_seeker") {
       return user.user.has_resume
         ? "/applicant/dashboard"
         : "/applicant/upload-resume";
-    } else if (user.user.is_recruiter) {
+    } else if (user.user.role === "recruiter") {
       return user.user.has_company
         ? `/companies/${session.user.company_id}/dashboard`
         : "/companies/create";
