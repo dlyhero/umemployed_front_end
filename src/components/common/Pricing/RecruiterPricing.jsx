@@ -171,7 +171,7 @@ const RecruiterPricing = () => {
           },
           {
             title: 'Standard',
-            monthlyPrice: 25,
+            monthlyPrice: 10,
             description: 'Ideal for small hiring teams',
             features: [
               { text: 'Post 5 jobs per day', available: true },
