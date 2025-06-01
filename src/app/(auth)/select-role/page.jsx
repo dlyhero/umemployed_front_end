@@ -1,128 +1,81 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Briefcase, User } from 'lucide-react';
 import { toast } from 'sonner';
-import useUser from '@/src/hooks/useUser';
-import baseUrl from '../../api/baseUrl';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/Spinner';
 
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
-  const [roleSelected, setRoleSelected] = useState(false);
-  const { data: session, update: updateSession } = useSession(); // Added update function
   const router = useRouter();
-  const { user, mutateUser, loading: userLoading } = useUser();
-
-  // Navigation prevention (unchanged)
-
-  console.log(session)
-  useEffect(() => {
-    if (!roleSelected) return;
-
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = 'You cannot go back after selecting a role';
-      return e.returnValue;
-    };
-
-    const handlePopState = (e) => {
-      if (roleSelected) {
-        toast.info("You cannot go back after selecting a role");
-        window.history.pushState(null, '', window.location.pathname);
-      }
-    };
-
-    window.history.replaceState(null, '', window.location.pathname);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [roleSelected]);
-
-  // Redirect if user already has a role
-  useEffect(() => {
-    if (!userLoading && user?.role && user.role !== 'none') {
-      router.replace('/');
-    }
-  }, [user, userLoading, router]);
+  const { data: session, update } = useSession();
 
   const handleRoleSelect = async (role) => {
-    if (!['recruiter', 'job_seeker'].includes(role)) {
-      toast.error('Invalid role selection');
-      return;
-    }
-
     setLoading(true);
     try {
-      // Optimistically update local state immediately
-      setRoleSelected(true);
-      await mutateUser(
-        { ...user, role }, 
-        { revalidate: false } // Don't revalidate yet
-      );
+      // Include credentials in the fetch request
+      const response = await fetch('/api/auth/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role }),
+        credentials: 'include' // This is crucial for session cookies
+      });
 
-      // Update role via API
-      const response = await axios.post(
-        `${baseUrl}/users/choose-account-type/`,
-        { account_type: role },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken}`
-          }
-        }
-      );
-
-      // Update both user data and session
-      await Promise.all([
-        mutateUser({ ...user, role: response.data.state }, { revalidate: true }),
-        updateSession({ ...session, user: { ...session?.user, role: response.data.state } })
-      ]);
-
-      toast.success(response.data.message || 'Account type updated successfully');
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      if (role === 'recruiter') {
-        router.push('/companies/create');
-      } else {
-        router.push('/applicant/upload-resume');
+      // Handle non-JSON responses
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update role');
       }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to update role');
+      }
+
+      // Update client-side session
+      await update({
+        user: {
+          ...session?.user,
+          role: role
+        }
+      });
+
+      // Redirect after successful update
+      router.push(data.redirectTo);
 
     } catch (error) {
       console.error('Role selection error:', error);
-      
-      // Revert all states if error occurs
-      await Promise.all([
-        mutateUser({ ...user, role: 'none' }, { revalidate: true }),
-        updateSession({ ...session, user: { ...session?.user, role: 'none' } })
-      ]);
-      
-      setRoleSelected(false);
-      toast.error(
-        error.response?.data?.message || 
-        error.message || 
-        'Failed to update account type'
-      );
+      toast.error(error.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  if (userLoading || (user?.role && user.role !== 'none')) {
+  useEffect(() => {
+    if (session?.user?.role && session.user.role !== "none") {
+      if (session.user.role === "job_seeker") {
+        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+      } else {
+        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+      }
+    }
+  }, [session, router]);
+
+  // If session is loading or user already has a role
+  if (!session || (session?.user?.role && session.user.role !== 'none')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner />
       </div>
     );
   }
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -138,7 +91,7 @@ export default function SelectRolePage() {
           <Button
             variant="outline"
             onClick={() => handleRoleSelect('job_seeker')}
-            disabled={loading || roleSelected}
+            disabled={loading}
             className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-blue-50 transition-colors"
           >
             <User className="h-8 w-8 text-blue-600" />
@@ -151,7 +104,7 @@ export default function SelectRolePage() {
           <Button
             variant="outline"
             onClick={() => handleRoleSelect('recruiter')}
-            disabled={loading || roleSelected}
+            disabled={loading}
             className="h-24 flex flex-col items-center justify-center gap-2 p-4 hover:bg-green-50 transition-colors"
           >
             <Briefcase className="h-8 w-8 text-green-600" />

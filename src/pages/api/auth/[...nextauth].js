@@ -70,61 +70,40 @@ export const authOptions = {
     verifyRequest: "/auth/verify-request",
     newUser: "/select-role", // Redirect to role selection for new users
   },
-  callbacks: {
-    async jwt({ token, user, account }) {
-      // Initial sign in
-      if (account && user) {
-        // Add user details to token when logging in
-        token.role = user.role || 'none';
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.has_resume = user.has_resume;
-        token.has_company = user.has_company;
-        token.company_id = user.company_id;
-        token.user_id = user.user_id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Pass token info to the client-side session
-      session.user.role = token.role;
-      session.user.name = token.name || session.user.name;
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      session.user.has_resume = token.has_resume;
-      session.user.has_company = token.has_company;
-      session.user.company_id = token.company_id;
-      session.user.user_id = token.user_id;
-      
-      return session;
-    },
-    async redirect({ url, baseUrl }) {
-      // Handle redirects after sign in
-      // Check if URL starts with baseUrl
-      if (url.startsWith(baseUrl)) {
-        // If there's a callbackUrl in the URL, use that for redirection
-        const urlObj = new URL(url);
-        const callbackUrl = urlObj.searchParams.get('callbackUrl');
-        
-        if (callbackUrl) {
-          // Make sure the callbackUrl is from the same origin
-          try {
-            const callbackUrlObj = new URL(callbackUrl);
-            if (callbackUrlObj.origin === baseUrl) {
-              return callbackUrl;
-            }
-          } catch (error) {
-            // Invalid URL, fall back to baseUrl
-            console.error("Invalid callback URL:", error);
-          }
-        }
-        
-        return url;
-      }
-      
-      return baseUrl;
+ // [...nextauth].js
+callbacks: {
+  async jwt({ token, user, trigger, session }) {
+    // Handle session updates from client
+    if (trigger === "update" ) {
+      return { ...token, ...session.user };
     }
+    
+    // Initial sign in
+    if (user) {
+      return { 
+        ...token, 
+        role: user.role,
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+        has_resume: user.has_resume,
+        has_company: user.has_company,
+        company_id: user.company_id,
+        user_id: user.user_id
+      };
+    }
+    return token;
   },
+  async session({ session, token }) {
+    session.user.role = token.role;
+    session.accessToken = token.accessToken;
+    session.refreshToken = token.refreshToken;
+    session.user.has_resume = token.has_resume;
+    session.user.has_company = token.has_company;
+    session.user.company_id = token.company_id;
+    session.user.user_id = token.user_id;
+    return session;
+  },
+}
 };
 
 export default NextAuth(authOptions);
