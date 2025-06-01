@@ -39,7 +39,7 @@ export default function ProfilePage() {
           axios.get(`${baseUrl}/resume/contact-info/`, {headers: {'Authorization': `Bearer ${token}`}})
         ]);
         
-
+          console.log(contactInfo);
         const details = detailsResponse.data;
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',

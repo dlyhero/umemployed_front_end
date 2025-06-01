@@ -47,7 +47,7 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     { 
       icon: <Settings className="w-5 h-5" />, 
       label: "Account Settings", 
-      path: "/applicant/update_profile",
+      path: "/settings",
       description: "Update your account preferences"
     }
   ]

@@ -3,13 +3,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { 
+import {
   BarChart2,
-  Building2, 
-  Briefcase, 
+  Building2,
+  Briefcase,
   FileText,
   Home,
-  PlusCircle, 
+  PlusCircle,
   Mail,
   Bell,
   MessageSquare,
@@ -17,7 +17,8 @@ import {
   ThumbsUp,
   Users,
   Receipt,
-  Loader2
+  Loader2,
+  Bookmark
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -36,26 +37,32 @@ export function MenuLinks() {
     setLoading(true);
     router.push("/companies/related-users");
   };
-  
+
   const CommonLinks = () => (
     <>
-      <Link 
-        href="/notifications" 
-        className={`flex items-center gap-3 p-2 rounded-lg ${
-          isActive('/notifications') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-        }`}
+      <Link
+        href="/notifications"
+        className={`flex items-center gap-3 p-2 rounded-lg font-semibold ${isActive('/notifications') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
       >
         <Bell className="w-5 h-5" />
-        <span className="font-medium">Notifications</span>
+        <span className="">Notifications</span>
       </Link>
-      <Link 
-        href="/messages" 
-        className={`flex items-center gap-3 p-2 rounded-lg ${
-          isActive('/messages') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-        }`}
+      <Link
+        href="/messages"
+        className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/messages') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
       >
         <MessageSquare className="w-5 h-5" />
         <span className="font-semibold">Messages</span>
+      </Link>
+      <Link
+        href="/settings"
+        className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/settings') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
+      >
+        <Settings className="w-5 h-5" />
+        <span className="font-semibold">Settings</span>
       </Link>
     </>
   );
@@ -79,38 +86,27 @@ export function MenuLinks() {
           <Link
             key={index}
             href={item.path}
-            className={`md:hidden flex items-center gap-3 p-2 rounded-lg ${
-              isActive(item.path) ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-            }`}
+            className={`md:hidden flex items-center gap-3 p-2 rounded-lg ${isActive(item.path) ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+              }`}
           >
             {item.icon}
             <span className="font-semibold">{item.label}</span>
           </Link>
 
         ))}
-        <Link 
-          href="/post-job" 
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/post-job') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          }`}
+        <Link
+          href="/post-job"
+          className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/post-job') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+            }`}
         >
           <PlusCircle className="w-5 h-5" />
           <span className="font-semibold">Post a Job</span>
         </Link>
-        {/* <Link 
-          href="/settings" 
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/settings') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          }`}
-        >
-          <Settings className="w-5 h-5" />
-          <span className="font-semibold">Settings</span>
-        </Link> */}
+
         <button
           onClick={handleEndorsementClick}
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/companies/related-users') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          } w-full text-left`}
+          className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/companies/related-users') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+            } w-full text-left`}
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -119,54 +115,62 @@ export function MenuLinks() {
           )}
           <span className="font-semibold">{loading ? "Loading..." : "Endorsement"}</span>
         </button>
-        <Link 
-          href="/transactions" 
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/transactions') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          }`}
+        <Link
+          href="/transactions"
+          className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/transactions') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+            }`}
         >
           <Receipt className="w-5 h-5" />
           <span className="font-semibold">Transaction History</span>
         </Link>
-        
-        
+
+
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-2 mb-6">
-      <CommonLinks />
-      <Link 
-        href="/companies/listing" 
-        className={`flex items-center gap-3 p-2 rounded-lg ${
-          isActive('/companies') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-        }`}
+      <Link
+        href="/companies/listing"
+        className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/companies') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
       >
         <Building2 className="w-5 h-5" />
         <span className="font-semibold">Companies</span>
       </Link>
-      <Link 
-        href="/jobs" 
-        className={`flex items-center gap-3 p-2 rounded-lg ${
-          isActive('/jobs') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-        }`}
+      <Link
+        href="/jobs"
+        className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/jobs') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+          }`}
       >
         <Briefcase className="w-5 h-5" />
         <span className="font-semibold">Browse Jobs</span>
       </Link>
-     
+
       {!session && (
-        <Link 
-          href="/contact" 
-          className={`flex items-center gap-3 p-2 rounded-lg ${
-            isActive('/contact') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
-          }`}
+        <Link
+          href="/contact"
+          className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/contact') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'
+            }`}
         >
           <Mail className="w-5 h-5" />
           <span className="font-semibold">Contact Us</span>
         </Link>
       )}
+
+      {session && (
+        <Link
+          href="/contact"
+          className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/applicant/shortlistedJobs') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'}`}
+        >
+          <Bookmark className="w-5 h-5" />
+          <span className="font-semibold">Shortlisted Jobs</span>
+        </Link>
+      )}
+
+      <CommonLinks />
+
     </div>
   );
 }
