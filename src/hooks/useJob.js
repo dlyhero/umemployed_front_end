@@ -58,7 +58,7 @@ export const useJobs = () => {
     return typeMap[type] || type;
   };
 
-  const fetchJos = async () => {
+  const fetchJobs = async () => {
    try {
     const api = axios.create({
       baseURL: baseUrl,
@@ -197,8 +197,8 @@ export const useJobs = () => {
 
   useEffect(() => {
     if (session) fetchData();
-    else fetchJos();
-  }, [session]);
+    else fetchJobs();
+  }, [session, fetchData, fetchJobs]);
 
   const toggleSaveJob = async (jobId) => {
     try {
@@ -325,6 +325,6 @@ export const useJobs = () => {
     resetFilters,
     toggleSaveJob,
     fetchData, 
-    fetchJos
+    fetchJobs
   };
 };

@@ -121,34 +121,32 @@ export const useJobForm = (currentStep) => {
     fetchJobOptions();
   }, [form, session, status, router]);
 
-  useEffect(() => {
-    if (currentStep === 'basicinformation') {
-      clearStore();
-      form.reset();
-    } else if (currentStep === 'skills' && jobId) {
-      const loadSkills = async () => {
-        setIsLoadingSkills(true);
-        try {
-          const skills = await fetchExtractedSkills(jobId);
-          setExtractedSkills(skills);
-          if (skills.length === 0) {
-            form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
-          } else {
-            form.clearErrors('root');
-          }
-        } catch (error) {
-          console.error('Error loading skills:', error.message);
-          form.setError('root', { message: 'Failed to load skills. Please try again.' });
-        } finally {
-          setIsLoadingSkills(false);
+  // Update the useEffect to include the missing dependency
+useEffect(() => {
+  if (currentStep === 'skills' && jobId) {
+    const loadSkills = async () => {
+      setIsLoadingSkills(true);
+      try {
+        const skills = await fetchExtractedSkills(jobId);
+        setExtractedSkills(skills);
+        if (skills.length === 0) {
+          form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+        } else {
+          form.clearErrors('root');
         }
-      };
-      loadSkills();
-    } else if (!jobId && currentStep !== 'basicinformation') {
-      toast.error('No job ID found. Please complete the Basic Information step first.');
-      router.push('/companies/jobs/create/basicinformation');
-    }
-  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router]);
+      } catch (error) {
+        console.error('Error loading skills:', error.message);
+        form.setError('root', { message: 'Failed to load skills. Please try again.' });
+      } finally {
+        setIsLoadingSkills(false);
+      }
+    };
+    loadSkills();
+  } else if (!jobId && currentStep !== 'basicinformation') {
+    toast.error('No job ID found. Please complete the Basic Information step first.');
+    router.push('/companies/jobs/create/basicinformation');
+  }
+}, [currentStep, jobId, form, setExtractedSkills, clearStore, router, fetchExtractedSkills]); // Add fetchExtractedSkills
 
   const fetchExtractedSkills = async (jobId) => {
     console.log('fetchExtractedSkills called with jobId:', jobId);

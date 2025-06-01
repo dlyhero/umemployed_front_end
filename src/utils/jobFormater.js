@@ -70,7 +70,6 @@ export const experienceLevelsMap = {
   
     return initials;
   };
-
   export const CompanyLogo = ( company ) => {
     const initials = getInitials(company?.name);
     const colors = [
@@ -89,11 +88,15 @@ export const experienceLevelsMap = {
   
     if (company?.logo && company.logo !== 'https://umemployeds1.blob.core.windows.net/umemployedcont1/resume/images/default.jpg') {
       return (
-        <img
-          src={company.logo}
-          alt={`${company.name} Logo`}
-          className="w-full h-full object-contain"
-        />
+        <div className="w-full h-full relative">
+          <Image
+            src={company.logo}
+            alt={`${company.name} Logo`}
+            layout="fill"
+            objectFit="contain"
+            unoptimized={true} // If you need to optimize external images, you might need a custom loader
+          />
+        </div>
       );
     }
   
