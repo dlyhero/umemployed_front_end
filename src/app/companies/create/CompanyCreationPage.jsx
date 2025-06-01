@@ -32,6 +32,8 @@ const CompanyCreationPage = () => {
     linkedin: '',
     video_introduction: '',
   });
+
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
