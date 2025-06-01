@@ -1,5 +1,5 @@
 // hooks/useJobs.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import baseUrl from '../app/api/baseUrl';
@@ -58,147 +58,149 @@ export const useJobs = () => {
     return typeMap[type] || type;
   };
 
-  const fetchJos = async () => {
-   try {
-    const api = axios.create({
-      baseURL: baseUrl,
-      headers: {
-      }
-    });
-
-    const jobsResponse = await api.get('/job/jobs/');
-    const formattedJobs = jobsResponse.data.map(job => ({
-      ...job,
-      formattedType: formatJobType(job.job_type),
-      formattedExperience: formatExperienceLevel(job.experience_level),
-      formattedSalary: formatSalaryRange(job.salary_range),
-      formattedLocationType: formatLocationType(job.job_location_type),
-      postedDate: new Date(job.created_at).toLocaleDateString(),
-      description: job.description.replace(/<[^>]*>/g, '')
-    }));
-
-
-    setAllJobs(formattedJobs);
-    setFilteredJobs(formattedJobs);
-
-      const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
-        .filter(Boolean)
-        .map(type => ({
-          value: type,
-          label: formatLocationType(type),
-          count: formattedJobs.filter(job => job.job_location_type === type).length
-        }));
-
-      const experienceLevels = [...new Set(formattedJobs.map(job => job.experience_level))]
-        .filter(Boolean)
-        .map(level => ({
-          value: level,
-          label: formatExperienceLevel(level),
-          count: formattedJobs.filter(job => job.experience_level === level).length
-        }));
-
-      const locations = [...new Set(formattedJobs.map(job => job.location))]
-        .filter(Boolean)
-        .map(location => ({
-          value: location,
-          label: location,
-          count: formattedJobs.filter(job => job.location === location).length
-        }));
-
-      const salaryRanges = [
-        {
-          value: '0-50000', label: 'Under $50K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
-            return salary < 50000;
-          }).length
-        },
-        {
-          value: '50000-100000', label: '$50K - $100K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
-            return salary >= 50000 && salary < 100000;
-          }).length
-        },
-        {
-          value: '100000-150000', label: '$100K - $150K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
-            return salary >= 100000 && salary < 150000;
-          }).length
-        },
-        {
-          value: '150000-200000', label: '$150K - $200K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
-            return salary >= 150000 && salary < 200000;
-          }).length
-        },
-        {
-          value: '200000-', label: 'Over $200K', count: formattedJobs.filter(job => {
-            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
-            return salary >= 200000;
-          }).length
-        }
-      ];
-
-      setFilterOptions({
-        employment_types: employmentTypes,
-        experience_levels: experienceLevels,
-        locations: locations,
-        salary_ranges: salaryRanges
-      });
-
-   }  catch (err) {
-    setError(err.response?.data?.message || err.message);
-    toast.error('Failed to load jobs data');
-  } finally {
-    setLoading(false);
-  }
-  }
-
-  const fetchData = async () => {
-
+  const fetchJobs = useCallback( async () => {
     try {
-      setLoading(true);
-      const api = axios.create({
-        baseURL: baseUrl,
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`
-        }
-      });
+     const api = axios.create({
+       baseURL: baseUrl,
+       headers: {
+       }
+     });
+ 
+     const jobsResponse = await api.get('/job/jobs/');
+     const formattedJobs = jobsResponse.data.map(job => ({
+       ...job,
+       formattedType: formatJobType(job.job_type),
+       formattedExperience: formatExperienceLevel(job.experience_level),
+       formattedSalary: formatSalaryRange(job.salary_range),
+       formattedLocationType: formatLocationType(job.job_location_type),
+       postedDate: new Date(job.created_at).toLocaleDateString(),
+       description: job.description.replace(/<[^>]*>/g, '')
+     }));
+ 
+ 
+     setAllJobs(formattedJobs);
+     setFilteredJobs(formattedJobs);
+ 
+       const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
+         .filter(Boolean)
+         .map(type => ({
+           value: type,
+           label: formatLocationType(type),
+           count: formattedJobs.filter(job => job.job_location_type === type).length
+         }));
+ 
+       const experienceLevels = [...new Set(formattedJobs.map(job => job.experience_level))]
+         .filter(Boolean)
+         .map(level => ({
+           value: level,
+           label: formatExperienceLevel(level),
+           count: formattedJobs.filter(job => job.experience_level === level).length
+         }));
+ 
+       const locations = [...new Set(formattedJobs.map(job => job.location))]
+         .filter(Boolean)
+         .map(location => ({
+           value: location,
+           label: location,
+           count: formattedJobs.filter(job => job.location === location).length
+         }));
+ 
+       const salaryRanges = [
+         {
+           value: '0-50000', label: 'Under $50K', count: formattedJobs.filter(job => {
+             const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+             return salary < 50000;
+           }).length
+         },
+         {
+           value: '50000-100000', label: '$50K - $100K', count: formattedJobs.filter(job => {
+             const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+             return salary >= 50000 && salary < 100000;
+           }).length
+         },
+         {
+           value: '100000-150000', label: '$100K - $150K', count: formattedJobs.filter(job => {
+             const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+             return salary >= 100000 && salary < 150000;
+           }).length
+         },
+         {
+           value: '150000-200000', label: '$150K - $200K', count: formattedJobs.filter(job => {
+             const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+             return salary >= 150000 && salary < 200000;
+           }).length
+         },
+         {
+           value: '200000-', label: 'Over $200K', count: formattedJobs.filter(job => {
+             const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+             return salary >= 200000;
+           }).length
+         }
+       ];
+ 
+       setFilterOptions({
+         employment_types: employmentTypes,
+         experience_levels: experienceLevels,
+         locations: locations,
+         salary_ranges: salaryRanges
+       });
+ 
+    }  catch (err) {
+     setError(err.response?.data?.message || err.message);
+     toast.error('Failed to load jobs data');
+   } finally {
+     setLoading(false);
+   }
+   },[])
 
-      const jobsResponse = await api.get('/job/jobs/');
-      const formattedJobs = jobsResponse.data.map(job => ({
-        ...job,
-        formattedType: formatJobType(job.job_type),
-        formattedExperience: formatExperienceLevel(job.experience_level),
-        formattedSalary: formatSalaryRange(job.salary_range),
-        formattedLocationType: formatLocationType(job.job_location_type),
-        postedDate: new Date(job.created_at).toLocaleDateString(),
-        description: job.description.replace(/<[^>]*>/g, '')
-      }));
+  const fetchData = useCallback(
+    async () => {
 
-
-      setAllJobs(formattedJobs);
-      setFilteredJobs(formattedJobs);
-
-      const savedResponse = await api.get('/job/saved-jobs/');
-      setSavedJobs(savedResponse.data.map(job => job.id));
-
-      const appliedResponse = await api.get('/job/applied-jobs/');
-      setAppliedJobs(appliedResponse.data.map(job => job.id));
-
-      
-
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-      toast.error('Failed to load jobs data');
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        setLoading(true);
+        const api = axios.create({
+          baseURL: baseUrl,
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`
+          }
+        });
+  
+        const jobsResponse = await api.get('/job/jobs/');
+        const formattedJobs = jobsResponse.data.map(job => ({
+          ...job,
+          formattedType: formatJobType(job.job_type),
+          formattedExperience: formatExperienceLevel(job.experience_level),
+          formattedSalary: formatSalaryRange(job.salary_range),
+          formattedLocationType: formatLocationType(job.job_location_type),
+          postedDate: new Date(job.created_at).toLocaleDateString(),
+          description: job.description.replace(/<[^>]*>/g, '')
+        }));
+  
+  
+        setAllJobs(formattedJobs);
+        setFilteredJobs(formattedJobs);
+  
+        const savedResponse = await api.get('/job/saved-jobs/');
+        setSavedJobs(savedResponse.data.map(job => job.id));
+  
+        const appliedResponse = await api.get('/job/applied-jobs/');
+        setAppliedJobs(appliedResponse.data.map(job => job.id));
+  
+        
+  
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+        toast.error('Failed to load jobs data');
+      } finally {
+        setLoading(false);
+      }
+    }, [session?.accessToken, session?.token]
+  )
 
   useEffect(() => {
     if (session) fetchData();
-    else fetchJos();
-  }, [session]);
+    else fetchJobs();
+  }, [session, fetchData, fetchJobs]);
 
   const toggleSaveJob = async (jobId) => {
     try {
@@ -325,6 +327,6 @@ export const useJobs = () => {
     resetFilters,
     toggleSaveJob,
     fetchData, 
-    fetchJos
+    fetchJobs
   };
 };

@@ -13,7 +13,6 @@ import useUser from "@/src/hooks/useUser";
 export default function ResumeUploadPage() {
   const { data: session, status } = useSession();
   const user = useUser();
-  console.log("user1", user)
   const token = session?.accessToken; // Added optional chaining
   const {
     fileName,
