@@ -148,29 +148,29 @@ useEffect(() => {
   }
 }, [currentStep, jobId, form, setExtractedSkills, clearStore, router, fetchExtractedSkills]); // Add fetchExtractedSkills
 
-  const fetchExtractedSkills = async (jobId) => {
-    console.log('fetchExtractedSkills called with jobId:', jobId);
-    try {
-      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
-      }
-      const data = await response.json();
-      const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
-      console.log('fetchExtractedSkills successful, skills:', skills);
-      return skills;
-    } catch (error) {
-      console.error('Error fetching extracted skills:', error.message);
-      return [];
+const fetchExtractedSkills = useCallback(async (jobId) => {
+  console.log('fetchExtractedSkills called with jobId:', jobId);
+  try {
+    const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
     }
-  };
+    const data = await response.json();
+    const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
+    console.log('fetchExtractedSkills successful, skills:', skills);
+    return skills;
+  } catch (error) {
+    console.error('Error fetching extracted skills:', error.message);
+    return [];
+  }
+}, [session?.accessToken, session?.token]);
 
   const verifyJob = async (jobId, retries = 3, delay = 1000) => {
     console.log('Verifying job with jobId:', jobId);
