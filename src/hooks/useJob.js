@@ -151,7 +151,7 @@ export const useJobs = () => {
    } finally {
      setLoading(false);
    }
-   },[])
+   })
 
   const fetchData = useCallback(
     async () => {
