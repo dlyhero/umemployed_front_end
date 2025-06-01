@@ -67,7 +67,7 @@ export default function SelectRolePage() {
   }, [session, router]);
 
   // If session is loading or user already has a role
-  if (!session || (session?.user?.role && session.user.role !== 'none')) {
+  if (!session ) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner />
