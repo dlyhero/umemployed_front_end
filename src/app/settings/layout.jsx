@@ -53,7 +53,6 @@ import {
               <div className="max-w-[1350px] mx-auto px-4 py-8">
                 <div className="space-y-6">
                   <div className="flex items-center">
-                    <SettingsIcon className="h-6 w-6" />
                     <h1 className="text-2xl font-bold ml-2">Settings</h1>
                   </div>
                   <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
