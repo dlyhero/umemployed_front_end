@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import useUser from '@/src/hooks/useUser';
 
 export default function LoginForm() {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -16,40 +17,47 @@ export default function LoginForm() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const user = useUser();
 
     // Get callbackUrl from query parameters or default to dashboard
     const callbackUrl = searchParams.get('callbackUrl') || '/';
     
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    const handleRoleBasedRedirect = (user) => {
-        // Handle default redirects based on role and status
-        switch(user?.role) {
-            case 'job_seeker':
-                if (user?.has_resume) {
-                    router.replace('/applicant/dashboard');
-                } else {
-                    router.replace('/upload-resume');
-                }
-                break;
-            case 'recruiter':
-                if (user?.has_company && user?.company_id) {
-                    router.replace(`/companies/${user.company_id}/dashboard`);
-                } else {
-                    router.replace('/company/create');
-                }
-                break;
-            case 'none':
-            default:
-                router.replace('/select-role');
-        }
-    };
 
     useEffect(() => {
-        if (status === "authenticated" && session?.user) {
-            handleRoleBasedRedirect(session.user);
+        if (status === "authenticated") {
+            // Add a small delay to ensure session is fully loaded
+            const timer = setTimeout(() => {
+                const role = user?.user?.role;
+                console.log(role)
+             
+
+                // Handle default redirects based on role and status
+                switch(role) {
+                    case 'job_seeker':
+                        if (session?.user?.has_resume) {
+                            router.replace('/applicant/dashboard');
+                        } else {
+                            router.replace('/applicant/upload-resume');
+                        }
+                        break;
+                    case 'recruiter':
+                        if (session?.user?.has_company && session?.user?.company_id) {
+                            router.replace(`/companies/${session.user.company_id}/dashboard`);
+                        } else {
+                            router.replace('/companies/create');
+                        }
+                        break;
+                    case 'none':
+                    default:
+                        router.replace('/select-role');
+                }
+            }, 3000);
+
+            return () => clearTimeout(timer);
         }
-    }, [status, session, router]);
+    }, [status, session, router, callbackUrl]);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -60,6 +68,7 @@ export default function LoginForm() {
                 email: data.email,
                 password: data.password,
                 redirect: false,
+                callbackUrl: callbackUrl // Pass the callbackUrl to signIn
             });
 
             if (result?.error === "EMAIL_NOT_VERIFIED") {
@@ -79,6 +88,20 @@ export default function LoginForm() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Helper function to check if a route is an authentication route
+    const isAuthRoute = (path) => {
+        const authRoutes = [
+            '/login',
+            '/signup',
+            '/forgetPassword',
+            '/changePassword',
+            '/verify_email',
+            '/verify_email/failure',
+            '/verify_email/success'
+        ];
+        return authRoutes.some(route => path.startsWith(route));
     };
 
     return (
