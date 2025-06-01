@@ -34,7 +34,7 @@ export function NavLinks() {
         <span className={`text-sm font-semibold group-hover:text-brand transition-colors ${
           isActive('/jobs') ? 'text-brand' : 'text-gray-600'
         }`}>
-          Browse Job
+          Browse Jobs
         </span>
       </Link>
     </div>
