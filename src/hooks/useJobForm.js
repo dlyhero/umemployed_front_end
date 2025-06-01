@@ -121,58 +121,56 @@ export const useJobForm = (currentStep) => {
     fetchJobOptions();
   }, [form, session, status, router]);
 
-  useEffect(() => {
-    if (currentStep === 'basicinformation') {
-      clearStore();
-      form.reset();
-    } else if (currentStep === 'skills' && jobId) {
-      const loadSkills = async () => {
-        setIsLoadingSkills(true);
-        try {
-          const skills = await fetchExtractedSkills(jobId);
-          setExtractedSkills(skills);
-          if (skills.length === 0) {
-            form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
-          } else {
-            form.clearErrors('root');
-          }
-        } catch (error) {
-          console.error('Error loading skills:', error.message);
-          form.setError('root', { message: 'Failed to load skills. Please try again.' });
-        } finally {
-          setIsLoadingSkills(false);
+  // Update the useEffect to include the missing dependency
+useEffect(() => {
+  if (currentStep === 'skills' && jobId) {
+    const loadSkills = async () => {
+      setIsLoadingSkills(true);
+      try {
+        const skills = await fetchExtractedSkills(jobId);
+        setExtractedSkills(skills);
+        if (skills.length === 0) {
+          form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+        } else {
+          form.clearErrors('root');
         }
-      };
-      loadSkills();
-    } else if (!jobId && currentStep !== 'basicinformation') {
-      toast.error('No job ID found. Please complete the Basic Information step first.');
-      router.push('/companies/jobs/create/basicinformation');
-    }
-  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router]);
-
-  const fetchExtractedSkills = async (jobId) => {
-    console.log('fetchExtractedSkills called with jobId:', jobId);
-    try {
-      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
+      } catch (error) {
+        console.error('Error loading skills:', error.message);
+        form.setError('root', { message: 'Failed to load skills. Please try again.' });
+      } finally {
+        setIsLoadingSkills(false);
       }
-      const data = await response.json();
-      const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
-      console.log('fetchExtractedSkills successful, skills:', skills);
-      return skills;
-    } catch (error) {
-      console.error('Error fetching extracted skills:', error.message);
-      return [];
+    };
+    loadSkills();
+  } else if (!jobId && currentStep !== 'basicinformation') {
+    toast.error('No job ID found. Please complete the Basic Information step first.');
+    router.push('/companies/jobs/create/basicinformation');
+  }
+}, [currentStep, jobId, form, setExtractedSkills, clearStore, router, fetchExtractedSkills]); // Add fetchExtractedSkills
+
+const fetchExtractedSkills = useCallback(async (jobId) => {
+  console.log('fetchExtractedSkills called with jobId:', jobId);
+  try {
+    const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
     }
-  };
+    const data = await response.json();
+    const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
+    console.log('fetchExtractedSkills successful, skills:', skills);
+    return skills;
+  } catch (error) {
+    console.error('Error fetching extracted skills:', error.message);
+    return [];
+  }
+}, [session?.accessToken, session?.token]);
 
   const verifyJob = async (jobId, retries = 3, delay = 1000) => {
     console.log('Verifying job with jobId:', jobId);
