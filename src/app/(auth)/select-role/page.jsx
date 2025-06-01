@@ -18,6 +18,8 @@ export default function SelectRolePage() {
   const { user, mutateUser, loading: userLoading } = useUser();
 
   // Navigation prevention (unchanged)
+
+  console.log(session)
   useEffect(() => {
     if (!roleSelected) return;
 
