@@ -138,7 +138,7 @@ const HeroSection = ({ session, status }) => {
             
               <img 
               className="bg-cover w-[2000px]" 
-              src="/Group 6 (3).png" alt="" 
+              src="/hero.webp" alt="" 
             
               />
               

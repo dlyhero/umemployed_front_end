@@ -33,7 +33,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
   const DEFAULT_CATEGORY_ID = 1;
 
   // Fetch user skills on mount and when session changes
-  const fetchUserSkills = useCallback(async () => {
+  const fetchUserSkills = async () => {
     try {
       setIsFetching(true);
       const response = await axios.get(`${baseUrl}/resume/skills/`, {
@@ -45,8 +45,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
     } finally {
       setIsFetching(false);
     }
-  }, [session?.accessToken]);
-
+  }
   // Fetch available skills with debounce
   const fetchAvailableSkills = useCallback(async (query = '') => {
     try {
