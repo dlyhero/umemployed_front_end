@@ -64,10 +64,10 @@ export default function SelectRolePage() {
   }, [session, router]);
 
   return (
-    <div className="max-w-5xl mx-auto min-h-screen flex items-center justify-center px-4">
+    <div className="max-w-5xl mx-auto  mt-5 px-4">
       <div className="w-full max-w-4xl p-8 space-y-8 bg-white rounded-xl">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join as a Recruiter or Job Seeker</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join as a <br className='md:hidden' /> Recruiter or Job Seeker</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Select your account type to get started. You can always switch later.
           </p>
