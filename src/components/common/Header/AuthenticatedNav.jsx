@@ -12,6 +12,8 @@ export default function AuthenticatedNav() {
   const user = useUser();
   const pathname = usePathname();
 
+  console.log(session);
+
   const getNavigationPath = () => {
     if (!session?.user) return "/";
     if (session.user.role === "job_seeker") {
@@ -19,7 +21,7 @@ export default function AuthenticatedNav() {
         ? "/applicant/dashboard"
         : "/applicant/upload-resume";
     } else if (user.user.role === "recruiter") {
-      return user.user.has_company
+      return  session.user.has_company 
         ? `/companies/${session.user.company_id}/dashboard`
         : "/companies/create";
     }
