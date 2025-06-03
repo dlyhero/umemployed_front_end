@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import JobCard from '../../../jobs/_components/JobCard';
+import JobListingCard from './JobListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const RecentJobListings = ({ companyData }) => {
@@ -126,10 +126,9 @@ const RecentJobListings = ({ companyData }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {jobs.map((job) => (
-        <JobCard
+        <JobListingCard
           key={job.id}
           job={job}
-          isRecruiter={true}
         />
       ))}
     </div>

@@ -2,26 +2,23 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Bookmark, MapPin, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyLogo, formatRelativeTime, formatSalary } from "@/src/utils/jobFormater";
+import useUser from "@/src/hooks/useUser";
 
-const JobCard = ({ job, onToggleSave, loading }) => {
+const JobListingCard = ({ job, loading }) => {
   const { data: session } = useSession();
   const router = useRouter();
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onToggleSave?.(job.id);
-  };
+  const user = useUser();
+  const isRecruiter = user?.user?.role === 'recruiter';
 
   const handleViewJob = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/jobs/${job.id}`);
+    router.push(`/companies/${job.company_id}/jobs/${job.id}/applications`);
   };
 
   if (loading) {
@@ -38,7 +35,6 @@ const JobCard = ({ job, onToggleSave, loading }) => {
 
           <div className="flex flex-col items-end gap-1">
             <Skeleton className="w-20 h-5 rounded-md" />
-            <Skeleton className="w-5 h-5 rounded-md" />
           </div>
         </div>
 
@@ -84,14 +80,6 @@ const JobCard = ({ job, onToggleSave, loading }) => {
           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium text-brand whitespace-nowrap">
             ${formatSalary(job.salary_range || job.formattedSalary)}/year
           </span>
-          {session && (
-            <button 
-              onClick={handleSave}
-              className={`p-1 rounded-md cursor-pointer ${job.is_saved ? 'text-brand' : 'text-muted-foreground'}`}
-            >
-              <Bookmark className={`w-4 h-4 ${job.is_saved ? 'fill-brand' : ''}`} />
-            </button>
-          )}
         </div>
       </div>
 
@@ -121,14 +109,13 @@ const JobCard = ({ job, onToggleSave, loading }) => {
           {formatRelativeTime(job?.created_at)}
         </div>
 
-        {session && (
+        {session && isRecruiter && (
           <Button 
             size="xl" 
             className="h-8 px-3 text-sm bg-brand text-white hover:bg-brand/70 w-[55%]"
             onClick={handleViewJob}
-            disabled={job.is_applied}
           >
-            {job.is_applied ? 'Applied' : 'Apply'}
+            Candidates
           </Button>
         )}
       </div>
@@ -136,4 +123,4 @@ const JobCard = ({ job, onToggleSave, loading }) => {
   );
 };
 
-export default JobCard;
+export default JobListingCard;
