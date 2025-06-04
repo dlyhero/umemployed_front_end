@@ -29,7 +29,7 @@ export default function LoginForm() {
                 if (user?.has_resume) {
                     router.push('/applicant/dashboard');
                 } else {
-                    router.push('/upload-resume');
+                    router.push('/applicant/upload-resume');
                 }
                 break;
             case 'recruiter':
