@@ -185,11 +185,11 @@ export default function EnhancedResumePage({ params }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className="mt-5 md:mt-10 max-w-6xl mx-auto px-4 py-8 space-y-6">
       {/* Header with title and upgrade button */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Enhance Resume Based on Your Shortlisted Jobs</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Enhance Resume <br/> Based on Your Shortlisted Jobs</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {filteredJobs.length} {filteredJobs.length === 1 ? 'opportunity' : 'opportunities'} found
           </p>
