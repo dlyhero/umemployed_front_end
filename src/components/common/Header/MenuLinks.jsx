@@ -161,7 +161,7 @@ export function MenuLinks() {
 
       {session && (
         <Link
-          href="/contact"
+          href="/applicant/resume-enhancer"
           className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/applicant/shortlistedJobs') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'}`}
         >
           <Bookmark className="w-5 h-5" />
