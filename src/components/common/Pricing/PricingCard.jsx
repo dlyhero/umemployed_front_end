@@ -92,7 +92,7 @@ const PricingCard = ({ title, monthlyPrice, description, features, actionLabel, 
             onClick={onAction}
             disabled={isLoading || isActive}
           >
-            {isLoading ? 'Processing...' : isActive ? 'Active Plan' : actionLabel}
+            {isLoading ? 'Processing...' : isActive ? 'Current Plan' : actionLabel}
           </Button>
         </CardFooter>
       </Card>

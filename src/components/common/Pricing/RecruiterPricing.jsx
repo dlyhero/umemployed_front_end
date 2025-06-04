@@ -23,39 +23,38 @@ const PricingHeader = ({ title, subtitle }) => (
 
 const RecruiterPricing = () => {
   const [loadingTier, setLoadingTier] = useState(null); // Track which tier button is loading
-  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null); // Track subscription status
   const scrollRef = useRef(null);
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log('Session:', session);
-    console.log('Status:', status);
     if (scrollRef.current) {
       const cardWidth = 256;
       const containerWidth = scrollRef.current.offsetWidth;
       const scrollPosition = cardWidth - (containerWidth - cardWidth) / 2;
       scrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
     }
-  }, [session, status]);
+  }, []);
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
       if (status === 'authenticated' && session?.user?.user_id && session?.accessToken) {
         try {
-          console.log('Fetching subscription status for user:', session.user.user_id);
           const statusResponse = await checkSubscriptionStatus(
             session.user.user_id,
-            'recruiter', // Lowercase
+            'recruiter',
             session.accessToken
           );
-          console.log('Subscription status response:', statusResponse);
-          setSubscriptionStatus(statusResponse);
+          // If no active subscription or tier is 'basic', set to null to indicate default plan
+          if (!statusResponse.has_active_subscription || statusResponse.tier.toLowerCase() === 'basic') {
+            setSubscriptionStatus(null);
+          } else {
+            setSubscriptionStatus(statusResponse);
+          }
         } catch (error) {
           console.error('Failed to fetch subscription status:', error);
           toast.error('Failed to check subscription status');
         }
-      } else {
-        console.log('Cannot fetch subscription status - Session:', session, 'Status:', status);
       }
     };
     fetchSubscriptionStatus();
@@ -63,29 +62,31 @@ const RecruiterPricing = () => {
 
   const handleSubscribe = useCallback(async (tier) => {
     if (status !== 'authenticated' || !session?.user?.user_id || !session?.accessToken) {
-      console.log('Subscription attempt failed - Session:', session, 'Status:', status);
       toast.error('Please sign in to subscribe.');
+      return;
+    }
+
+    // Handle Basic plan as default, non-subscription plan
+    if (tier === 'basic') {
+      toast.success('Basic plan selected. No subscription required.');
+      setSubscriptionStatus(null); // Reset subscription status for Basic plan
       return;
     }
 
     setLoadingTier(tier);
     try {
-      console.log('Checking subscription status before subscribing:', session.user.user_id);
       const statusResponse = await checkSubscriptionStatus(
         session.user.user_id,
-        'recruiter', // Lowercase
+        'recruiter',
         session.accessToken
       );
 
-      if (statusResponse.has_active_subscription) {
+      if (statusResponse.has_active_subscription && statusResponse.tier.toLowerCase() !== 'basic') {
         toast.error('You already have an active subscription.');
         return;
       }
 
-      console.log('Creating subscription for tier:', tier);
-      const sessionId = await subscribeToPlan(tier, 'recruiter', session.accessToken); // Lowercase user_type
-
-      console.log('Redirecting to Stripe Checkout with sessionId:', sessionId);
+      const sessionId = await subscribeToPlan(tier, 'recruiter', session.accessToken);
       const stripe = await getStripe();
       const { error } = await stripe.redirectToCheckout({ sessionId });
 
@@ -94,8 +95,7 @@ const RecruiterPricing = () => {
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      const errorMessage = error.message || 'Failed to process subscription. Please try again.';
-      toast.error(errorMessage);
+      toast.error(error.message || 'Failed to process subscription. Please try again.');
     } finally {
       setLoadingTier(null);
     }
@@ -103,21 +103,18 @@ const RecruiterPricing = () => {
 
   const handleCancelSubscription = useCallback(async () => {
     if (status !== 'authenticated' || !session?.accessToken) {
-      console.log('Cancel attempt failed - Session:', session, 'Status:', status);
       toast.error('Please sign in to cancel your subscription.');
       return;
     }
 
     setLoadingTier('cancel');
     try {
-      console.log('Canceling subscription for user:', session.user.user_id);
-      await cancelSubscription('recruiter', session.accessToken); // Lowercase user_type
+      await cancelSubscription('recruiter', session.accessToken);
       toast.success('Subscription canceled successfully.');
-      setSubscriptionStatus(null);
+      setSubscriptionStatus(null); // Reset to default (Basic) plan
     } catch (error) {
       console.error('Cancel subscription error:', error);
-      const errorMessage = error.message || 'Failed to cancel subscription';
-      toast.error(errorMessage);
+      toast.error(error.message || 'Failed to cancel subscription');
     } finally {
       setLoadingTier(null);
     }
@@ -171,7 +168,7 @@ const RecruiterPricing = () => {
           },
           {
             title: 'Standard',
-            monthlyPrice: 25,
+            monthlyPrice: 10,
             description: 'Ideal for small hiring teams',
             features: [
               { text: 'Post 5 jobs per day', available: true },
@@ -214,7 +211,7 @@ const RecruiterPricing = () => {
               actionLabel={plan.title === 'Custom' ? 'Contact Sales' : 'Get Started'}
               onAction={() => plan.title !== 'Custom' && handleSubscribe(plan.title.toLowerCase())}
               isLoading={loadingTier === plan.title.toLowerCase()}
-              isActive={subscriptionStatus?.has_active_subscription && subscriptionStatus.tier.toLowerCase() === plan.title.toLowerCase()}
+              isActive={subscriptionStatus?.tier.toLowerCase() === plan.title.toLowerCase()}
             />
           </div>
         ))}
