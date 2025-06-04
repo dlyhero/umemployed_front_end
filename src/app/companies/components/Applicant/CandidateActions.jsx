@@ -1,10 +1,10 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Archive, Bookmark, MessageSquare, Star, Calendar, Loader2 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { Bookmark, MessageSquare, Star, Calendar, Loader2 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 const CandidateActions = ({
@@ -13,12 +13,11 @@ const CandidateActions = ({
   isShortlisted = false,
   handleViewDetails = () => {},
   handleShortlist = () => {},
-  handleUnshortlist = () => {},
   handleEndorse = () => {},
   handleSchedule = () => {},
   handleGiveEndorsement = () => {},
+  handleMessage = () => {},
   isShortlistLoading = false,
-  isUnshortlistLoading = false,
   isEndorseLoading = false,
   isScheduleLoading = false,
   isGiveEndorsementLoading = false,
@@ -26,124 +25,60 @@ const CandidateActions = ({
   isAuthenticated = false,
   jobId = '',
   companyId = '',
-  accessToken = '', // Kept as fallback, though session.accessToken is preferred
+  accessToken = '',
 }) => {
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: session } = useSession();
   const userId = candidate.user_id || '';
-  const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api';
-  const [isUnshortlistButtonLoading, setIsUnshortlistButtonLoading] = useState(false);
-
-  const handleUnshortlistAction = async (userId) => {
-    if (!companyId || !jobId || !userId) {
-      toast.error('Missing company, job, or user information');
-      return;
-    }
-
-    if (sessionStatus !== 'authenticated' || !session?.accessToken) {
-      toast.error('Please sign in to unshortlist a candidate');
-      return;
-    }
-
-    setIsUnshortlistButtonLoading(true);
-    try {
-      console.log('Unshortlist request:', { companyId, jobId, candidate_id: userId, accessToken: session.accessToken });
-      const response = await fetch(`${baseUrl}/company/company/${companyId}/job/${jobId}/unshortlist/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify({ candidate_id: userId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 400) {
-          throw new Error(errorData.message || 'Invalid request. Please check the candidate or job details.');
-        } else if (response.status === 404) {
-          throw new Error(errorData.message || 'Job or candidate not found.');
-        } else {
-          throw new Error(errorData.message || `Failed to unshortlist candidate: ${response.status}`);
-        }
-      }
-
-      toast.success('Candidate unshortlisted successfully');
-      handleUnshortlist(userId);
-    } catch (error) {
-      console.error('Error unshortlisting candidate:', error);
-      toast.error(error.message || 'Failed to unshortlist candidate. Please try again.');
-    } finally {
-      setIsUnshortlistButtonLoading(false);
-    }
-  };
 
   return (
     <>
       <Toaster />
-      <div className="flex md:hidden flex-row flex-nowrap gap-2 w-full">
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Archive className="w-5 h-5" />
-        </Button>
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Bookmark className="w-5 h-5" />
-        </Button>
+      <div className="grid grid-cols-2 gap-3 w-full">
         {activeTab === 'shortlist' ? (
           <>
             <Button
               variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
+              size="sm"
+              className="w-full border-brand text-brand hover:bg-brand/10 transition-colors"
+              onClick={() => handleMessage(userId)}
               disabled={isMessageLoading || !isAuthenticated}
             >
               {isMessageLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <MessageSquare className="w-5 h-5 mr-1" />
+                <MessageSquare className="w-4 h-4 mr-2" />
               )}
               Message
             </Button>
             <Button
-              className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-              disabled={isEndorseLoading || !isAuthenticated}
+              variant="outline"
+              size="sm"
+              className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
-              {isEndorseLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                <Star className="w-5 h-5 mr-1" />
-              )}
-              See Endorsements
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save
             </Button>
             <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand text-white hover:bg-brand/90 transition-colors"
               onClick={() => handleSchedule(userId)}
               disabled={isScheduleLoading || !isAuthenticated}
             >
               {isScheduleLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Calendar className="w-5 h-5 mr-1" />
+                <Calendar className="w-4 h-4 mr-2" />
               )}
               Schedule Interview
             </Button>
             <Button
-              className="flex-1 bg-red-500 text-white hover:bg-red-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleUnshortlistAction(userId)}
-              disabled={isUnshortlistLoading || isUnshortlistButtonLoading || !isAuthenticated}
-            >
-              {isUnshortlistButtonLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                'Unshortlist'
-              )}
-            </Button>
-            <Button
-              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand/80 text-white hover:bg-brand transition-colors"
               onClick={() => handleGiveEndorsement(userId)}
               disabled={isGiveEndorsementLoading || !isAuthenticated}
             >
               {isGiveEndorsementLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 'Give Endorsement'
               )}
@@ -153,174 +88,77 @@ const CandidateActions = ({
           <>
             <Button
               variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
+              size="sm"
+              className="w-full border-brand text-brand hover:bg-brand/10 transition-colors"
+              onClick={() => handleMessage(userId)}
               disabled={isMessageLoading || !isAuthenticated}
             >
               {isMessageLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <MessageSquare className="w-5 h-5 mr-1" />
+                <MessageSquare className="w-4 h-4 mr-2" />
               )}
               Message
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save
+            </Button>
             {isShortlisted ? (
               <Button
-                className="flex-1 bg-gray-400 text-white cursor-not-allowed min-w-0 px-4 py-2 text-sm truncate"
+                size="sm"
+                className="w-full bg-gray-400 text-white cursor-not-allowed"
                 disabled
               >
                 Shortlisted
               </Button>
             ) : (
               <Button
-                className="flex-1 bg-green-500 text-white hover:bg-green-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+                size="sm"
+                className="w-full bg-green-500 text-white hover:bg-green-600 transition-colors"
                 onClick={() => handleShortlist(userId)}
                 disabled={isShortlistLoading || !isAuthenticated}
               >
                 {isShortlistLoading ? (
-                  <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  'Shortlist'
+                  <Star className="w-4 h-4 mr-2" />
                 )}
+                Shortlist
               </Button>
             )}
             <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand text-white hover:bg-brand/90 transition-colors"
               onClick={() => handleViewDetails(candidate)}
             >
               View Details
             </Button>
             <Button
-              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleGiveEndorsement(userId)}
-              disabled={isGiveEndorsementLoading || !isAuthenticated}
-            >
-              {isGiveEndorsementLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                'Give Endorsement'
-              )}
-            </Button>
-          </>
-        )}
-      </div>
-      <div className="hidden md:flex flex-row flex-nowrap gap-2 w-full">
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Archive className="w-5 h-5" />
-        </Button>
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Bookmark className="w-5 h-5" />
-        </Button>
-        {activeTab === 'shortlist' ? (
-          <>
-            <Button
-              variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-              disabled={isMessageLoading || !isAuthenticated}
-            >
-              {isMessageLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                <MessageSquare className="w-5 h-5 mr-1" />
-              )}
-              Message
-            </Button>
-            <Button
-              className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
               onClick={() => handleEndorse(userId)}
               disabled={isEndorseLoading || !isAuthenticated}
             >
               {isEndorseLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Star className="w-5 h-5 mr-1" />
+                <Star className="w-4 h-4 mr-2" />
               )}
               See Endorsements
             </Button>
             <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleSchedule(userId)}
-              disabled={isScheduleLoading || !isAuthenticated}
-            >
-              {isScheduleLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                <Calendar className="w-5 h-5 mr-1" />
-              )}
-              Schedule Interview
-            </Button>
-            <Button
-              className="flex-1 bg-red-500 text-white hover:bg-red-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleUnshortlistAction(userId)}
-              disabled={isUnshortlistLoading || isUnshortlistButtonLoading || !isAuthenticated}
-            >
-              {isUnshortlistButtonLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                'Unshortlist'
-              )}
-            </Button>
-            <Button
-              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand/80 text-white hover:bg-brand transition-colors"
               onClick={() => handleGiveEndorsement(userId)}
               disabled={isGiveEndorsementLoading || !isAuthenticated}
             >
               {isGiveEndorsementLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                'Give Endorsement'
-              )}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-              disabled={isMessageLoading || !isAuthenticated}
-            >
-              {isMessageLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-              ) : (
-                <MessageSquare className="w-5 h-5 mr-1" />
-              )}
-              Message
-            </Button>
-            {isShortlisted ? (
-              <Button
-                className="flex-1 bg-gray-400 text-white cursor-not-allowed min-w-0 px-4 py-2 text-sm truncate"
-                disabled
-              >
-                Shortlisted
-              </Button>
-            ) : (
-              <Button
-                className="flex-1 bg-green-500 text-white hover:bg-green-600 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-                onClick={() => handleShortlist(userId)}
-                disabled={isShortlistLoading || !isAuthenticated}
-              >
-                {isShortlistLoading ? (
-                  <Loader2 className="w-5 h-5 mr-1 animate-spin" />
-                ) : (
-                  'Shortlist'
-                )}
-              </Button>
-            )}
-            <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleViewDetails(candidate)}
-            >
-              View Details
-            </Button>
-            <Button
-              className="flex-1 bg-brand/600 text-white hover:bg-brand/700 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleGiveEndorsement(userId)}
-              disabled={isGiveEndorsementLoading || !isAuthenticated}
-            >
-              {isGiveEndorsementLoading ? (
-                <Loader2 className="w-5 h-5 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 'Give Endorsement'
               )}

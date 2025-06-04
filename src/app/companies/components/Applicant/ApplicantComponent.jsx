@@ -12,6 +12,7 @@ import ApplicationList from './ApplicationList';
 import CandidateModal from './CandidateModal';
 import InterviewModal from './InterviewModal';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
+import baseUrl from '../../../api/baseUrl';
 
 const ApplicantComponent = ({ type = 'job' }) => {
   const { companyId, jobId } = useParams();
@@ -32,34 +33,26 @@ const ApplicantComponent = ({ type = 'job' }) => {
 
   const handleTabChange = (tab) => {
     console.log('handleTabChange: Switching to tab:', tab);
-    if (tab === 'shortlist') {
-      router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
-    } else if (tab === 'archived') {
-      router.push(`/companies/${companyId}/jobs/${jobId}/archived`);
-    } else {
-      setActiveTab(tab);
-    }
+    setActiveTab(tab);
   };
 
   const handleViewDetails = (candidate) => {
     if (!candidate || !candidate.profile) {
       console.warn('handleViewDetails: Invalid candidate:', candidate);
+      toast.error('Invalid candidate data.');
       return;
     }
-    console.log('handleViewDetails: Viewing details for candidateId:', candidate.user_id);
     setSelectedCandidate(candidate);
     setIsModalOpen(true);
   };
 
   const handleSchedule = (candidateId) => {
-    console.log('handleSchedule: Starting for candidateId:', candidateId);
     setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], schedule: true } }));
     const candidate = applications.find((app) => app.user_id === candidateId);
     if (candidate) {
       setSelectedCandidate(candidate);
       setIsInterviewModalOpen(true);
     } else {
-      console.warn('handleSchedule: Candidate not found for candidateId:', candidateId);
       toast.error('Candidate not found.');
     }
     setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], schedule: false } }));
@@ -67,17 +60,14 @@ const ApplicantComponent = ({ type = 'job' }) => {
 
   const handleShortlist = async (candidateId) => {
     if (!session?.accessToken) {
-      console.warn('handleShortlist: Unauthorized, no access token for candidateId:', candidateId);
-      toast.error('Unauthorized: No access token available');
+      toast.error('Unauthorized: Please sign in.');
       return;
     }
 
-    console.log('handleShortlist: Starting for candidateId:', candidateId);
     setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], shortlist: true } }));
     try {
-      console.log('handleShortlist: Sending POST request to shortlist endpoint');
       const response = await fetch(
-        `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company/${companyId}/job/${jobId}/shortlist/`,
+        `${baseUrl}/company/company/${companyId}/job/${jobId}/shortlist/`,
         {
           method: 'POST',
           headers: {
@@ -88,16 +78,9 @@ const ApplicantComponent = ({ type = 'job' }) => {
         }
       );
 
-      console.log('handleShortlist: Response status:', response.status, 'for candidateId:', candidateId);
       if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { message: `Server error: ${response.statusText || 'Unknown error'}` };
-        }
-        console.error('handleShortlist: Error:', errorData, 'for candidateId:', candidateId);
-        throw new Error(`Failed to shortlist candidate: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to shortlist candidate.');
       }
 
       toast.success('Candidate shortlisted successfully!');
@@ -106,35 +89,26 @@ const ApplicantComponent = ({ type = 'job' }) => {
           app.user_id === candidateId ? { ...app, isShortlisted: true } : app
         )
       );
-      console.log('handleShortlist: Navigating to shortlist page for candidateId:', candidateId);
-      router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
     } catch (err) {
-      console.error('handleShortlist: Error:', {
-        message: err.message,
-        candidateId,
-      });
+      console.error('handleShortlist: Error:', err);
       toast.error(err.message || 'Failed to shortlist candidate.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], shortlist: false } }));
-      console.log('handleShortlist: Completed for candidateId:', candidateId);
     }
   };
 
   const handleUnshortlist = async (candidateId) => {
     if (!session?.accessToken) {
-      console.warn('handleUnshortlist: Unauthorized, no access token for candidateId:', candidateId);
-      toast.error('Unauthorized: No access token available');
+      toast.error('Unauthorized: Please sign in.');
       return;
     }
 
-    console.log('handleUnshortlist: Starting for candidateId:', candidateId, 'accessToken:', session.accessToken);
     setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], unshortlist: true } }));
     try {
-      console.log('handleUnshortlist: Sending DELETE request to shortlist endpoint for candidateId:', candidateId);
       const response = await fetch(
-        `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company/${companyId}/job/${jobId}/shortlist/`,
+        `${baseUrl}/company/company/${companyId}/job/${jobId}/unshortlist/`,
         {
-          method: 'DELETE',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.accessToken}`,
@@ -143,38 +117,22 @@ const ApplicantComponent = ({ type = 'job' }) => {
         }
       );
 
-      console.log('handleUnshortlist: Response received, status:', response.status, 'for candidateId:', candidateId);
       if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { message: `Server error: ${response.statusText || 'Unknown error'}` };
-        }
-        console.error('handleUnshortlist: Error response:', errorData, 'status:', response.status, 'for candidateId:', candidateId);
-        throw new Error(`Failed to unshortlist candidate: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to unshortlist candidate.');
       }
 
-      console.log('handleUnshortlist: Successfully unshortlisted candidateId:', candidateId);
       toast.success('Candidate removed from shortlist successfully!');
       setApplications((prev) =>
         prev.map((app) =>
           app.user_id === candidateId ? { ...app, isShortlisted: false } : app
         )
       );
-      console.log('handleUnshortlist: Navigating to shortlist page for candidateId:', candidateId);
-      router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
     } catch (err) {
-      console.error('handleUnshortlist: Error:', {
-        message: err.message,
-        candidateId,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
+      console.error('handleUnshortlist: Error:', err);
       toast.error(err.message || 'Failed to unshortlist candidate.');
     } finally {
       setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], unshortlist: false } }));
-      console.log('handleUnshortlist: Completed for candidateId:', candidateId);
     }
   };
 
