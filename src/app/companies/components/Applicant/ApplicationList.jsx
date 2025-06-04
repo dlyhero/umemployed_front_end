@@ -122,7 +122,7 @@ const ApplicationList = ({
                     <p className="text-gray-500">
                       No shortlisted candidates.{' '}
                       <a
-                        href={`/companies/${companyId}/jobs/${jobId}/candidates`}
+                        href={`/companies/${companyId}/jobs/${jobId}/applications`}
                         className="text-brand/50 underline hover:text-brand/70"
                       >
                         View candidates

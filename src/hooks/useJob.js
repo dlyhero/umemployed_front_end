@@ -151,7 +151,7 @@ export const useJobs = () => {
    } finally {
      setLoading(false);
    }
-   },[])
+   }, [])
 
   const fetchData = useCallback(
     async () => {
@@ -194,7 +194,7 @@ export const useJobs = () => {
       } finally {
         setLoading(false);
       }
-    }, [session?.accessToken, session?.token]
+    }, [session?.accessToken]
   )
 
   useEffect(() => {

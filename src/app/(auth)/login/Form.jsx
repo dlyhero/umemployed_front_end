@@ -27,21 +27,21 @@ export default function LoginForm() {
         switch(user?.role) {
             case 'job_seeker':
                 if (user?.has_resume) {
-                    router.replace('/applicant/dashboard');
+                    router.push('/applicant/dashboard');
                 } else {
-                    router.replace('/upload-resume');
+                    router.push('/upload-resume');
                 }
                 break;
             case 'recruiter':
                 if (user?.has_company && user?.company_id) {
-                    router.replace(`/companies/${user.company_id}/dashboard`);
+                    router.push(`/companies/${user.company_id}/dashboard`);
                 } else {
-                    router.replace('/company/create');
+                    router.push('/company/create');
                 }
                 break;
             case 'none':
             default:
-                router.replace('/select-role');
+                router.push('/select-role');
         }
     };
 

@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import JobCard from '../../../jobs/_components/JobCard';
+import JobListingCard from './JobListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import baseUrl from '../../../api/baseUrl';
 
 const RecentJobListings = ({ companyData }) => {
   const { companyId } = useParams();
@@ -38,7 +39,7 @@ const RecentJobListings = ({ companyData }) => {
 
         // Step 1: Fetch the list of job IDs and titles
         const response = await fetch(
-          `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company/${companyId}/jobs`,
+          `${baseUrl}/company/company/${companyId}/jobs`,
           {
             method: 'GET',
             headers: {
@@ -60,7 +61,7 @@ const RecentJobListings = ({ companyData }) => {
         // Step 2: Fetch full details for each job
         const jobDetailsPromises = jobList.map(async (job) => {
           const jobResponse = await fetch(
-            `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/job/jobs/${job.id}/`,
+            `${baseUrl}/job/jobs/${job.id}/`,
             {
               method: 'GET',
               headers: {
@@ -126,10 +127,9 @@ const RecentJobListings = ({ companyData }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {jobs.map((job) => (
-        <JobCard
+        <JobListingCard
           key={job.id}
           job={job}
-          isRecruiter={true}
         />
       ))}
     </div>

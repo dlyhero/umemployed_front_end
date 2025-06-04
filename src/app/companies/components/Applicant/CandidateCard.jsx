@@ -1,24 +1,27 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Loader2, Star } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import CandidateProfile from './CandidateProfile';
 import CandidateActions from './CandidateActions';
-import CandidateDetails from './CandidateDetails';
 import PaymentModal from '../../../recruiter/PaymentModal/PaymentModal';
 import { checkPaymentStatus, initiateStripePayment, getEndorsements } from '@/lib/api/endorsements';
-import { useRouter, useParams } from 'next/navigation';
-import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import baseUrl from '../../../api/baseUrl';
 
 const CandidateCard = ({
   candidate = {},
-  type = 'company',
   handleViewDetails = () => {},
   handleShortlist = () => {},
   handleUnshortlist = () => {},
-  handleEndorse = () => {},
   handleSchedule = () => {},
   activeTab = '',
   isShortlisted = false,
@@ -34,185 +37,275 @@ const CandidateCard = ({
   const [isEndorseLoading, setIsEndorseLoading] = useState(false);
   const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [isGiveEndorsementLoading, setIsGiveEndorsementLoading] = useState(false);
+  const [isUnshortlistLocalLoading, setIsUnshortlistLocalLoading] = useState(false);
   const [stripeLoaded, setStripeLoaded] = useState(false);
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log('CandidateCard: Mounted, candidate:', candidate.user_id, 'path:', window.location.pathname);
+    console.log('CandidateCard: Mounted, candidate:', candidate.user_id);
     return () => {
-      console.log('CandidateCard: Unmounted, candidate:', candidate.user_id, 'last path:', window.location.pathname);
+      console.log('CandidateCard: Unmounted, candidate:', candidate.user_id);
     };
   }, [candidate.user_id]);
 
   if (!candidate || !candidate.profile) {
     console.error('CandidateCard: Invalid candidate data:', candidate);
-    return <div>Error: Candidate data is missing</div>;
+    toast.error('Candidate data is missing');
+    return <div className="text-red-500 text-center py-4">Error: Candidate data is missing</div>;
   }
 
   const onEndorse = async (id) => {
     if (status !== 'authenticated') {
-      console.log('onEndorse: User not authenticated, redirecting to signin for candidateId:', id);
       toast.error('Please sign in to view endorsements');
       router.push('/auth/signin');
       return;
     }
 
-    console.log('onEndorse: Starting for candidateId:', id, 'accessToken:', accessToken);
     setIsEndorseLoading(true);
     try {
-      console.log('onEndorse: Checking payment status for candidateId:', id);
       const { has_paid } = await checkPaymentStatus(id, accessToken);
-      console.log('onEndorse: Payment status received:', has_paid, 'for candidateId:', id);
       if (has_paid) {
-        console.log('onEndorse: Payment verified, fetching endorsements for candidateId:', id);
         const endorsements = await getEndorsements(id, accessToken);
-        console.log('onEndorse: Endorsements fetched:', endorsements, 'for candidateId:', id);
+        toast.success('Navigating to endorsements');
         router.push(`/companies/candidate/${id}/endorsements`);
       } else {
-        console.log('onEndorse: Payment required, opening payment modal for candidateId:', id);
         setCandidateId(id);
         setIsPaymentModalOpen(true);
       }
     } catch (error) {
-      console.error('onEndorse: Error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        candidateId: id,
-      });
-      toast.error(error.message || 'Failed to check payment status. Please try again or contact support.');
+      console.error('onEndorse: Error:', error);
+      toast.error(error.message || 'Failed to check payment status');
     } finally {
       setIsEndorseLoading(false);
-      console.log('onEndorse: Completed for candidateId:', id);
     }
   };
 
   const handlePayment = async () => {
     if (status !== 'authenticated') {
-      console.log('handlePayment: User not authenticated, redirecting to signin for candidateId:', candidateId);
       toast.error('Please sign in to proceed with payment');
       router.push('/auth/signin');
       return;
     }
 
     if (!stripeLoaded) {
-      console.log('handlePayment: Stripe.js not loaded for candidateId:', candidateId);
-      toast.error('Stripe.js is not loaded yet. Please try again.');
+      toast.error('Stripe.js is not loaded yet. Please try again');
       return;
     }
 
-    console.log('handlePayment: Initiating Stripe payment for candidateId:', candidateId);
     try {
-      console.log('handlePayment: Calling initiateStripePayment with accessToken:', accessToken);
       const { session_id } = await initiateStripePayment(candidateId, accessToken);
-      console.log('handlePayment: Received Stripe session_id:', session_id, 'for candidateId:', candidateId);
-
       const stripe = window.Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
       if (!stripe) {
-        console.error('handlePayment: Stripe.js not loaded for candidateId:', candidateId);
         throw new Error('Stripe.js not loaded');
       }
-      console.log('handlePayment: Redirecting to Stripe Checkout with session_id:', session_id);
-      const { error } = await stripe.redirectToCheckout({
-        sessionId: session_id,
-      });
+      const { error } = await stripe.redirectToCheckout({ sessionId: session_id });
       if (error) {
-        console.error('handlePayment: Stripe redirect error:', error, 'for candidateId:', candidateId);
         throw new Error(error.message);
       }
-      console.log('handlePayment: Payment modal closing after redirect for candidateId:', candidateId);
+      toast.success('Redirecting to payment');
       setIsPaymentModalOpen(false);
     } catch (error) {
-      console.error('handlePayment: Error:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        candidateId,
-      });
-      toast.error(
-        error.response?.data?.error ||
-        error.message ||
-        'Failed to initiate Stripe payment. Please try again or contact support.'
-      );
+      console.error('handlePayment: Error:', error);
+      toast.error(error.message || 'Failed to initiate payment');
     }
   };
 
   const handleGiveEndorsement = (id) => {
     if (status !== 'authenticated') {
-      console.log('handleGiveEndorsement: User not authenticated, redirecting to signin for candidateId:', id);
       toast.error('Please sign in to give an endorsement');
       router.push('/auth/signin');
       return;
     }
-    console.log('handleGiveEndorsement: Starting navigation to rate-candidate for candidateId:', id);
     setIsGiveEndorsementLoading(true);
+    toast.success('Navigating to endorsement form');
     router.push(`/companies/rate-candidate/${id}`);
-    setTimeout(() => {
-      setIsGiveEndorsementLoading(false);
-      console.log('handleGiveEndorsement: Loading state reset for candidateId:', id);
-    }, 1000);
+    setTimeout(() => setIsGiveEndorsementLoading(false), 1000);
   };
 
-  const handleMessage = (id) => {
-    console.log('handleMessage: Starting for candidateId:', id);
+  const handleMessage = async (id) => {
+    if (status !== 'authenticated') {
+      toast.error('Please sign in to send a message');
+      router.push('/auth/signin');
+      return;
+    }
+
     setIsMessageLoading(true);
-    console.log('handleMessage: Message action not implemented for candidateId:', id);
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${baseUrl}/messages/conversations/start/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ recipient_id: id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start conversation');
+      }
+
+      const { conversation_id } = await response.json();
+      toast.success('Conversation started');
+      router.push(`/messages/conversations/${conversation_id}`);
+    } catch (error) {
+      console.error('handleMessage: Error:', error);
+      toast.error(error.message || 'Failed to start conversation');
+    } finally {
       setIsMessageLoading(false);
-      console.log('handleMessage: Loading state reset for candidateId:', id);
-    }, 1000);
+    }
+  };
+
+  const handleUnshortlistAction = async (userId) => {
+    if (!companyId || !jobId || !userId) {
+      toast.error('Missing company, job, or user information');
+      console.error('handleUnshortlistAction: Missing params', { companyId, jobId, userId });
+      return;
+    }
+
+    if (!session?.accessToken) {
+      toast.error('Please sign in to unshortlist a candidate');
+      router.push('/auth/signin');
+      return;
+    }
+
+    setIsUnshortlistLocalLoading(true);
+    try {
+      const response = await fetch(`${baseUrl}/company/company/${companyId}/job/${jobId}/unshortlist/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify({ candidate_id: userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('handleUnshortlistAction: API Error', errorData);
+        throw new Error(errorData.message || `Failed to unshortlist candidate (Status: ${response.status})`);
+      }
+
+      toast.success('Candidate unshortlisted successfully');
+      handleUnshortlist(userId);
+    } catch (error) {
+      console.error('handleUnshortlistAction: Error:', error);
+      toast.error(error.message || 'Failed to unshortlist candidate');
+    } finally {
+      setIsUnshortlistLocalLoading(false);
+    }
   };
 
   return (
     <>
+      <Toaster />
       <Script
         src="https://js.stripe.com/v3/"
         strategy="lazyOnload"
-        onLoad={() => {
-          console.log('Stripe.js: Loaded successfully');
-          setStripeLoaded(true);
-        }}
+        onLoad={() => setStripeLoaded(true)}
       />
-      <Card className="hover:bg-gray-50 transition-colors border">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex flex-col gap-4 md:w-[50%] lg:w-[28%]">
+      <Card className="hover:shadow-xl transition-shadow border border-gray-200 rounded-xl bg-white">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Profile Section */}
+            <div className="md:col-span-3">
               <CandidateProfile candidate={candidate} />
-              <div className="flex flex-col gap-2">
-                <CandidateActions
-                  candidate={candidate}
-                  activeTab={activeTab}
-                  isShortlisted={isShortlisted}
-                  handleViewDetails={handleViewDetails}
-                  handleShortlist={handleShortlist}
-                  handleUnshortlist={handleUnshortlist}
-                  handleEndorse={onEndorse}
-                  handleSchedule={handleSchedule}
-                  handleGiveEndorsement={handleGiveEndorsement}
-                  isShortlistLoading={isShortlistLoading}
-                  isUnshortlistLoading={isUnshortlistLoading}
-                  isEndorseLoading={isEndorseLoading}
-                  isScheduleLoading={isScheduleLoading}
-                  isGiveEndorsementLoading={isGiveEndorsementLoading}
-                  isMessageLoading={isMessageLoading}
-                  isAuthenticated={status === 'authenticated'}
-                  jobId={jobId}
-                  companyId={companyId}
-                  accessToken={accessToken}
-                />
+            </div>
+            {/* Metrics Section */}
+            <div className="md:col-span-5 space-y-4">
+              <div className="space-y-2">
+                <span className="text-lg font-semibold text-green-600 truncate">
+                  {candidate.job.title || 'Unknown'}
+                </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Match Score:</span>
+                  <span className="font-medium">{Math.round(candidate.matchingPercentage)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-brand h-2 rounded-full"
+                    style={{ width: `${Math.round(candidate.matchingPercentage)}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Assessment Score:</span>
+                  <span className="font-medium">{candidate.quizScore}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{ width: `${candidate.quizScore}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm text-gray-600">
+                  Status: {candidate.status || 'Unknown'}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-base font-semibold text-gray-800">Qualifications</div>
+                <div className="flex flex-wrap gap-2">
+                  {candidate.profile.skills.slice(0, 3).map((skill, index) => (
+                    <Badge
+                      key={index}
+                      className="bg-brand/10 text-brand font-medium px-3 py-1"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                  {candidate.profile.skills.length > 3 && (
+                    <Badge className="bg-gray-100 text-gray-600 font-medium px-3 py-1">
+                      +{candidate.profile.skills.length - 3} more
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
-            <CandidateDetails candidate={candidate} type={type} />
+            {/* Actions Section */}
+            <div className="md:col-span-4 space-y-2">
+              <CandidateActions
+                candidate={candidate}
+                activeTab={activeTab}
+                isShortlisted={isShortlisted}
+                handleViewDetails={handleViewDetails}
+                handleShortlist={handleShortlist}
+                handleEndorse={onEndorse}
+                handleSchedule={handleSchedule}
+                handleGiveEndorsement={handleGiveEndorsement}
+                handleMessage={handleMessage}
+                isShortlistLoading={isShortlistLoading}
+                isEndorseLoading={isEndorseLoading}
+                isScheduleLoading={isScheduleLoading}
+                isGiveEndorsementLoading={isGiveEndorsementLoading}
+                isMessageLoading={isMessageLoading}
+                isAuthenticated={status === 'authenticated'}
+                jobId={jobId}
+                companyId={companyId}
+                accessToken={accessToken}
+              />
+              {isShortlisted && activeTab === 'shortlist' && (
+                <Button 
+                variant="destructive" 
+                size="sm" 
+                className="w-full"
+                onClick={() => handleUnshortlist(candidate.user_id)}
+                disabled={isShortlistLoading}
+              >
+                 {isShortlistLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Star className="w-4 h-4 mr-2" />
+                )}
+                UnShortlist
+              </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
       <PaymentModal
         isOpen={isPaymentModalOpen}
-        onClose={() => {
-          console.log('PaymentModal: Closed for candidateId:', candidateId);
-          setIsPaymentModalOpen(false);
-        }}
+        onClose={() => setIsPaymentModalOpen(false)}
         onSelectPayment={handlePayment}
       />
     </>

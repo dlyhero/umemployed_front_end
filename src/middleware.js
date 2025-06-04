@@ -65,6 +65,31 @@ export async function middleware(request) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Handle role-based access control for authenticated users
+  const userRole = token.role || token.user?.role; // Adjust based on your token structure
+  
+  // If user has a role (not "none") and tries to access select-role, redirect them away
+  if (pathname === '/select-role' && userRole && userRole !== 'none') {
+    // Redirect based on their role or to a default page
+    if (userRole === 'job_seeker') {
+      return NextResponse.redirect(new URL('/jobs', request.url));
+    } else if (userRole === 'recruiter') {
+      return NextResponse.redirect(new URL('/companies/listing', request.url));
+    } else {
+      // Default redirect for other roles
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
+
+  // If user has no role (role is "none") and tries to access protected routes other than onboarding,
+  // redirect them to select-role
+  if ((!userRole || userRole === 'none') && 
+      !matchesPattern(pathname, ONBOARDING_ROUTES) && 
+      !matchesPattern(pathname, PUBLIC_ROUTES) && 
+      !matchesPattern(pathname, AUTH_ROUTES)) {
+    return NextResponse.redirect(new URL('/select-role', request.url));
+  }
+
   return NextResponse.next();
 }
 
