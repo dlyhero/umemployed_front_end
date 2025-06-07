@@ -283,7 +283,7 @@ export default function EnhancedResumePage({ params }) {
               ? "When companies shortlist you for jobs, they'll appear here." 
               : "Try adjusting your filters to see more results."}
           </p>
-          <Button asChild size="sm">
+          <Button variant={`brand`} asChild size="sm">
             <Link href="/jobs">Browse Jobs</Link>
           </Button>
         </div>

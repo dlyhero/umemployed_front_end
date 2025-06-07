@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function ProfileHeader() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative overflow-hidden">
+    <div className="bg-white rounded-xl  border border-gray-200 p-6 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 opacity-10">
         <Sparkles className="w-24 h-24 text-brand" />
@@ -47,21 +47,7 @@ export function ProfileHeader() {
               Complete your profile to increase visibility by up to 80%
             </p>
             
-            {/* Progress bar */}
-            <div className="mt-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Profile Strength</span>
-                <span className="font-medium text-brand">75% Complete</span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: "75%" }}
-                  transition={{ duration: 1 }}
-                  className="h-2 rounded-full bg-gradient-to-r from-brand to-blue-400"
-                />
-              </div>
-            </div>
+          
           </motion.div>
         </div>
 

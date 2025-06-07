@@ -42,7 +42,7 @@ export const FileUpload = ({
                       error ? '#ef4444' : 
                       isComplete ? '#10b981' : '#e5e7eb'
         }}
-        className={`bg-white p-6 rounded-xl border-2 border-dashed transition-colors relative overflow-hidden shadow-md ${
+        className={`bg-white p-6 rounded-xl border-2 border-dashed transition-colors relative overflow-hidden  ${
           error ? 'border-red-500' : 
           isComplete ? 'border-green-500' : 'border-gray-300'
         }`}

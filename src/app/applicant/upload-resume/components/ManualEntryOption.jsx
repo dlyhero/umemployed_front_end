@@ -4,7 +4,7 @@ import { FileText, SkipForwardIcon } from "lucide-react";
 export const ManualEntryOption = () => (
   <motion.div 
     whileHover={{ y: -5 }}
-    className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 shadow-md relative overflow-hidden"
+    className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 relative overflow-hidden"
   >
     <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-200 rounded-full opacity-10"></div>
     <div className="relative z-10 flex flex-col h-full justify-between">
@@ -15,7 +15,7 @@ export const ManualEntryOption = () => (
       </div>
       <motion.a 
         whileTap={{ scale: 0.95 }}
-        href="/resume/update-resume/"
+        href="/applicant/update-profile"
         className="group flex items-center justify-between px-4 py-3 bg-white rounded-lg border border-blue-200 hover:border-blue-400 transition-colors"
       >
         <span className="font-medium text-brand">Enter details manually</span>
