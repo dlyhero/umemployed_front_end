@@ -3,7 +3,7 @@ import { BadgeCheck, Bell, Shield, HelpCircle } from "lucide-react";
 
 export function ProfileSidebar() {
   return (
-    <div className="bg-white rounded-lg shadow border border-gray-200 p-6 space-y-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
       <div>
         
         <p className="text-sm text-gray-500 mt-2">Complete your profile to increase visibility</p>

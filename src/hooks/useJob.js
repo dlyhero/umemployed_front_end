@@ -58,7 +58,7 @@ export const useJobs = () => {
     return typeMap[type] || type;
   };
 
-  const fetchJobs = useCallback( async () => {
+  const fetchJobs =  async () => {
     try {
      const api = axios.create({
        baseURL: baseUrl,
@@ -151,7 +151,7 @@ export const useJobs = () => {
    } finally {
      setLoading(false);
    }
-   }, [])
+   }
 
   const fetchData = useCallback(
     async () => {
