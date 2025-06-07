@@ -24,43 +24,6 @@ const JobCard = ({ job, onToggleSave, loading }) => {
     router.push(`/jobs/${job.id}`);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm h-full flex flex-col mx-2">
-        <div className="flex justify-between items-start gap-2 mb-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <Skeleton className="w-8 h-8 rounded-md" />
-            <div className="min-w-0">
-              <Skeleton className="w-28 h-4 mb-1" />
-              <Skeleton className="w-20 h-3" />
-            </div>
-          </div>
-
-          <div className="flex flex-col items-end gap-1">
-            <Skeleton className="w-20 h-5 rounded-md" />
-            <Skeleton className="w-5 h-5 rounded-md" />
-          </div>
-        </div>
-
-        <Skeleton className="w-full h-5 mb-2" />
-        
-        <div className="flex gap-2 mb-3">
-          <Skeleton className="w-16 h-5 rounded-md" />
-          <Skeleton className="w-12 h-5 rounded-md" />
-        </div>
-
-        <div className="flex-1 mb-2">
-          <Skeleton className="w-full h-[3.6rem] rounded-md" />
-        </div>
-
-        <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-          <Skeleton className="w-20 h-4" />
-          <Skeleton className="w-[55%] h-8 rounded-md" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <motion.div
       className="bg-white border border-gray-200 rounded-xl p-4 h-full flex flex-col mx-2 cursor-pointer"
