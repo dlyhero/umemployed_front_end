@@ -55,7 +55,6 @@ export default function AuthenticatedNav() {
         isActive={isProfileActive}
       />
 
-      <LogoutButton />
     </>
   );
 }

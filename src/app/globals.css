@@ -146,104 +146,85 @@ body {
   font-family: "Quicksand", sans-serif;
   font-weight: 400;
   background-color: white;
+  font-size: 17px; /* Slightly increased base size */
+  line-height: 1.5;
 }
 
-
-Button{
-  font-size: 15 !important 
+button {
+  font-size: 16px !important;
+  padding: 8px 16px;
 }
 
-Link{
-  font-size: 10px !important;
+a {
+  font-size: 12px !important;
 }
 
-/* Responsive font sizing - reduce font size on small screens */
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 640px) {
   html {
-    font-size: 14px; /* Base font size for small screens */
+    font-size: 15px;
   }
 
-  p,
-  span,
-  div,
-  li,
-  input,
-  textarea,
-  button {
-    font-size: 0.8rem; /* Further reduce for specific elements */
+  body {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  p, span, div, li, input, textarea, button {
+    font-size: 0.9rem; /* Slightly reduced from 1rem */
   }
 
   h1 {
-    font-size: 1.7rem;
+    font-size: 1.8rem; /* Reduced from 2rem */
   }
 
-  .Herotitle{
-    font-size: 1.7rem;
+  .Herotitle {
+    font-size: 1.8rem;
   }
 
-  .ctAtitle{
-    font-size: 1.2rem;
+  .ctAtitle {
+    font-size: 1.3rem; /* Reduced from 1.5rem */
   }
-  .heroName{
-    font-size: 1.7rem;
+
+  .heroName {
+    font-size: 1.8rem;
   }
 
   h2 {
-    font-size: 1.2rem;
+    font-size: 1.4rem; /* Reduced from 1.6rem */
   }
 
   h3 {
-    font-size: 1rem;
+    font-size: 1.1rem; /* Reduced from 1.3rem */
   }
 
-  .text-xs {
-    font-size: 0.7rem !important;
+  button {
+    font-size: 16px !important;
+    padding: 10px 20px;
   }
-
-  .text-sm {
-    font-size: 0.8rem !important;
-  }
-
-  .text-base {
-    font-size: 0.9rem !important;
-  }
-
-  .text-lg {
-    font-size: 1.1rem !important;
-  }
-
-  .text-xl {
-    font-size: 1.1rem !important;
-  }
-
-  .text-2xl {
-    font-size: 1.2rem !important;
-  }
-
-Button{
-  font-size: 15 !important 
-}
 }
 
-/* For very small screens, reduce even further */
 @media (max-width: 375px) {
   html {
-    font-size: 13px;
+    font-size: 14px;
   }
 
-  .text-xs {
-    font-size: 0.65rem !important;
+  body {
+    font-size: 14px;
   }
-
-  .text-sm {
-    font-size: 0.75rem !important;
-  }
-
-Button{
-  font-size: 14 !important 
 }
-}
-
 
 @layer base {
   * {

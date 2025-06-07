@@ -38,7 +38,7 @@ export function Logo() {
         viewBox="0 0 150 100" // Keep this fixed
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-[1em] h-[1em]" // This makes it scale with font-size
+        className="w-[4em] h-[4Sem]" // This makes it scale with font-size
         whileHover="hover"
         initial="initial"
         animate="animate"
