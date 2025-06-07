@@ -17,7 +17,7 @@ function Login() {
   return (
     <Suspense>
       <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="sm:flex-1 flex sm:items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-8">
