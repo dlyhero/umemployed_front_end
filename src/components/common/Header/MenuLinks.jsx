@@ -18,7 +18,8 @@ import {
   Users,
   Receipt,
   Loader2,
-  Bookmark
+  Bookmark,
+  RefreshCw
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -76,7 +77,9 @@ export function MenuLinks({ onLinkClick }) {
       { icon: <Briefcase className="w-5 h-5" />, label: 'Jobs', path: `/companies/${companyId}/jobs/listing` },
       { icon: <FileText className="w-5 h-5" />, label: 'Applications', path: `/companies/${companyId}/applications` },
       { icon: <BarChart2 className="w-5 h-5" />, label: 'Analytics', path: `/companies/${companyId}/analytics` },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/update` },
+      { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/settings` },
+      { icon: <RefreshCw className="w-5 h-5" />, label: 'Update', path: `/companies/${companyId}/update` },
+
     ];
 
     return (
@@ -97,14 +100,14 @@ export function MenuLinks({ onLinkClick }) {
             <span className="font-semibold">{item.label}</span>
           </Link>
         ))}
-        <Link
+        {/* <Link
           href="/post-job"
           onClick={onLinkClick} // Trigger close action
           className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/post-job') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'}`}
         >
           <PlusCircle className="w-5 h-5" />
           <span className="font-semibold">Post a Job</span>
-        </Link>
+        </Link> */}
         <button
           onClick={handleEndorsementClick}
           className={`flex items-center gap-3 p-2 rounded-lg ${isActive('/companies/related-users') ? 'bg-gray-100 text-brand' : 'hover:bg-gray-50 text-gray-600'} w-full text-left`}
