@@ -46,6 +46,24 @@ export default async function handler(req, res) {
       data: response.data,
     });
 
+    // Update session on the server
+    const sessionUpdateResponse = await fetch('http://localhost:3000/api/auth/session', {
+      method: 'POST',
+      headers: {
+Next: 'application/json',
+      },
+      body: JSON.stringify({
+        user: {
+          ...token.user,
+          role: req.body.role,
+        },
+      }),
+    });
+    console.log('[UpdateRoleAPI] Session update response:', {
+      status: sessionUpdateResponse.status,
+      data: await sessionUpdateResponse.json(),
+    });
+
     const redirectTo =
       req.body.role === 'recruiter' ? '/companies/create' : '/applicant/upload-resume';
     console.log('[UpdateRoleAPI] Returning response with redirect:', redirectTo);

@@ -1,3 +1,4 @@
+// src/app/(auth)/select-role/page.jsx
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,9 +48,16 @@ export default function SelectRolePage() {
       });
       console.log('[SelectRole] Session update result:', updatedSession);
 
+      // Force session refresh
+      console.log('[SelectRole] Forcing session refresh');
+      await fetch('/api/auth/session', { cache: 'no-store' });
+      const sessionResponse = await fetch('/api/auth/session', { cache: 'no-store' });
+      const sessionData = await sessionResponse.json();
+      console.log('[SelectRole] Refreshed session:', sessionData);
+
       if (data.redirectTo) {
         console.log('[SelectRole] Redirecting to:', data.redirectTo);
-        window.location.href = data.redirectTo;
+        window.location.href = data.redirectTo; // Use window.location.href for reliability
       } else {
         console.log('[SelectRole] No redirectTo provided, reloading page');
         window.location.reload();
@@ -82,16 +90,16 @@ export default function SelectRolePage() {
           ? '/applicant/dashboard'
           : '/applicant/upload-resume';
         console.log('[SelectRole] Redirecting job_seeker to:', redirectPath);
-        router.push(redirectPath);
+        window.location.href = redirectPath; // Use window.location.href
       } else {
         const redirectPath = session.user.has_company
           ? `/companies/${session.user.company_id}/dashboard`
           : '/companies/create';
         console.log('[SelectRole] Redirecting recruiter to:', redirectPath);
-        router.push(redirectPath);
+        window.location.href = redirectPath; // Use window.location.href
       }
     }
-  }, [session, router, status]);
+  }, [session, status]);
 
   const roles = [
     { 

@@ -35,7 +35,7 @@ const CompanyCreationPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [redirectPath, setRedirectPath] = useState(null);
-  const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
   const totalSteps = 3;
 
   const logError = (context, error, additionalData = {}) => {
@@ -63,6 +63,7 @@ const CompanyCreationPage = () => {
       user: session?.user,
       hasCompany: session?.user?.has_company,
       companyId: session?.user?.company_id,
+      role: session?.user?.role,
     });
     if (status === 'loading') {
       logDebug('useEffect', { state: 'Session loading' });
@@ -85,11 +86,10 @@ const CompanyCreationPage = () => {
   useEffect(() => {
     if (redirectPath) {
       console.log('[CompanyCreation] Redirecting to:', { redirectPath });
-      router.push(redirectPath);
-      router.refresh();
-      console.log('[CompanyCreation] Redirect initiated, router state:', { pathname: router.pathname });
+      window.location.href = redirectPath; // Use window.location.href
+      console.log('[CompanyCreation] Redirect initiated via window.location.href');
     }
-  }, [redirectPath, router]);
+  }, [redirectPath]);
 
   const handleInputChange = (e) => {
     try {
@@ -188,9 +188,17 @@ const CompanyCreationPage = () => {
             ...session?.user,
             has_company: true,
             company_id: response.data.id,
+            role: 'recruiter', // Ensure role is updated
           },
         });
         console.log('[CompanyCreation] Session updated:', updatedSession);
+
+        // Force session refresh
+        console.log('[CompanyCreation] Forcing session refresh');
+        await fetch('/api/auth/session', { cache: 'no-store' });
+        const sessionResponse = await fetch('/api/auth/session', { cache: 'no-store' });
+        const sessionData = await sessionResponse.json();
+        console.log('[CompanyCreation] Refreshed session:', sessionData);
       } catch (sessionError) {
         logError('Session Update', sessionError);
         toast.error('Company created, but session update failed. Please log in again.');
@@ -210,7 +218,7 @@ const CompanyCreationPage = () => {
       toast.error(err.message || 'Failed to create company.');
     } finally {
       setLoading(false);
-      console.log('[CompanyCreation] Submission completed, loading:', loading);
+      console.log('[CompanyCreation] Submission completed, loading:', false);
     }
   };
 

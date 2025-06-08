@@ -48,6 +48,15 @@ export async function middleware(request) {
     companyId: token?.user?.company_id,
   });
 
+  // Force session refresh
+  await fetch('http://localhost:3000/api/auth/session', { cache: 'no-store' });
+  const updatedToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  console.log('[Middleware] Updated token after refresh:', {
+    role: updatedToken?.role || updatedToken?.user?.role,
+    hasCompany: updatedToken?.user?.has_company,
+    companyId: updatedToken?.user?.company_id,
+  });
+
   if (matchesPattern(pathname, PUBLIC_ROUTES)) {
     console.log('[Middleware] Allowing access to public route:', pathname);
     return NextResponse.next();
@@ -69,7 +78,7 @@ export async function middleware(request) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const userRole = token.role || token.user?.role;
+  const userRole = updatedToken?.role || updatedToken?.user?.role;
   console.log('[Middleware] User role:', userRole);
 
   if (pathname === '/select-role' && userRole && userRole !== 'none') {
@@ -77,7 +86,9 @@ export async function middleware(request) {
     if (userRole === 'job_seeker') {
       redirectPath = '/jobs';
     } else if (userRole === 'recruiter') {
-      redirectPath = '/companies/listing';
+      redirectPath = updatedToken?.user?.has_company
+        ? `/companies/${updatedToken.user.company_id}/dashboard`
+        : '/companies/listing';
     } else {
       redirectPath = '/';
     }
