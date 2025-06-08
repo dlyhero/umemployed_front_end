@@ -27,11 +27,7 @@ const ONBOARDING_ROUTES = [
   '/companies/create',
 ];
 
-// Add recruiter-specific routes
-const RECRUITER_ROUTES = [
-  '/companies',
-  '/companies/(.*)', // Match all sub-routes under /companies/
-];
+
 
 // Check if the path matches any pattern in the routes array
 const matchesPattern = (path, patterns) => {
@@ -96,14 +92,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/select-role', request.url));
   }
 
-  // Restrict /companies/ routes to recruiters
-  if (matchesPattern(pathname, RECRUITER_ROUTES)) {
-    if (userRole !== 'recruiter') {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-    // Explicitly allow recruiters to access all /companies/ sub-routes
-    return NextResponse.next();
-  }
+
 
   return NextResponse.next();
 }
