@@ -18,14 +18,14 @@ export default function AuthButtons() {
       <div className="flex gap-4">
         <Button
           variant="outline"
-          className="gap-2 hidden md:flex"
+          className="flex"
           onClick={() => signIn()}
         >
           <UserPlus className="w-4 h-4" />
           Sign Up
         </Button>
         <Button
-          className="gap-2 bg-brand text-white"
+          className="gap-2 bg-brand text-white hover:bg-brand/90 hover:text-white"
           onClick={() => signIn()}
         >
           <LogIn className="w-4 h-4" />
