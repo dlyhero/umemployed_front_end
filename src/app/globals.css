@@ -184,31 +184,31 @@ a {
 
   body {
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
   p, span, div, li, input, textarea, button {
-    font-size: 0.9rem; /* Slightly reduced from 1rem */
+    font-size: 0.85rem; /* Slightly reduced from 1rem */
   }
 
   h1 {
-    font-size: 1.8rem; /* Reduced from 2rem */
+    font-size: 1.75rem; /* Reduced from 2rem */
   }
 
   .Herotitle {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
 
   .ctAtitle {
-    font-size: 1.3rem; /* Reduced from 1.5rem */
+    font-size: 1.25rem; /* Reduced from 1.5rem */
   }
 
   .heroName {
-    font-size: 1.8rem;
+    font-size: 1.875rem;
   }
 
   h2 {
-    font-size: 1.4rem; /* Reduced from 1.6rem */
+    font-size: 1.35rem; /* Reduced from 1.6rem */
   }
 
   h3 {
