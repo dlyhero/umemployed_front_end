@@ -61,6 +61,9 @@ export default function SelectRolePage() {
         router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
       }
     }
+    else if (session?.user?.role === "none") {
+      router.back();
+    }
   }, [session, router]);
 
   return (
