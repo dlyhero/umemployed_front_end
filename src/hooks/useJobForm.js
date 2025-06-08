@@ -81,6 +81,9 @@ export const useJobForm = (currentStep) => {
   });
 
   useEffect(() => {
+    // Debug: Log session status
+    console.log('useJobForm Debug: Session', { status, userRole: session?.user?.role });
+
     const fetchJobOptions = async () => {
       setIsLoadingOptions(true);
       try {
@@ -115,10 +118,14 @@ export const useJobForm = (currentStep) => {
         setIsLoadingOptions(false);
       }
     };
-    if (status === 'unauthenticated') {
+
+    // Only redirect to /login if session is confirmed unauthenticated after a delay
+    if (status === 'unauthenticated' && session === null) {
+      console.log('useJobForm Debug: Redirecting to /login due to unauthenticated status');
       router.push('/login');
       return;
     }
+
     fetchJobOptions();
   }, [form, session, status, router]);
 
@@ -126,6 +133,7 @@ export const useJobForm = (currentStep) => {
     if (currentStep === 'basicinformation') {
       clearStore();
       form.reset();
+      // No subscription check here; defer to onSubmit
     } else if (currentStep === 'skills' && jobId) {
       const loadSkills = async () => {
         setIsLoadingSkills(true);
@@ -273,6 +281,7 @@ export const useJobForm = (currentStep) => {
 
       if (currentStep === 'basicinformation') {
         const subscriptionStatus = await checkSubscription();
+        console.log('useJobForm Debug: onSubmit Subscription Check', subscriptionStatus); // Debug
         if (!subscriptionStatus.has_active_subscription) {
           setSubscriptionError(subscriptionStatus.error || 'No active subscription found. Please upgrade your plan.');
           setShowSubscriptionModal(true);
