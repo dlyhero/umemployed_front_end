@@ -1,3 +1,4 @@
+// src/app/companies/create/CompanyCreationPage.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -56,9 +57,13 @@ const CompanyCreationPage = () => {
     }, null, 2));
   };
 
-  console.log('CompanyCreationPage: Initial session:', { session, status, step });
-
   useEffect(() => {
+    console.log('[CompanyCreation] Initial session check:', {
+      sessionStatus: status,
+      user: session?.user,
+      hasCompany: session?.user?.has_company,
+      companyId: session?.user?.company_id,
+    });
     if (status === 'loading') {
       logDebug('useEffect', { state: 'Session loading' });
       return;
@@ -69,8 +74,9 @@ const CompanyCreationPage = () => {
       return;
     }
     if (session?.user?.has_company && session?.user?.company_id) {
-      logDebug('useEffect', { state: 'User has company, setting redirect to dashboard' });
-      setRedirectPath(`/companies/${session.user.company_id}/dashboard`);
+      const dashboardPath = `/companies/${session.user.company_id}/dashboard`;
+      logDebug('useEffect', { state: 'User has company, setting redirect to', dashboardPath });
+      setRedirectPath(dashboardPath);
       return;
     }
     logDebug('useEffect', { state: 'No redirect needed, rendering form' });
@@ -78,9 +84,10 @@ const CompanyCreationPage = () => {
 
   useEffect(() => {
     if (redirectPath) {
-      logDebug('Redirect Effect', { path: redirectPath });
+      console.log('[CompanyCreation] Redirecting to:', { redirectPath });
       router.push(redirectPath);
       router.refresh();
+      console.log('[CompanyCreation] Redirect initiated, router state:', { pathname: router.pathname });
     }
   }, [redirectPath, router]);
 
@@ -110,8 +117,6 @@ const CompanyCreationPage = () => {
     if (step < totalSteps) {
       setStep(step + 1);
       logDebug('Step Change', { newStep: step + 1 });
-    } else {
-      logDebug('Continue Button', { state: 'Already at final step, preventing advance' });
     }
   };
 
@@ -125,7 +130,7 @@ const CompanyCreationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    logDebug('Form Submit', { formData, step });
+    console.log('[CompanyCreation] Form submission started:', { step, formData });
     if (step !== totalSteps) {
       logError('Form Submit', new Error('Submission attempted on wrong step'), { step });
       toast.error('Please complete all steps before submitting.');
@@ -134,6 +139,7 @@ const CompanyCreationPage = () => {
 
     try {
       setLoading(true);
+      console.log('[CompanyCreation] Validating form data');
       const result = companySchema.safeParse(formData);
       if (!result.success) {
         const errors = result.error.flatten().fieldErrors;
@@ -153,9 +159,8 @@ const CompanyCreationPage = () => {
         throw new Error('No authentication token found. Please sign in again.');
       }
 
-      logDebug('API Request', {
+      console.log('[CompanyCreation] Sending API request:', {
         url: `${BASE_URL}/api/company/create-company/`,
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         payload,
       });
 
@@ -170,8 +175,12 @@ const CompanyCreationPage = () => {
         }
       );
 
-      logDebug('API Response', { status: response.status, data: response.data });
+      console.log('[CompanyCreation] API response:', {
+        status: response.status,
+        data: response.data,
+      });
 
+      console.log('[CompanyCreation] Updating session');
       try {
         const updatedSession = await update({
           ...session,
@@ -181,7 +190,7 @@ const CompanyCreationPage = () => {
             company_id: response.data.id,
           },
         });
-        logDebug('Session Update', { updatedSession });
+        console.log('[CompanyCreation] Session updated:', updatedSession);
       } catch (sessionError) {
         logError('Session Update', sessionError);
         toast.error('Company created, but session update failed. Please log in again.');
@@ -189,36 +198,19 @@ const CompanyCreationPage = () => {
 
       toast.success('Company created successfully!');
       const redirectPath = `/companies/${response.data.id}/dashboard`;
-      logDebug('Redirect', { path: redirectPath });
+      console.log('[CompanyCreation] Setting redirect path:', redirectPath);
       setRedirectPath(redirectPath);
-
     } catch (err) {
       const errorDetails = logError('Form Submit', err, {
         status: err.response?.status,
         data: err.response?.data,
         requestPayload: payload,
       });
-
-      let errorMessage = 'Failed to create company. Please try again.';
-      if (err.response?.data) {
-        if (err.response.data.detail) {
-          errorMessage = err.response.data.detail;
-        } else if (err.response.data.non_field_errors) {
-          errorMessage = err.response.data.non_field_errors.join(', ');
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        } else {
-          const errors = Object.values(err.response.data).flat();
-          errorMessage = errors.join(', ');
-        }
-      } else {
-        errorMessage = err.message;
-      }
-
-      toast.error(errorMessage);
+      console.error('[CompanyCreation] Submission error:', errorDetails);
+      toast.error(err.message || 'Failed to create company.');
     } finally {
       setLoading(false);
-      logDebug('Form Submit', { state: 'Loading complete' });
+      console.log('[CompanyCreation] Submission completed, loading:', loading);
     }
   };
 
@@ -254,15 +246,16 @@ const CompanyCreationPage = () => {
   };
 
   if (status === 'loading') {
-    logDebug('Render', { state: 'Loading' });
+    console.log('[CompanyCreation] Rendering loader due to session loading');
     return <Loader />;
   }
 
   if (redirectPath) {
-    logDebug('Render', { state: 'Redirect pending', redirectPath });
+    console.log('[CompanyCreation] Rendering loader due to pending redirect:', redirectPath);
     return <Loader />;
   }
 
+  console.log('[CompanyCreation] Rendering form, step:', step);
   return (
     <main className="container mx-auto p-4 bg-white rounded-lg shadow-md max-w-3xl mt-16 mb-16">
       <div className="mb-4 text-center">

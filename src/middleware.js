@@ -1,3 +1,4 @@
+// src/middleware.js
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
@@ -27,15 +28,9 @@ const ONBOARDING_ROUTES = [
   '/companies/create',
 ];
 
-
-
-// Check if the path matches any pattern in the routes array
 const matchesPattern = (path, patterns) => {
-  return patterns.some(pattern => {
-    const regexPattern = pattern
-      .replace(/\[([^\]]+)\]/g, '[^/]+')
-      .replace(/\//g, '\\/');
-    
+  return patterns.some((pattern) => {
+    const regexPattern = pattern.replace(/\[([^\]]+)\]/g, '[^/]+').replace(/\//g, '\\/');
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(path);
   });
@@ -43,62 +38,67 @@ const matchesPattern = (path, patterns) => {
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
+  console.log('[Middleware] Processing request:', { pathname });
+
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  
-  // Public routes are accessible to everyone
+  console.log('[Middleware] Token fetched:', {
+    hasToken: !!token,
+    role: token?.role || token?.user?.role,
+    hasCompany: token?.user?.has_company,
+    companyId: token?.user?.company_id,
+  });
+
   if (matchesPattern(pathname, PUBLIC_ROUTES)) {
+    console.log('[Middleware] Allowing access to public route:', pathname);
     return NextResponse.next();
   }
 
-  // Authentication routes are only for non-authenticated users
   if (matchesPattern(pathname, AUTH_ROUTES)) {
     if (token) {
-      // Redirect to home if already authenticated
+      console.log('[Middleware] User authenticated, redirecting to / from:', pathname);
       return NextResponse.redirect(new URL('/', request.url));
     }
+    console.log('[Middleware] Allowing access to auth route:', pathname);
     return NextResponse.next();
   }
 
-  // If user is not authenticated and trying to access a protected route,
-  // redirect to login with callbackUrl
   if (!token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('callbackUrl', request.url);
+    console.log('[Middleware] No token, redirecting to login:', loginUrl.toString());
     return NextResponse.redirect(loginUrl);
   }
 
-  // Handle role-based access control for authenticated users
-  const userRole = token.role || token.user?.role; // Adjust based on your token structure
-  
-  // If user has a role (not "none") and tries to access select-role, redirect them away
+  const userRole = token.role || token.user?.role;
+  console.log('[Middleware] User role:', userRole);
+
   if (pathname === '/select-role' && userRole && userRole !== 'none') {
-    // Redirect based on their role or to a default page
+    let redirectPath;
     if (userRole === 'job_seeker') {
-      return NextResponse.redirect(new URL('/jobs', request.url));
+      redirectPath = '/jobs';
     } else if (userRole === 'recruiter') {
-      return NextResponse.redirect(new URL('/companies/listing', request.url));
+      redirectPath = '/companies/listing';
     } else {
-      // Default redirect for other roles
-      return NextResponse.redirect(new URL('/', request.url));
+      redirectPath = '/';
     }
+    console.log('[Middleware] User has role, redirecting from /select-role to:', redirectPath);
+    return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
-  // If user has no role (role is "none") and tries to access protected routes other than onboarding,
-  // redirect them to select-role
-  if ((!userRole || userRole === 'none') && 
-      !matchesPattern(pathname, ONBOARDING_ROUTES) && 
-      !matchesPattern(pathname, PUBLIC_ROUTES) && 
-      !matchesPattern(pathname, AUTH_ROUTES)) {
+  if (
+    (!userRole || userRole === 'none') &&
+    !matchesPattern(pathname, ONBOARDING_ROUTES) &&
+    !matchesPattern(pathname, PUBLIC_ROUTES) &&
+    !matchesPattern(pathname, AUTH_ROUTES)
+  ) {
+    console.log('[Middleware] No role, redirecting to /select-role from:', pathname);
     return NextResponse.redirect(new URL('/select-role', request.url));
   }
 
-
-
+  console.log('[Middleware] Allowing access to route:', pathname);
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|images|api).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|api).*)'],
 };

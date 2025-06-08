@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Briefcase, User, ArrowRight } from 'lucide-react';
+import { Briefcase, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/Spinner';
@@ -14,60 +14,84 @@ export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const { data: session, update, status } = useSession();
 
   const handleRoleSelect = async (role) => {
     setLoading(true);
+    console.log('[SelectRole] Starting role selection:', { role, sessionStatus: status });
     try {
+      console.log('[SelectRole] Sending request to /api/auth/update-role');
       const response = await fetch('/api/auth/update-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ role }),
-        credentials: 'same-origin'
+        credentials: 'same-origin',
       });
-  
+
       const data = await response.json();
-      
+      console.log('[SelectRole] API response:', { status: response.status, data });
+
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Failed to update role');
       }
-  
-      // Update session
-      await update({
+
+      console.log('[SelectRole] Updating session with role:', role);
+      const updatedSession = await update({
         ...session,
         user: {
           ...session?.user,
-          role: role
-        }
+          role,
+        },
       });
+      console.log('[SelectRole] Session update result:', updatedSession);
 
-      // Force a hard refresh to ensure all data is properly loaded
       if (data.redirectTo) {
+        console.log('[SelectRole] Redirecting to:', data.redirectTo);
         window.location.href = data.redirectTo;
       } else {
-        // Fallback in case redirectTo is not provided
+        console.log('[SelectRole] No redirectTo provided, reloading page');
         window.location.reload();
       }
-  
     } catch (error) {
-      console.error('Full error:', error);
+      console.error('[SelectRole] Error:', {
+        message: error.message,
+        stack: error.stack,
+        sessionStatus: status,
+      });
       toast.error(error.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
+      console.log('[SelectRole] Role selection completed, loading:', loading);
     }
   };
 
   useEffect(() => {
-    if (session?.user?.role && session.user.role !== "none") {
-      if (session.user.role === "job_seeker") {
-        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+    console.log('[SelectRole] useEffect triggered:', {
+      sessionStatus: status,
+      userRole: session?.user?.role,
+      hasResume: session?.user?.has_resume,
+      hasCompany: session?.user?.has_company,
+      companyId: session?.user?.company_id,
+    });
+    if (status === 'loading') return;
+    if (session?.user?.role && session.user.role !== 'none') {
+      if (session.user.role === 'job_seeker') {
+        const redirectPath = session.user.has_resume
+          ? '/applicant/dashboard'
+          : '/applicant/upload-resume';
+        console.log('[SelectRole] Redirecting job_seeker to:', redirectPath);
+        router.push(redirectPath);
       } else {
-        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+        const redirectPath = session.user.has_company
+          ? `/companies/${session.user.company_id}/dashboard`
+          : '/companies/create';
+        console.log('[SelectRole] Redirecting recruiter to:', redirectPath);
+        router.push(redirectPath);
       }
     }
-  }, [session, router]);
+  }, [session, router, status]);
 
   const roles = [
     { 
