@@ -53,18 +53,15 @@ export default function SelectRolePage() {
     }
   };
 
-  useEffect(() => {
-    if (session?.user?.role && session.user.role !== "none") {
-      if (session.user.role === "job_seeker") {
-        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
-      } else {
-        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
-      }
-    }
-    else if (session?.user?.role === "none") {
-      router.back();
-    }
-  }, [session, router]);
+  // useEffect(() => {
+  //   if (session?.user?.role && session.user.role !== "none") {
+  //     if (session.user.role === "job_seeker") {
+  //       router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+  //     } else {
+  //       router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+  //     }
+  //   }
+  // }, [session, router]);
 
   return (
     <div className="max-w-5xl mx-auto  mt-5 px-4">
