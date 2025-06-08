@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { checkSubscriptionStatus } from '@lib/api/recruiter_subscription';
+import { checkSubscriptionStatus } from '../../../../../lib/api/recruiter_subscribe';
 import Loader from '../../../../components/common/Loader/Loader';
 
 const SuccessPage = () => {
