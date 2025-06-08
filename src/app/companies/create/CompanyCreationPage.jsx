@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import companySchema from '@/src/app/companies/create/schemas/companySchema';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const CompanyCreationPage = () => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
@@ -32,8 +31,6 @@ const CompanyCreationPage = () => {
     linkedin: '',
     video_introduction: '',
   });
-
-
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
@@ -58,15 +55,23 @@ const CompanyCreationPage = () => {
     }, null, 2));
   };
 
+  console.log('CompanyCreationPage: Initial session:', { session, status });
 
-  if (status === 'loading') {
-    logDebug('Render', { state: 'Loading' });
-    return <Loader />;
-  }
-  if (session?.user?.has_company) {
-    logDebug('Render', { state: 'User has company, skipping render' });
-    return null;
-  }
+  useEffect(() => {
+    if (status === 'loading') {
+      logDebug('useEffect', { state: 'Session loading' });
+      return;
+    }
+    if (status === 'unauthenticated') {
+      logDebug('useEffect', { state: 'User unauthenticated, redirecting to /login' });
+      router.push('/login?callbackUrl=/companies/create');
+      return;
+    }
+    if (session?.user?.has_company && session?.user?.company_id) {
+      logDebug('useEffect', { state: 'User has company, redirecting to dashboard' });
+      router.push(`/companies/${session.user.company_id}/dashboard`);
+    }
+  }, [session, status, router]);
 
   const handleInputChange = (e) => {
     try {
@@ -93,6 +98,8 @@ const CompanyCreationPage = () => {
     }
     if (step < totalSteps) {
       setStep(step + 1);
+    } else {
+      logDebug('Continue Button', { state: 'Already at final step, preventing advance' });
     }
   };
 
@@ -105,12 +112,15 @@ const CompanyCreationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    logDebug('Form Submit', { formData, step });
+    if (step !== totalSteps) {
+      logError('Form Submit', new Error('Submission attempted on wrong step'), { step });
+      toast.error('Please complete all steps before submitting.');
+      return;
+    }
+
     try {
-      logDebug('Form Submit', { formData, step });
-      if (step !== totalSteps) {
-        logError('Form Submit', new Error('Submission attempted on wrong step'), { step });
-        return;
-      }
+      setLoading(true);
       const result = companySchema.safeParse(formData);
       if (!result.success) {
         const errors = result.error.flatten().fieldErrors;
@@ -118,7 +128,6 @@ const CompanyCreationPage = () => {
         throw new Error(errorMessage || 'Invalid form data.');
       }
 
-      setLoading(true);
       const payload = {};
       for (const key in formData) {
         if (formData[key] !== '' && formData[key] !== null && formData[key] !== undefined) {
@@ -150,11 +159,22 @@ const CompanyCreationPage = () => {
 
       logDebug('API Response', { status: response.status, data: response.data });
 
-      session.user.has_company = true;
-      session.user.companyId = response.data.id;
+      const updatedSession = await update({
+        ...session,
+        user: {
+          ...session?.user,
+          has_company: true,
+          company_id: response.data.id, // Use company_id consistently
+        },
+      });
+      logDebug('Session Update', { updatedSession });
 
       toast.success('Company created successfully!');
-      router.push(`/companies/${response.data.id}/dashboard`);
+      const redirectPath = `/companies/${response.data.id}/dashboard`;
+      logDebug('Redirect', { path: redirectPath });
+      router.push(redirectPath);
+      router.refresh();
+
     } catch (err) {
       const errorDetails = logError('Form Submit', err, {
         status: err.response?.status,
@@ -181,35 +201,57 @@ const CompanyCreationPage = () => {
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+      logDebug('Form Submit', { state: 'Loading complete' });
     }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      logDebug('KeyDown', { key: e.key, step });
       if (step < totalSteps) {
         handleContinue();
+      } else {
+        handleSubmit(e); // Only submit on Enter at final step
       }
     }
   };
 
   const renderStep = () => {
     logDebug('Render Step', { step });
-    return (
-      <>
-        {step === 1 ? (
-          <CompanyInformation formData={formData} handleChange={handleInputChange} />
-        ) : step === 2 ? (
+    switch (step) {
+      case 1:
+        return <CompanyInformation formData={formData} handleChange={handleInputChange} />;
+      case 2:
+        return (
           <div className="space-y-4">
             <ContactInformation formData={formData} handleChange={handleInputChange} />
             <CompanyDescription formData={formData} handleChange={handleInputChange} />
           </div>
-        ) : step === 3 ? (
-          <SocialLinksAndVideo formData={formData} handleChange={handleInputChange} />
-        ) : null}
-      </>
-    );
+        );
+      case 3:
+        return <SocialLinksAndVideo formData={formData} handleChange={handleInputChange} />;
+      default:
+        return null;
+    }
   };
+
+  if (status === 'loading') {
+    logDebug('Render', { state: 'Loading' });
+    return <Loader />;
+  }
+
+  if (status === 'unauthenticated') {
+    logDebug('Render', { state: 'Unauthenticated, redirecting to /login' });
+    router.push('/login?callbackUrl=/companies/create');
+    return null;
+  }
+
+  if (session?.user?.has_company && session?.user?.company_id) {
+    logDebug('Render', { state: 'User has company, redirecting to dashboard' });
+    router.push(`/companies/${session.user.company_id}/dashboard`);
+    return null;
+  }
 
   return (
     <main className="container mx-auto p-4 bg-white rounded-lg shadow-md max-w-3xl mt-16 mb-16">
@@ -220,7 +262,7 @@ const CompanyCreationPage = () => {
           className="w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4"
         />
         <h2 className="text-xl font-bold text-gray-800">Create Your Company Profile</h2>
-        <p className="text-gray-600 text-sm">Step {step} of {2}</p>
+        <p className="text-gray-600 text-sm">Step {step} of {totalSteps}</p>
       </div>
       {loading ? (
         <div className="flex justify-center items-center h-48">
