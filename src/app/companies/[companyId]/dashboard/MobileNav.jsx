@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
-import { BarChart2, Briefcase, FileText, Home, Settings, Users } from 'lucide-react';
+import { BarChart2, Briefcase, FileText, Home, Settings,RefreshCw, Users } from 'lucide-react';
 
 export const MobileNav = ({ companyId, closeMenu, activeTab, setActiveTab }) => {
   const router = useRouter();
@@ -12,7 +12,8 @@ export const MobileNav = ({ companyId, closeMenu, activeTab, setActiveTab }) => 
     { icon: <Briefcase className="w-5 h-5" />, label: 'Jobs', path: `/companies/${companyId}/jobs/listing` },
     { icon: <FileText className="w-5 h-5" />, label: 'Applications', path: `/companies/${companyId}/applications` },
     { icon: <BarChart2 className="w-5 h-5" />, label: 'Analytics', path: `/companies/${companyId}/analytics` },
-    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/update` },
+    { icon: <RefreshCw className="w-5 h-5" />, label: 'Update', path: `/companies/${companyId}/update` },
+    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/settings` },
   ];
 
   return (

@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, Briefcase, FileText, Home, Settings, Users } from 'lucide-react';
+import { BarChart2, Briefcase, FileText, Home, Settings, RefreshCw, Users } from 'lucide-react';
 
 export const SidebarNav = ({ activeTab, setActiveTab, companyId }) => {
   const pathname = usePathname();
@@ -13,7 +13,8 @@ export const SidebarNav = ({ activeTab, setActiveTab, companyId }) => {
     { icon: <Briefcase className="w-5 h-5" />, label: 'Jobs', path: `/companies/${companyId}/jobs/listing` },
     { icon: <FileText className="w-5 h-5" />, label: 'Applications', path: `/companies/${companyId}/applications` },
     { icon: <BarChart2 className="w-5 h-5" />, label: 'Analytics', path: `/companies/${companyId}/analytics` },
-    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/${companyId}/update` },
+    { icon: <RefreshCw className="w-5 h-5" />, label: 'Update', path: `/companies/${companyId}/update` },
+    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: `/companies/settings` },
   ];
 
   return (
