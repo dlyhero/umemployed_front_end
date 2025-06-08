@@ -33,6 +33,7 @@ const CompanyCreationPage = () => {
   });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [redirectPath, setRedirectPath] = useState(null);
   const BASE_URL = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/';
   const totalSteps = 3;
 
@@ -55,7 +56,7 @@ const CompanyCreationPage = () => {
     }, null, 2));
   };
 
-  console.log('CompanyCreationPage: Initial session:', { session, status });
+  console.log('CompanyCreationPage: Initial session:', { session, status, step });
 
   useEffect(() => {
     if (status === 'loading') {
@@ -63,15 +64,25 @@ const CompanyCreationPage = () => {
       return;
     }
     if (status === 'unauthenticated') {
-      logDebug('useEffect', { state: 'User unauthenticated, redirecting to /login' });
-      router.push('/login?callbackUrl=/companies/create');
+      logDebug('useEffect', { state: 'User unauthenticated, setting redirect to /login' });
+      setRedirectPath('/login?callbackUrl=/companies/create');
       return;
     }
     if (session?.user?.has_company && session?.user?.company_id) {
-      logDebug('useEffect', { state: 'User has company, redirecting to dashboard' });
-      router.push(`/companies/${session.user.company_id}/dashboard`);
+      logDebug('useEffect', { state: 'User has company, setting redirect to dashboard' });
+      setRedirectPath(`/companies/${session.user.company_id}/dashboard`);
+      return;
     }
-  }, [session, status, router]);
+    logDebug('useEffect', { state: 'No redirect needed, rendering form' });
+  }, [session, status]);
+
+  useEffect(() => {
+    if (redirectPath) {
+      logDebug('Redirect Effect', { path: redirectPath });
+      router.push(redirectPath);
+      router.refresh();
+    }
+  }, [redirectPath, router]);
 
   const handleInputChange = (e) => {
     try {
@@ -98,6 +109,7 @@ const CompanyCreationPage = () => {
     }
     if (step < totalSteps) {
       setStep(step + 1);
+      logDebug('Step Change', { newStep: step + 1 });
     } else {
       logDebug('Continue Button', { state: 'Already at final step, preventing advance' });
     }
@@ -107,6 +119,7 @@ const CompanyCreationPage = () => {
     logDebug('Previous Button', { step });
     if (step > 1) {
       setStep(step - 1);
+      logDebug('Step Change', { newStep: step - 1 });
     }
   };
 
@@ -159,21 +172,25 @@ const CompanyCreationPage = () => {
 
       logDebug('API Response', { status: response.status, data: response.data });
 
-      const updatedSession = await update({
-        ...session,
-        user: {
-          ...session?.user,
-          has_company: true,
-          company_id: response.data.id, // Use company_id consistently
-        },
-      });
-      logDebug('Session Update', { updatedSession });
+      try {
+        const updatedSession = await update({
+          ...session,
+          user: {
+            ...session?.user,
+            has_company: true,
+            company_id: response.data.id,
+          },
+        });
+        logDebug('Session Update', { updatedSession });
+      } catch (sessionError) {
+        logError('Session Update', sessionError);
+        toast.error('Company created, but session update failed. Please log in again.');
+      }
 
       toast.success('Company created successfully!');
       const redirectPath = `/companies/${response.data.id}/dashboard`;
       logDebug('Redirect', { path: redirectPath });
-      router.push(redirectPath);
-      router.refresh();
+      setRedirectPath(redirectPath);
 
     } catch (err) {
       const errorDetails = logError('Form Submit', err, {
@@ -212,7 +229,7 @@ const CompanyCreationPage = () => {
       if (step < totalSteps) {
         handleContinue();
       } else {
-        handleSubmit(e); // Only submit on Enter at final step
+        handleSubmit(e);
       }
     }
   };
@@ -241,16 +258,9 @@ const CompanyCreationPage = () => {
     return <Loader />;
   }
 
-  if (status === 'unauthenticated') {
-    logDebug('Render', { state: 'Unauthenticated, redirecting to /login' });
-    router.push('/login?callbackUrl=/companies/create');
-    return null;
-  }
-
-  if (session?.user?.has_company && session?.user?.company_id) {
-    logDebug('Render', { state: 'User has company, redirecting to dashboard' });
-    router.push(`/companies/${session.user.company_id}/dashboard`);
-    return null;
+  if (redirectPath) {
+    logDebug('Render', { state: 'Redirect pending', redirectPath });
+    return <Loader />;
   }
 
   return (
