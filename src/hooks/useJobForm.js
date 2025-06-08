@@ -114,19 +114,13 @@ export const useJobForm = (currentStep) => {
         });
       } catch (error) {
         form.setError('root', { message: 'Failed to load job options. Please try again.' });
-        toast.error('Failed to load job options. Please try again.');
       } finally {
         setIsLoadingOptions(false);
       }
     };
 
-    // Only redirect to /login if session is confirmed unauthenticated and no session data exists
-    if (status === 'unauthenticated' && session === null) {
-      console.log('useJobForm Debug: Redirecting to /login due to unauthenticated status');
-      router.push('/login');
-      return;
-    }
-
+    // Removed redirect to /login
+    // Original: if (status === 'unauthenticated') { router.push('/login'); return; }
     fetchJobOptions();
   }, [form, session, status, router]);
 
@@ -149,7 +143,6 @@ export const useJobForm = (currentStep) => {
           }
         } catch (error) {
           form.setError('root', { message: 'Failed to load skills. Please try again.' });
-          toast.error('Failed to load skills. Please try again.');
         } finally {
           setIsLoadingSkills(false);
         }
@@ -198,7 +191,7 @@ export const useJobForm = (currentStep) => {
           throw new Error(`Failed to verify job: ${response.status} ${errorText}`);
         }
         const data = await response.json();
-        const verifiedJobId = data.id || data.jobId || null;
+        const verifiedJobId = data.id || data.job_id || null;
         if (!verifiedJobId) {
           throw new Error('No job ID found in verification response');
         }
@@ -275,7 +268,7 @@ export const useJobForm = (currentStep) => {
   const onSubmit = async (data) => {
     const baseUrl = 'https://server.umemployed.com/api';
 
-    console.log('onSubmit Debug: Starting submission', { currentStep, data }); // Debug
+    console.log('onSubmit Debug: Starting submission', { currentStep, data, sessionStatus: status }); // Debug
 
     if (status === 'loading') {
       console.log('onSubmit Debug: Session loading, exiting'); // Debug
@@ -302,7 +295,7 @@ export const useJobForm = (currentStep) => {
 
       if (currentStep === 'basicinformation') {
         const subscriptionStatus = await checkSubscription();
-        console.log('useJobForm Debug: onSubmit Subscription Check', subscriptionStatus); // Debug
+        console.log('onSubmit Debug: Subscription Check', { subscriptionStatus }); // Debug
         if (!subscriptionStatus.has_active_subscription) {
           setSubscriptionError(subscriptionStatus.error || 'No active subscription found. Please upgrade your plan.');
           setShowSubscriptionModal(true);
@@ -439,7 +432,6 @@ export const useJobForm = (currentStep) => {
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
       console.log('onSubmit Debug: Error', { error: error.message }); // Debug
-      toast.error(`Submission failed: ${error.message}`);
       return { error: error.message };
     } finally {
       await form.setValue('isSubmitting', false, { shouldValidate: false });
