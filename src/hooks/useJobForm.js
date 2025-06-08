@@ -268,20 +268,27 @@ export const useJobForm = (currentStep) => {
   const onSubmit = async (data) => {
     const baseUrl = 'https://server.umemployed.com/api';
 
-    console.log('onSubmit Debug: Starting submission', { currentStep, data, sessionStatus: status }); // Debug
+    console.log('onSubmit Debug: Starting submission', { currentStep, data, sessionStatus: status, hasSession: !!session }); // Debug
 
+    // Wait for session to resolve if loading
     if (status === 'loading') {
-      console.log('onSubmit Debug: Session loading, exiting'); // Debug
-      return { error: 'Session is still loading' };
+      console.log('onSubmit Debug: Session loading, waiting'); // Debug
+      return { error: 'Session is still loading, please try again in a moment.' };
     }
-    if (status === 'unauthenticated') {
-      console.log('onSubmit Debug: Unauthenticated, exiting'); // Debug
+
+    // Trust middleware if session exists, even if status is unauthenticated
+    if (!session || (!session.accessToken && status === 'unauthenticated')) {
+      console.log('onSubmit Debug: No session or token, exiting'); // Debug
+      toast.error('Please log in to create a job.');
+      router.push('/login');
       return { error: 'Please log in to create a job.' };
     }
 
     const token = session?.accessToken;
     if (!token) {
       console.log('onSubmit Debug: No token, exiting'); // Debug
+      toast.error('Authentication token missing. Please log in again.');
+      router.push('/login');
       return { error: 'No authentication token found' };
     }
 
@@ -432,6 +439,7 @@ export const useJobForm = (currentStep) => {
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
       console.log('onSubmit Debug: Error', { error: error.message }); // Debug
+      toast.error(`Submission failed: ${error.message}`);
       return { error: error.message };
     } finally {
       await form.setValue('isSubmitting', false, { shouldValidate: false });
