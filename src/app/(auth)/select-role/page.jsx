@@ -52,15 +52,15 @@ export default function SelectRolePage() {
     }
   };
 
-  // useEffect(() => {
-  //   if (session?.user?.role && session.user.role !== "none") {
-  //     if (session.user.role === "job_seeker") {
-  //       router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
-  //     } else {
-  //       router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
-  //     }
-  //   }
-  // }, [session, router]);
+  useEffect(() => {
+    if (session?.user?.role && session.user.role !== "none") {
+      if (session.user.role === "job_seeker") {
+        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+      } else {
+        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+      }
+    }
+  }, [session, router]);
 
   const roles = [
     { 
@@ -148,7 +148,7 @@ export default function SelectRolePage() {
         >
           <Button
             disabled={!selectedRole || loading}
-            className={`px-8 py-6 text-lg font-semibold ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
+            className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
             onClick={() => handleRoleSelect(selectedRole)}
           >
             {loading ? (
