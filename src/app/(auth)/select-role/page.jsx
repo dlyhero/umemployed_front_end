@@ -62,9 +62,9 @@ export default function SelectRolePage() {
   useEffect(() => {
     if (session?.user?.role && session.user.role !== "none") {
       if (session.user.role === "job_seeker") {
-        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+        router.back() //push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
       } else {
-        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+        router.back() //.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
       }
     }
   }, [session, router]);
