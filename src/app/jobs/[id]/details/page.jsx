@@ -14,6 +14,139 @@ import { Suitcase } from '@phosphor-icons/react';
 import { Spinner } from '@/components/ui/Spinner';
 import { levelMap, experienceLevelsMap, weeklyRangesMap, cleanDescription, getInitials, CompanyLogo, formatDate } from '@/src/utils/jobFormater';
 
+const RetakeRequestForm = ({ jobId, onClose }) => {
+  const { data: session } = useSession();
+  const [reason, setReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!reason.trim()) {
+      toast.error('Please provide a reason for retaking');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const response = await axios.post(
+        `/job/${jobId}/report-test/`,
+        { reason },
+        {
+          baseURL: baseUrl,
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success(
+          <div className="space-y-1">
+            <p className="font-medium">Retake request submitted!</p>
+            <p className="text-sm">We'll review your request shortly.</p>
+          </div>
+        );
+        onClose();
+      } else {
+        throw new Error(response.data?.message || 'Request failed');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to submit request. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
+        <p className="text-muted-foreground">
+          Please explain why you need to retake this assessment.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <textarea
+          autoFocus
+          className="w-full min-h-[200px] p-4 border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Example: I experienced technical issues during my previous attempt..."
+          required
+        />
+      </div>
+
+      <div className="flex gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={onClose}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1 bg-brand hover:bg-brand/90 text-white"
+          disabled={isSubmitting || !reason.trim()}
+        >
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Submitting...
+            </>
+          ) : 'Submit Request'}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+const RetakeModal = ({ jobId, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div 
+        className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <RetakeRequestForm jobId={jobId} onClose={onClose} />
+      </div>
+    </div>
+  );
+};
+
+const MobileRetakePage = ({ jobId, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
+      <div className="container mx-auto">
+        <Button
+          variant="ghost"
+          className="mb-4 gap-1.5 px-0 hover:bg-transparent"
+          onClick={onClose}
+        >
+          <ChevronLeft className="h-5 w-5" />
+          Back to job
+        </Button>
+        <div className="max-w-md mx-auto">
+          <RetakeRequestForm jobId={jobId} onClose={onClose} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const JobDetailPage = () => {
   const router = useRouter();
@@ -27,109 +160,8 @@ const JobDetailPage = () => {
   const [activeTab, setActiveTab] = useState('details');
   const [isLoading, setIsLoading] = useState(true);
   const [showRetakeModal, setShowRetakeModal] = useState(false);
-  const [retakeReason, setRetakeReason] = useState('');
   const [isMobileView, setIsMobileView] = useState(false);
 
-  // RetakeModal component definition
-  const RetakeModal = () => {
-    return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full">
-          <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
-        </div>
-      </div>
-    );
-  };
-
-// Fixed RetakeRequestForm component
-const RetakeRequestForm = ({ onClose }) => {
-  const [localRetakeReason, setLocalRetakeReason] = useState(retakeReason);
-
-  const handleSubmit = () => {
-    setRetakeReason(localRetakeReason);
-    submitRetakeRequest();
-  };
-
-  return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
-      <p className="text-muted-foreground">
-        Please explain why you need to retake this assessment. We'll review your request and get back to you.
-      </p>
-
-      <textarea
-        className="w-full border rounded-lg p-4 min-h-[200px] focus:ring-2 focus:ring-brand focus:border-transparent"
-        value={localRetakeReason}
-        onChange={(e) => setLocalRetakeReason(e.target.value)}
-        placeholder="Enter your reasons here..."
-      />
-
-      <div className="flex gap-4">
-        <Button
-          className="border-brand text-brand hover:text-brand flex-1"
-          variant="outline"
-          onClick={onClose}
-        >
-          Cancel
-        </Button>
-        <Button
-          className="flex-1 bg-brand hover:bg-brand/80 text-white"
-          onClick={handleSubmit}
-          disabled={!localRetakeReason.trim()}
-        >
-          Submit Request
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-// Fixed submit function
-const submitRetakeRequest = async () => {
-  try {
-    const api = axios.create({
-      baseURL: baseUrl,
-      headers: {
-        Authorization: `Bearer ${session?.accessToken}`
-      }
-    });
-
-    await api.post(`/job/${jobId}/report-test/`, {
-      reason: retakeReason
-    });
-
-    toast.success(
-      <div className="space-y-1">
-        <p className="font-medium">Retake request submitted successfully</p>
-        <p className="text-sm">We'll review your request and get back to you shortly.</p>
-      </div>
-    );
-    setShowRetakeModal(false);
-    setRetakeReason('');
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to submit retake request');
-  }
-};
-  // MobileRetakePage component definition
-  const MobileRetakePage = () => {
-    return (
-      <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto">
-        <div className="container mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-1.5 px-0 hover:bg-transparent"
-            onClick={() => setShowRetakeModal(false)}
-          >
-            <ChevronLeft className="h-5 w-5" />
-            Back to job
-          </Button>
-          <div className="max-w-md mx-auto">
-            <RetakeRequestForm onClose={() => setShowRetakeModal(false)} />
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   useEffect(() => {
     // Check if mobile view on component mount
@@ -358,8 +390,7 @@ const submitRetakeRequest = async () => {
     setShowRetakeModal(true);
   };
 
-
-
+ 
 
 
 
@@ -389,10 +420,11 @@ const submitRetakeRequest = async () => {
 
   return (
     <div className="min-h-screen bg-white pb-8 pt-2">
-      {showRetakeModal && (
-        isMobileView ? <MobileRetakePage /> : <RetakeModal />
+       {showRetakeModal && (
+        isMobileView ? 
+          <MobileRetakePage jobId={jobId} onClose={() => setShowRetakeModal(false)} /> 
+          : <RetakeModal jobId={jobId} onClose={() => setShowRetakeModal(false)} />
       )}
-
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Button
           variant="ghost"
