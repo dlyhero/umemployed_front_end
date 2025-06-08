@@ -83,7 +83,7 @@ export async function middleware(request) {
 
   // If user has no role (role is "none") and tries to access protected routes other than onboarding,
   // redirect them to select-role
-  if ((userRole === 'none') && 
+  if ((!userRole || userRole === 'none') && 
       !matchesPattern(pathname, ONBOARDING_ROUTES) && 
       !matchesPattern(pathname, PUBLIC_ROUTES) && 
       !matchesPattern(pathname, AUTH_ROUTES)) {
