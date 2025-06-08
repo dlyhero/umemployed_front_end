@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Briefcase, User } from 'lucide-react';
+import { Briefcase, User, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/Spinner';
@@ -16,9 +16,7 @@ export default function SelectRolePage() {
   const router = useRouter();
   const { data: session, update } = useSession();
 
-  const handleContinue = async () => {
-    if (!selectedRole) return;
-    
+  const handleRoleSelect = async (role) => {
     setLoading(true);
     try {
       const response = await fetch('/api/auth/update-role', {
@@ -26,7 +24,7 @@ export default function SelectRolePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ role: selectedRole }),
+        body: JSON.stringify({ role }),
         credentials: 'same-origin'
       });
   
@@ -41,18 +39,22 @@ export default function SelectRolePage() {
         ...session,
         user: {
           ...session?.user,
-          role: selectedRole
+          role: role
         }
       });
 
-      // Force a hard refresh after a short delay to ensure session is updated
-      setTimeout(() => {
-        window.location.href = data.redirectTo || window.location.pathname;
-      }, 200);
+      // Force a hard refresh to ensure all data is properly loaded
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
+      } else {
+        // Fallback in case redirectTo is not provided
+        window.location.reload();
+      }
   
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Full error:', error);
       toast.error(error.message || 'An unexpected error occurred');
+    } finally {
       setLoading(false);
     }
   };
@@ -72,13 +74,23 @@ export default function SelectRolePage() {
       id: 'job_seeker', 
       label: "I'm a Job Seeker", 
       description: "Looking for work opportunities and want to showcase my skills to potential Recruiters.",
-      icon: <User className="h-5 w-5" />
+      icon: <User className="h-5 w-5" />,
+      benefits: [
+        "Find work opportunities",
+        "Build your professional profile",
+        "Get paid for your skills"
+      ]
     },
     { 
       id: 'recruiter', 
       label: "I'm a Recruiter", 
       description: "Looking to hire professionals for projects and grow my business with top talent.",
-      icon: <Briefcase className="h-5 w-5" />
+      icon: <Briefcase className="h-5 w-5" />,
+      benefits: [
+        "Find skilled professionals",
+        "Manage projects and payments",
+        "Build your dream team"
+      ]
     }
   ];
 
@@ -89,11 +101,11 @@ export default function SelectRolePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="text-[#0d141c] text-3xl font-bold text-center sm:text-4xl mb-8">
+        <h1 className="text-[#0d141c] text-3xl font-bold  text-center sm:text-4xl mb-8">
           Join as a Recruiter <br className='sm:hidden'/> or Job Seeker
         </h1>
-        <p className="text-gray-600 text-center mb-10 mx-auto text-lg">
-          This will help us tailor your experience and connect you with the right opportunities.
+        <p className="text-gray-600 text-center mb-10  mx-auto text-lg">
+         This will help us tailor your experience and connect you with the right opportunities.
         </p>
 
         <RadioGroup 
@@ -122,12 +134,11 @@ export default function SelectRolePage() {
                     id={role.id} 
                     className="h-6 w-6 border-2 border-bg-blue-50 data-[state=checked]:border-brand mr-4"
                   />
-                  <div className="flex items-center gap-3">
-                    {role.icon}
+                  <div className="flex items-center">
                     <span className="text-gray-700 text-xl font-semibold">{role.label}</span>
                   </div>
                 </div>
-                <p className="text-gray-500 text-[18px] ml-10">
+                <p className="text-gray-500 text-[18px] mb-4 ml-10">
                   {role.description}
                 </p>
               </Label>
@@ -144,15 +155,17 @@ export default function SelectRolePage() {
           <Button
             disabled={!selectedRole || loading}
             className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
-            onClick={handleContinue}
+            onClick={() => handleRoleSelect(selectedRole)}
           >
             {loading ? (
               <div className="flex items-center gap-2">
                 <Spinner className="h-5 w-5" />
-                <span>Processing...</span>
+                <span>Loading...</span>
               </div>
             ) : (
-              'Continue'
+              <>
+                Continue 
+              </>
             )}
           </Button>
         </motion.div>
