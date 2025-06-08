@@ -2,18 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Toaster, toast } from 'react-hot-toast';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { checkSubscriptionStatus } from '@/lib/api/recruiter_subscribe';
+import { checkSubscriptionStatus } from '@lib/api/recruiter_subscription';
 import Loader from '../../../../components/common/Loader/Loader';
 
 const SuccessPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { companyId } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   useEffect(() => {
@@ -26,35 +24,15 @@ const SuccessPage = () => {
             session.accessToken
           );
           setSubscriptionStatus(statusResponse);
-          if (statusResponse.has_active_subscription) {
-            toast.success(`Subscription activated: ${statusResponse.tier} plan!`, {
-              position: 'top-right',
-            });
-          } else {
-            toast.error('Subscription not found. Please contact support.', {
-              position: 'top-right',
-            });
-          }
         } catch (error) {
-          console.error('Failed to verify subscription:', error);
-          toast.error('Failed to verify subscription. Please contact support.', {
-            position: 'top-right',
-          });
+          setSubscriptionStatus({ has_active_subscription: false });
         }
       } else if (status === 'unauthenticated') {
-        toast.error('Please sign in to continue.', {
-          position: 'top-right',
-        });
         router.push('/auth/signin');
       }
     };
     verifySubscription();
   }, [status, session, router]);
-
-  const handleGoToDashboard = () => {
-    setIsLoading(true);
-    router.push(`/companies/${companyId}/dashboard`);
-  };
 
   if (status === 'loading') {
     return <Loader />;
@@ -62,7 +40,6 @@ const SuccessPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 py-8">
-      <Toaster />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,11 +61,10 @@ const SuccessPage = () => {
             : 'Verifying your subscription... If this persists, please contact support.'}
         </p>
         <Button
-          onClick={handleGoToDashboard}
-          disabled={isLoading || !companyId}
+          disabled={true}
           className="bg-brand text-white hover:bg-brand-dark"
         >
-          {isLoading ? 'Loading...' : 'Go to Dashboard'}
+          Go to Dashboard
         </Button>
       </motion.div>
     </div>
