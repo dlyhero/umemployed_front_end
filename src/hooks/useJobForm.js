@@ -30,7 +30,6 @@ export const useJobForm = (currentStep) => {
     salary_ranges: {},
     job_location_types: {},
     job_types: {},
-    errors: null,
     experience_levels: {},
     weekly_ranges: {},
     shifts: {},
@@ -121,7 +120,7 @@ export const useJobForm = (currentStep) => {
       }
     };
 
-    // Only redirect to /login if session is confirmed unauthenticated after a delay
+    // Only redirect to /login if session is confirmed unauthenticated and no session data exists
     if (status === 'unauthenticated' && session === null) {
       console.log('useJobForm Debug: Redirecting to /login due to unauthenticated status');
       router.push('/login');
@@ -135,7 +134,8 @@ export const useJobForm = (currentStep) => {
     if (currentStep === 'basicinformation') {
       clearStore();
       form.reset();
-      // No subscription check here; defer to onSubmit
+      // Debug: Log form initialization
+      console.log('useJobForm Debug: Form initialized for basicinformation');
     } else if (currentStep === 'skills' && jobId) {
       const loadSkills = async () => {
         setIsLoadingSkills(true);
@@ -178,7 +178,7 @@ export const useJobForm = (currentStep) => {
       const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
       return skills;
     } catch (error) {
-      console.log('fetchExtractedSkills Error:', error.message); // Debug
+      console.log('fetchExtractedSkills Debug: Error', { error: error.message }); // Debug
       return [];
     }
   };
@@ -198,13 +198,13 @@ export const useJobForm = (currentStep) => {
           throw new Error(`Failed to verify job: ${response.status} ${errorText}`);
         }
         const data = await response.json();
-        const verifiedJobId = data.id || data.job_id || null;
+        const verifiedJobId = data.id || data.jobId || null;
         if (!verifiedJobId) {
           throw new Error('No job ID found in verification response');
         }
         return verifiedJobId;
       } catch (error) {
-        console.log('verifyJob Error:', error.message); // Debug
+        console.log('verifyJob Debug: Error', { error: error.message }); // Debug
         if (i < retries - 1) {
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
@@ -248,7 +248,7 @@ export const useJobForm = (currentStep) => {
 
       return result;
     } catch (error) {
-      console.log('generateTailoredDescription Error:', error.message); // Debug
+      console.log('generateTailoredDescription Debug: Error', { error: error.message }); // Debug
       return { error: error.message };
     } finally {
       setIsGeneratingDescription(false);
@@ -267,8 +267,8 @@ export const useJobForm = (currentStep) => {
       );
       return statusResponse;
     } catch (error) {
-      console.log('checkSubscription Error:', error.message); // Debug
-      return { has_active_subscription:CatchError, error: 'Failed to check subscription' };
+      console.log('checkSubscription Debug: Error', { error: error.message }); // Debug
+      return { has_active_subscription: false, error: 'Failed to check subscription' };
     }
   };
 
@@ -507,6 +507,7 @@ export const useJobForm = (currentStep) => {
   };
 
   const prevStep = () => {
+    console.log('prevStep Debug: Starting', { currentStep, jobId }); // Debug
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
