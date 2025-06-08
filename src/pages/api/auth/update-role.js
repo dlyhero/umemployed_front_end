@@ -13,17 +13,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get the token directly using getToken instead of getSession
     const token = await getToken({ req, secret });
     
-    if (!token) {
+    if (!token || !token.accessToken) {
+      console.error('No token found');
       return res.status(401).json({ 
         success: false,
-        message: "Unauthorized" 
+        message: "Unauthorized - No token provided" 
       });
     }
 
-    // Update role on backend
     const response = await axios.post(
       `${baseUrl}/users/choose-account-type/`,
       { account_type: req.body.role },
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
       }
     );
 
-    // Return success with the new role
     return res.status(200).json({ 
       success: true,
       role: req.body.role,
@@ -45,14 +43,15 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Role update error:', error);
+    console.error('Full error:', error);
     const errorMessage = error.response?.data?.message || 
                        error.message || 
                        'Failed to update role';
     
-    return res.status(500).json({ 
+    return res.status(error.response?.status || 500).json({ 
       success: false,
-      message: errorMessage 
+      message: errorMessage,
+      details: error.response?.data
     });
   }
 }
