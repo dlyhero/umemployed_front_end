@@ -34,6 +34,7 @@ export default function SelectRolePage() {
         throw new Error(data.message || 'Failed to update role');
       }
   
+      // Update session
       await update({
         ...session,
         user: {
@@ -41,8 +42,14 @@ export default function SelectRolePage() {
           role: role
         }
       });
-  
-      router.push(data.redirectTo);
+
+      // Force a hard refresh to ensure all data is properly loaded
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
+      } else {
+        // Fallback in case redirectTo is not provided
+        window.location.reload();
+      }
   
     } catch (error) {
       console.error('Full error:', error);
@@ -104,17 +111,18 @@ export default function SelectRolePage() {
         <RadioGroup 
           value={selectedRole} 
           onValueChange={setSelectedRole}
-          className="space-y-4 px-4 sm:flex gap-2 mx-auto  "
+          className="space-y-4 px-4 sm:flex gap-2 mx-auto"
         >
           {roles.map((role) => (
             <motion.div
               key={role.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="flex-1"
             >
               <Label
                 htmlFor={role.id}
-                className={`flex flex-col p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                className={`flex flex-col h-full p-6 rounded-xl border-2 cursor-pointer transition-all ${
                   selectedRole === role.id
                     ? 'border-brand bg-brand/5'
                     : 'border-[#cedae8] hover:border-blue-200'
@@ -127,14 +135,12 @@ export default function SelectRolePage() {
                     className="h-6 w-6 border-2 border-bg-blue-50 data-[state=checked]:border-brand mr-4"
                   />
                   <div className="flex items-center">
-                   
                     <span className="text-gray-700 text-xl font-semibold">{role.label}</span>
                   </div>
                 </div>
                 <p className="text-gray-500 text-[18px] mb-4 ml-10">
                   {role.description}
                 </p>
-            
               </Label>
             </motion.div>
           ))}
@@ -152,7 +158,10 @@ export default function SelectRolePage() {
             onClick={() => handleRoleSelect(selectedRole)}
           >
             {loading ? (
-              <p>Loading...</p>
+              <div className="flex items-center gap-2">
+                <Spinner className="h-5 w-5" />
+                <span>Loading...</span>
+              </div>
             ) : (
               <>
                 Continue 
