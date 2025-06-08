@@ -24,7 +24,7 @@ const AUTH_ROUTES = [
 const ONBOARDING_ROUTES = [
   '/select-role',
   '/upload-resume',
-  '/company/create',
+  '/companies/create',
 ];
 
 // Check if the path matches any pattern in the routes array

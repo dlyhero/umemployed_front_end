@@ -36,7 +36,7 @@ export default function LoginForm() {
                 if (user?.has_company && user?.company_id) {
                     router.push(`/companies/${user.company_id}/dashboard`);
                 } else {
-                    router.push('/company/create');
+                    router.push('/companies/create');
                 }
                 break;
             case 'none':
