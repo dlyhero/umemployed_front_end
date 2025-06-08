@@ -22,31 +22,28 @@ export default function SelectRolePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ role }),
-        credentials: 'include'
+        credentials: 'same-origin' // or 'include' if cross-origin
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update role');
-      }
-
+  
       const data = await response.json();
       
-      if (!data.success) {
+      if (!response.ok || !data.success) {
         throw new Error(data.message || 'Failed to update role');
       }
-
+  
+      // Force a session update
       await update({
+        ...session,
         user: {
           ...session?.user,
           role: role
         }
       });
-
+  
       router.push(data.redirectTo);
-
+  
     } catch (error) {
-      console.error('Role selection error:', error);
+      console.error('Full error:', error);
       toast.error(error.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
