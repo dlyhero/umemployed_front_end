@@ -41,42 +41,75 @@ const JobDetailPage = () => {
     );
   };
 
-  // RetakeRequestForm component definition
-  const RetakeRequestForm = ({ onClose }) => {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
-        <p className="text-muted-foreground">
-          Please explain why you need to retake this assessment. We'll review your request and get back to you.
-        </p>
+// Fixed RetakeRequestForm component
+const RetakeRequestForm = ({ onClose }) => {
+  const [localRetakeReason, setLocalRetakeReason] = useState(retakeReason);
 
-        <textarea
-          className="w-full border rounded-lg p-4 min-h-[200px]"
-          value={retakeReason}
-          onChange={(e) => setRetakeReason(e.target.value)}
-          placeholder="Enter your reasons here..."
-        />
-
-        <div className="flex gap-4">
-          <Button
-            className="border-brand text-brand hover:text-brand flex-1"
-            variant="outline"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            className="flex-1 bg-brand hover:bg-brand/80 text-white"
-            onClick={submitRetakeRequest}
-            disabled={!retakeReason.trim()}
-          >
-            Submit Request
-          </Button>
-        </div>
-      </div>
-    );
+  const handleSubmit = () => {
+    setRetakeReason(localRetakeReason);
+    submitRetakeRequest();
   };
 
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Request Assessment Retake</h2>
+      <p className="text-muted-foreground">
+        Please explain why you need to retake this assessment. We'll review your request and get back to you.
+      </p>
+
+      <textarea
+        className="w-full border rounded-lg p-4 min-h-[200px] focus:ring-2 focus:ring-brand focus:border-transparent"
+        value={localRetakeReason}
+        onChange={(e) => setLocalRetakeReason(e.target.value)}
+        placeholder="Enter your reasons here..."
+      />
+
+      <div className="flex gap-4">
+        <Button
+          className="border-brand text-brand hover:text-brand flex-1"
+          variant="outline"
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+        <Button
+          className="flex-1 bg-brand hover:bg-brand/80 text-white"
+          onClick={handleSubmit}
+          disabled={!localRetakeReason.trim()}
+        >
+          Submit Request
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Fixed submit function
+const submitRetakeRequest = async () => {
+  try {
+    const api = axios.create({
+      baseURL: baseUrl,
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`
+      }
+    });
+
+    await api.post(`/job/${jobId}/report-test/`, {
+      reason: retakeReason
+    });
+
+    toast.success(
+      <div className="space-y-1">
+        <p className="font-medium">Retake request submitted successfully</p>
+        <p className="text-sm">We'll review your request and get back to you shortly.</p>
+      </div>
+    );
+    setShowRetakeModal(false);
+    setRetakeReason('');
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to submit retake request');
+  }
+};
   // MobileRetakePage component definition
   const MobileRetakePage = () => {
     return (
@@ -325,31 +358,7 @@ const JobDetailPage = () => {
     setShowRetakeModal(true);
   };
 
-  const submitRetakeRequest = async () => {
-    try {
-      const api = axios.create({
-        baseURL: baseUrl,
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`
-        }
-      });
 
-      await api.post(`/job/${jobId}/report-test/`, {
-        reason: retakeReason
-      });
-
-      toast.success(
-        <div className="space-y-1">
-          <p className="font-medium">Retake request submitted successfully</p>
-          <p className="text-sm">We'll review your request and get back to you shortly.</p>
-        </div>
-      );
-      setShowRetakeModal(false);
-      setRetakeReason('');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit retake request');
-    }
-  };
 
 
 
