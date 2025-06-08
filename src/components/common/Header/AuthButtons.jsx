@@ -18,7 +18,7 @@ export default function AuthButtons() {
       <div className="flex gap-4">
         <Button
           variant="outline"
-          className="gap-2 hidden md:inline-block"
+          className="gap-2 hidden md:flex"
           onClick={() => signIn()}
         >
           <UserPlus className="w-4 h-4" />
