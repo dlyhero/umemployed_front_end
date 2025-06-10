@@ -35,7 +35,7 @@ export function Header() {
     )}>
       <div className="max-w-[1400px] mx-auto px-2 py-3 flex items-center justify-between">
         <div className="flex items-center  gap-2">
-          <Logo />
+            <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
         </div>
 
