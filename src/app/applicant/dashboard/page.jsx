@@ -13,6 +13,7 @@ import { Sidebar } from './components/Sidebar'
 import { MobileMenu } from './components/MobileMenu'
 import { RecommendedJobs } from './components/RecommendedJobs'
 import { useJobs } from '@/src/hooks/useJob'
+import DashboardHeader from './header-dashoard'
 
 const applicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -39,17 +40,19 @@ const applicantDashBoard = () => {
   
 
   return (
-    <div className="h-fit pb-2 ">
-      <MobileMenu mobileMenuOpen={mobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="h-fit pb-2 bg-gray-50 ">
+      <MobileMenu mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
 
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <div className=" pt-2">
+        <div className="flex flex-col lg:flex-row gap-6 ">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <main className="flex-1">
+          <main className="relative flex-1  mx-auto md:ml-72 rounded-xl">
+            <div className='sticky top-0 '> <DashboardHeader  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/></div>
 
-            <div className="flex justify-end mb-2 lg:hidden px-1">
+           <div className=" mx-auto px-4 lg:px-6 bg-blue-50 rounded-xl">                                                                                                                                                                                                                                
+           <div className="flex justify-end mb-2 lg:hidden px-1">
               <button
                 className=" p-2 flex items-center justify-end bg-gradient-to-r from-brand to-purple-600 py-2 px-4 rounded-md  text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -61,6 +64,7 @@ const applicantDashBoard = () => {
             <StatsGrid stats={stats} />
             <RecommendedJobs/>
             <CareerTips />
+           </div>
           </main>
         </div>
       </div>

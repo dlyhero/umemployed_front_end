@@ -33,7 +33,7 @@ export default function AuthenticatedNav() {
 
   return (
     <>
-      {session.user.role === 'job_seeker' && (
+      {session?.user?.role === 'job_seeker' && (
         <NavigationLink
           href="/applicant/upload-resume" 
           isActive={isResumeActive}

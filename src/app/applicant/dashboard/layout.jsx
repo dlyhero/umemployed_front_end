@@ -35,10 +35,8 @@ export default function DashboardLayout({ children }) {
         className={` antialiased text-[15px]`}
       > 
        <AuthProvider>
-       <Header />
        {children}                                     
        </AuthProvider>
-       <Footer />
       </div>
   );
 }
