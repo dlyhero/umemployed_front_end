@@ -52,14 +52,7 @@ const applicantDashBoard = () => {
             <div className='sticky top-0 '> <DashboardHeader  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/></div>
 
            <div className=" mx-auto px-4 lg:px-6 bg-blue-50 rounded-xl">                                                                                                                                                                                                                                
-           <div className="flex justify-end mb-2 lg:hidden px-1">
-              <button
-                className=" p-2 flex items-center justify-end bg-gradient-to-r from-brand to-purple-600 py-2 px-4 rounded-md  text-white"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                side menu
-                <ChevronDoubleDownIcon className="w-4 h-4" />
-              </button></div>
+           
             <WelcomeSection />
             <StatsGrid stats={stats} />
             <RecommendedJobs/>
