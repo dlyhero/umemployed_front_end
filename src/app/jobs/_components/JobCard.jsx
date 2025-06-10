@@ -26,7 +26,7 @@ const JobCard = ({ job, onToggleSave, loading }) => {
 
   return (
     <motion.div
-      className="bg-white border border-gray-200 rounded-xl p-4 h-full flex flex-col mx-2 cursor-pointer"
+      className="bg-white border border-gray-200 rounded-xl p-4 h-full flex flex-col mx-2 cursor-pointer max-w-md"
       onClick={handleViewJob}
     >
       <div className="flex justify-between items-start gap-2 mb-3">

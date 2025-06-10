@@ -1,6 +1,21 @@
 'use client'
 import { motion } from 'framer-motion'
-import { BarChart2, Bookmark, Briefcase, ChevronRight, LayoutDashboard, Settings, User, FileText, ClipboardList } from 'lucide-react'
+import { 
+  BarChart2, 
+  Bookmark, 
+  Briefcase, 
+  ChevronRight, 
+  LayoutDashboard, 
+  Settings, 
+  User, 
+  FileText, 
+  ClipboardList,
+  MessageSquare,
+  Bell,
+  BookOpen,
+  FileEdit,
+  BookmarkCheck
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -8,6 +23,12 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
   const pathname = usePathname()
 
   const navItems = [
+    { 
+      icon: <LayoutDashboard className="w-5 h-5" />, 
+      label: "Dashboard",
+      path: "/applicant/dashboard",
+      description: "Manage your personal information"
+    },
     { 
       icon: <User className="w-5 h-5" />, 
       label: "My Profile",
@@ -34,9 +55,33 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     },
     { 
       icon: <FileText className="w-5 h-5" />, 
+      label: "Resume",
+      path: "/applicant/upload-resume",
+      description: "Upload and manage your resume"
+    },
+    { 
+      icon: <FileEdit className="w-5 h-5" />, 
       label: "Resume Advisor",
       path: "/applicant/resume-advisor",
       description: "Create and optimize your resume"
+    },
+    { 
+      icon: <Bell className="w-5 h-5" />, 
+      label: "Notifications",
+      path: "/notifications",
+      description: "Check your notifications and alerts",
+    },
+    { 
+      icon: <MessageSquare className="w-5 h-5" />,
+      label: "Messages",
+      path: "/messages",
+      description: "View your messages and notifications"
+    },
+    { 
+      icon: <BookmarkCheck className="w-5 h-5" />, 
+      label: "Shortlisted Jobs", 
+      path: "/shortlisted-jobs",
+      description: "View jobs you have shortlisted"
     },
     { 
       icon: <BarChart2 className="w-5 h-5" />, 
@@ -56,7 +101,7 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     <nav className="space-y-1">
       {navItems.map((item, index) => {
         const isActive = pathname?.startsWith(item.path) || 
-                         activeTab === item.label.toLowerCase()
+            activeTab === item.label.toLowerCase()
         
         return (
           <Link 
@@ -68,19 +113,20 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
           >
             <motion.a
               whileHover={{ x: 5 }}
-              className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+              className={`flex items-center w-full p-3 rounded-lg transition-colors font-semibold ${
                 isActive 
-                  ? 'bg-indigo-50 text-brand font-semibold' 
+                  ? 'bg-brand text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => setActiveTab(item.label.toLowerCase())}
               aria-label={item.description}
             >
-              <span className={isActive ? 'text-brand' : 'text-gray-500'}>
+              <span className={isActive ? 'text-white' : 'text-brand'}>
                 {item.icon}
               </span>
-              <span className="ml-3">{item.label}</span>
-              <ChevronRight className="ml-auto w-4 h-4 text-gray-400" />
+              <span className={`ml-3 ${isActive ? 'text-white' : 'text-gray-700'}`}>
+                {item.label}
+              </span>
             </motion.a>
           </Link>
         )
