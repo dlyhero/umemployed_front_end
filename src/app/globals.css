@@ -134,102 +134,117 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@font-face {
-  font-family: "Quicksand";
-  src: url("/Quicksand-Regular.woff2") format("woff2"), url("/Quicksand-Regular.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-}
-
-
-body {
-  font-family: "Quicksand", sans-serif;
-  font-weight: 400;
-  background-color: white;
-}
-
-body {
-  font-family: "Quicksand", sans-serif;
-  font-weight: 400;
-  background-color: white;
-  font-size: 17px; /* Slightly increased base size */
-  line-height: 1.5;
-}
-
-button {
-  font-size: 15.5px !important;
-}
-
-a {
-  font-size: 11.5px !important;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
   body {
-    font-size: 16px;
+    @apply bg-background text-foreground;
+    font-family: 'Quicksand', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
   }
 }
 
-@media (max-width: 768px) {
-  body {
-    font-size: 15px;
-  }
+Button{
+  font-size: 16 !important 
 }
 
+Link{
+  font-size: 10px !important;
+}
+
+
+
+/* Responsive font sizing - reduce font size on small screens */
 @media (max-width: 640px) {
   html {
-    font-size: 15px;
+    font-size: 14px; /* Base font size for small screens */
   }
 
-  body {
-    font-size: 15px;
-    line-height: 1.5;
+  p,
+  span,
+  div,
+  li,
+  input,
+  textarea,
+  button {
+    font-size: 0.85rem; /* Further reduce for specific elements */
   }
-
-  p, span, div, li, input, textarea, button {
-    font-size: 0.85rem; /* Slightly reduced from 1rem */
+  .Hero-title{
+    font-size: 1.8rem;
   }
-
   h1 {
-    font-size: 1.75rem; /* Reduced from 2rem */
+    font-size: 1.8rem;
   }
 
-  .Herotitle {
-    font-size: 1.75rem;
+  .Herotitle{
+    font-size: 1.8rem;
   }
 
-  .ctAtitle {
-    font-size: 1.25rem; /* Reduced from 1.5rem */
-  }
-
-  .heroName {
-    font-size: 1.875rem;
+  
+  .heroName{
+    font-size: 1.8rem;
   }
 
   h2 {
-    font-size: 1.35rem; /* Reduced from 1.6rem */
+    font-size: 1.25rem;
   }
 
   h3 {
-    font-size: 1.1rem; /* Reduced from 1.3rem */
+    font-size: 1.1rem;
   }
 
-  button {
-    font-size: 14.5px !important;
+  .text-xs {
+    font-size: 0.75rem !important;
   }
+
+  .text-sm {
+    font-size: 0.85rem !important;
+  }
+
+  .text-base {
+    font-size: 0.9rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.2rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.2rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+Button{
+  font-size: 15 !important 
+}
 }
 
+/* For very small screens, reduce even further */
 @media (max-width: 375px) {
   html {
-    font-size: 14px;
+    font-size: 13px;
   }
 
-  body {
-    font-size: 14px;
+  .text-xs {
+    font-size: 0.65rem !important;
   }
+
+  .text-sm {
+    font-size: 0.75rem !important;
+  }
+
+Button{
+  font-size: 14 !important 
+}
 }
 
+.logo{
+  font-size: 30px;
+}
 
 @layer base {
   * {
@@ -238,21 +253,4 @@ a {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Brand colors */
-.bg-brand-600 {
-  background-color: #0070f3;
-}
-
-.bg-brand-100 {
-  background-color: #e0eefe;
-}
-
-.hover\:bg-brand-700:hover {
-  background-color: #0057c6;
-}
-
-.text-brand-600 {
-  color: #0070f3;
 }
