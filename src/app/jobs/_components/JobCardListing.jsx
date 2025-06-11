@@ -55,7 +55,7 @@ const JobCardListing = ({ job, onToggleSave }) => {
                                 }
                             </a>
                             <a
-                                className="title block text-nowrap truncate max-w-[195px]  lg:-w-[250px] text-lg font-medium text-gray-900 hover:text-brand transition-colors cursor-pointer"
+                                className="title block text-nowrap truncate sm:max-w-[60px] border md:max-w-[195px]  lg:-w-[250px] text-lg font-medium text-gray-900 hover:text-brand transition-colors cursor-pointer"
                                 onClick={handleViewJob}
                             >
                                 {job.title}

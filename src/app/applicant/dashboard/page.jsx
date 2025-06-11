@@ -82,7 +82,7 @@ const ApplicantDashBoard = () => {
               <DashboardHeader onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/>
             </div>
 
-            <div className="mx-auto px-4 lg:px-6 bg-gray-100 rounded-xl shadow min-h-screen">                                                                                                                                                                                                                                
+            <div className="mx-auto px-4 lg:px-6 bg-gray-100 rounded-xl shadow min-h-screen mt-16 md:mt-0">                                                                                                                                                                                                                                
               {renderContent()}
             </div>
           </main>
