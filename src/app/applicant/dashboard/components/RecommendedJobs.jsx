@@ -25,7 +25,8 @@ export const RecommendedJobs = () => {
 
     <div className="space-y-4">
       {displayJobs.slice(0, 4).map((job) => (
-        <JobCard
+        <JobCardListing
+          key={job.id}
           job={job}
           onToggleSave={() => toggleSaveJob(job.id)}
         />
