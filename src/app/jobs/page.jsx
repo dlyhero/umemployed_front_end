@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import JobCard from './_components/JobCard';
 import { useJobs } from '@/src/hooks/useJob';
 import { Filters } from './_components/Filters';
+import JobCardListing from './_components/JobCardListing';
 
 function JobListingContent() {
   const router = useRouter();
@@ -95,7 +96,7 @@ function JobListingContent() {
           {/* Desktop Filter Panel */}
           {!isMobile && (
             <div className="w-80 flex-shrink-0">
-              <div className="sticky top-8">
+              <div className=" top-8">
                 <Filters
                   options={filterOptions} 
                   onFilterChange={applyFilters}
@@ -165,15 +166,12 @@ function JobListingContent() {
                   </h2>
                 </div>
 
-                {loading ? (
-                  <div className="flex justify-center items-center h-64">
-                    <Spinner className="h-8 w-8" />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+               
+              
+                  <div className="grid grid-cols-1">
                     {jobs.length > 0 ? (
                       jobs.map((job) => (
-                        <JobCard
+                        <JobCardListing
                           key={job.id}
                           job={job}
                           onToggleSave={() => toggleSaveJob(job.id)}
@@ -198,7 +196,6 @@ function JobListingContent() {
                       </div>
                     )}
                   </div>
-                )}
               </div>
             </Tabs>
           </div>

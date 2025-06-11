@@ -36,7 +36,7 @@ function DashboardHeader({ onClick }) {
     }
 
     return (
-        <header className="bg-blue-50 border-gray-200 px-4 md:px-8 py-4 w-full  z-40">
+        <header className="bg-white  px-4 md:px-8 py-4 w-fullz-40">
             <div className="flex items-center justify-end">
                 <button
                     className="md:hidden mr-auto p-2 text-gray-600 hover:brand/90 transition-colors duration-300"
@@ -49,7 +49,7 @@ function DashboardHeader({ onClick }) {
                     <input
                         placeholder="Search here.."
                         type="text"
-                        className=" md:w-lg bg-blue-100  h-11 border border-gray-200 rounded-xl px-5 pr-12 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+                        className=" md:w-lg bg-gray-100  h-11 border border-gray-200 rounded-xl px-5 pr-12 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-blue-200 transition-all duration-300"
                     />
                     <button
                         type="submit"

@@ -22,78 +22,67 @@ import { usePathname } from 'next/navigation'
 export const SidebarNav = ({ activeTab, setActiveTab }) => {
   const pathname = usePathname()
 
+ 
   const navItems = [
     { 
+      id: "dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />, 
       label: "Dashboard",
-      path: "/applicant/dashboard",
-      description: "Manage your personal information"
     },
     { 
+      id: "profile",
       icon: <User className="w-5 h-5" />, 
       label: "My Profile",
-      path: "/applicant/profile",
-      description: "Manage your personal information"
     },
     { 
+      id: "job-search",
       icon: <Briefcase className="w-5 h-5" />, 
       label: "Job Search",
-      path: "/jobs",
-      description: "Browse available job opportunities"
     },
     { 
+      id: "saved-positions",
       icon: <Bookmark className="w-5 h-5" />, 
       label: "Saved Positions",
-      path: "/jobs?tab=saved",
-      description: "Your shortlisted job opportunities"
     },
     { 
+      id: "my-applications",
       icon: <ClipboardList className="w-5 h-5" />, 
       label: "My Applications",
-      path: "/jobs?tab=applied",
-      description: "Track your job applications"
     },
     { 
+      id: "resume",
       icon: <FileText className="w-5 h-5" />, 
       label: "Resume",
-      path: "/applicant/upload-resume",
-      description: "Upload and manage your resume"
     },
     { 
+      id: "resume-advisor",
       icon: <FileEdit className="w-5 h-5" />, 
       label: "Resume Advisor",
-      path: "/applicant/resume-advisor",
-      description: "Create and optimize your resume"
     },
     { 
+      id: "notifications",
       icon: <Bell className="w-5 h-5" />, 
       label: "Notifications",
-      path: "/notifications",
-      description: "Check your notifications and alerts",
     },
     { 
+      id: "messages",
       icon: <MessageSquare className="w-5 h-5" />,
       label: "Messages",
-      path: "/messages",
-      description: "View your messages and notifications"
     },
     { 
+      id: "shortlisted",
       icon: <BookmarkCheck className="w-5 h-5" />, 
       label: "Shortlisted Jobs", 
-      path: "/shortlisted-jobs",
-      description: "View jobs you have shortlisted"
     },
     { 
+      id: "perfect-job",
       icon: <BarChart2 className="w-5 h-5" />, 
       label: "Perfect Job Title",
-      path: "/applicant/perfect-job",
-      description: "Your job search statistics"
     },
     { 
+      id: "account-settings",
       icon: <Settings className="w-5 h-5" />, 
       label: "Account Settings", 
-      path: "/settings",
-      description: "Update your account preferences"
     }
   ]
 
@@ -104,22 +93,19 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
             activeTab === item.label.toLowerCase()
         
         return (
-          <Link 
-            href={item.path} 
+          <div
             key={index} 
             passHref 
             legacyBehavior
             title={item.description}
           >
             <motion.a
-              whileHover={{ x: 5 }}
-              className={`flex items-center w-full p-3 rounded-lg transition-colors font-semibold ${
+              className={`flex items-center w-full p-3 text-lg rounded-lg transition-colors font-semibold cursor-pointer ${
                 isActive 
                   ? 'bg-brand text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => setActiveTab(item.label.toLowerCase())}
-              aria-label={item.description}
+              onClick={() => setActiveTab(item.id)}
             >
               <span className={isActive ? 'text-white' : 'text-brand'}>
                 {item.icon}
@@ -128,7 +114,7 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
                 {item.label}
               </span>
             </motion.a>
-          </Link>
+          </div>
         )
       })}
     </nav>

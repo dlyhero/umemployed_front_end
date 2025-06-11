@@ -77,7 +77,6 @@ export const useJobs = () => {
       description: job.description.replace(/<[^>]*>/g, '')
     }));
 
-
     setAllJobs(formattedJobs);
     setFilteredJobs(formattedJobs);
 
@@ -154,7 +153,6 @@ export const useJobs = () => {
   }
 
   const fetchData = async () => {
-
     try {
       setLoading(true);
       const api = axios.create({
@@ -175,7 +173,6 @@ export const useJobs = () => {
         description: job.description.replace(/<[^>]*>/g, '')
       }));
 
-
       setAllJobs(formattedJobs);
       setFilteredJobs(formattedJobs);
 
@@ -185,7 +182,70 @@ export const useJobs = () => {
       const appliedResponse = await api.get('/job/applied-jobs/');
       setAppliedJobs(appliedResponse.data.map(job => job.id));
 
-      
+      // Set filter options
+      const employmentTypes = [...new Set(formattedJobs.map(job => job.job_location_type))]
+        .filter(Boolean)
+        .map(type => ({
+          value: type,
+          label: formatLocationType(type),
+          count: formattedJobs.filter(job => job.job_location_type === type).length
+        }));
+
+      const experienceLevels = [...new Set(formattedJobs.map(job => job.experience_level))]
+        .filter(Boolean)
+        .map(level => ({
+          value: level,
+          label: formatExperienceLevel(level),
+          count: formattedJobs.filter(job => job.experience_level === level).length
+        }));
+
+      const locations = [...new Set(formattedJobs.map(job => job.location))]
+        .filter(Boolean)
+        .map(location => ({
+          value: location,
+          label: location,
+          count: formattedJobs.filter(job => job.location === location).length
+        }));
+
+      const salaryRanges = [
+        {
+          value: '0-50000', label: 'Under $50K', count: formattedJobs.filter(job => {
+            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+            return salary < 50000;
+          }).length
+        },
+        {
+          value: '50000-100000', label: '$50K - $100K', count: formattedJobs.filter(job => {
+            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+            return salary >= 50000 && salary < 100000;
+          }).length
+        },
+        {
+          value: '100000-150000', label: '$100K - $150K', count: formattedJobs.filter(job => {
+            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+            return salary >= 100000 && salary < 150000;
+          }).length
+        },
+        {
+          value: '150000-200000', label: '$150K - $200K', count: formattedJobs.filter(job => {
+            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+            return salary >= 150000 && salary < 200000;
+          }).length
+        },
+        {
+          value: '200000-', label: 'Over $200K', count: formattedJobs.filter(job => {
+            const salary = parseInt(job.salary_range?.split('-')[0]) || 0;
+            return salary >= 200000;
+          }).length
+        }
+      ];
+
+      setFilterOptions({
+        employment_types: employmentTypes,
+        experience_levels: experienceLevels,
+        locations: locations,
+        salary_ranges: salaryRanges
+      });
 
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -270,42 +330,64 @@ export const useJobs = () => {
     }
   };
 
+  // FIXED APPLY FILTERS FUNCTION - This was the main issue!
   const applyFilters = (filters) => {
+    console.log('Applying filters:', filters); // Debug log
+    
     let filtered = [...allJobs];
 
-    if (filters.employment_types?.length > 0) {
+    // Location filter (single selection)
+    if (filters.location && filters.location !== '') {
+      filtered = filtered.filter(job => {
+        return job.location === filters.location;
+      });
+    }
+
+    // Employment types filter (multiple selection)
+    if (filters.employment_types && filters.employment_types.length > 0) {
       filtered = filtered.filter(job =>
         filters.employment_types.includes(job.job_location_type)
       );
     }
 
-    if (filters.experience_levels?.length > 0) {
+    // Experience levels filter (multiple selection)
+    if (filters.experience_levels && filters.experience_levels.length > 0) {
       filtered = filtered.filter(job =>
         filters.experience_levels.includes(job.experience_level)
       );
     }
 
-    if (filters.locations?.length > 0) {
-      filtered = filtered.filter(job =>
-        filters.locations.includes(job.location)
-      );
-    }
-
-    if (filters.salary_ranges?.length > 0) {
+    // Salary range filter (slider-based)
+    if (filters.salary_ranges) {
       filtered = filtered.filter(job => {
         if (!job.salary_range) return false;
-        const minSalary = parseInt(job.salary_range.split('-')[0]);
-
-        return filters.salary_ranges.some(range => {
-          const [min, max] = range.split('-').map(Number);
-          if (range.endsWith('-')) return minSalary >= min;
-          return minSalary >= min && (!max || minSalary < max);
-        });
+        
+        // Extract the minimum salary from the job's salary range
+        const jobMinSalary = parseInt(job.salary_range.split('-')[0]) || 0;
+        
+        // Check if job salary falls within the selected range
+        return jobMinSalary >= filters.salary_ranges.min && 
+               jobMinSalary <= filters.salary_ranges.max;
       });
     }
 
+    // Category filter (multiple selection) - if you have categories
+    if (filters.category && filters.category.length > 0) {
+      filtered = filtered.filter(job =>
+        filters.category.includes(job.category)
+      );
+    }
+
+    // Tags filter (multiple selection) - if you have tags
+    if (filters.tags && filters.tags.length > 0) {
+      filtered = filtered.filter(job =>
+        job.tags && job.tags.some(tag => filters.tags.includes(tag))
+      );
+    }
+
+    console.log('Filtered jobs:', filtered); // Debug log
     setFilteredJobs(filtered);
-    toast.success('Filters applied successfully');
+    toast.success(`${filtered.length} jobs found`);
   };
 
   const resetFilters = () => {
