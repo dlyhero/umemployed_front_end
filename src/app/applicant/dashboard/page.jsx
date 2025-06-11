@@ -16,6 +16,7 @@ import { useJobs } from '@/src/hooks/useJob'
 import DashboardHeader from './header-dashoard'
 import EnhancedResumePage from '../resume-enhancer/page'
 import ResumeUploadPage from '../upload-resume/page'
+import ProfilePage from '../profile/page'
 
 const ApplicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -54,6 +55,8 @@ const ApplicantDashBoard = () => {
         return <EnhancedResumePage />
       case 'resume':
         return <ResumeUploadPage />
+      case "profile":
+        return <ProfilePage />
       // Add more cases for other tabs if needed
       default:
         return (
@@ -75,7 +78,7 @@ const ApplicantDashBoard = () => {
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
           <main className="relative flex-1 mx-auto md:ml-72">
-            <div className='sticky top-0'> 
+            <div className='fixed md:sticky top-0 left-0 right-0 z-10 md:px-4 bg-white'> 
               <DashboardHeader onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/>
             </div>
 

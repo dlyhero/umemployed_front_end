@@ -1,6 +1,6 @@
 'use client';
 
-import { UserCircle, Edit, MessageSquare, Share2, Camera, X, Phone, Mail, Cake, Maximize2 } from 'lucide-react';
+import { UserCircle, Edit, MessageSquare, Share2, Camera, X, Phone, Mail, Cake, MapPin, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -223,90 +223,49 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
   };
 
   return (
-    <>
-      <Card className="overflow-hidden border-0 shadow-sm rounded-lg bg-white pt-0">
-        {/* Cover Photo */}
-        <div className="h-56 bg-gray-100 relative group">
-          {coverImage ? (
-            <>
-              <img
-                src={coverImage}
-                alt="Cover"
-                className="w-full h-full object-cover cursor-pointer"
-                onClick={() => openImageModal(coverImage, 'cover')}
-              />
-              <button 
-                className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-all"
-                onClick={() => openImageModal(coverImage, 'cover')}
-              >
-                <Maximize2 className="h-4 w-4 text-gray-700" />
-              </button>
-            </>
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
-          )}
-
-          {isOwner && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-              <input
-                type="file"
-                ref={coverInputRef}
-                onChange={(e) => handleImageUpload(e, 'cover')}
-                accept="image/*"
-                className="hidden"
-              />
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-white/90 hover:bg-white text-gray-800 shadow"
-                  onClick={() => coverInputRef.current.click()}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <h2 className="text-2xl font-semibold text-gray-900">My Profile</h2>
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" className="hidden sm:flex">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Message
+              </Button>
+              <Button variant="outline" className="hidden sm:flex">
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+              {isOwner && (
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setEditOpen(true)}
                 >
-                  <Camera className="mr-2 h-4 w-4" />
-                  {coverImage ? 'Change' : 'Add'} Cover
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
                 </Button>
-                {coverImage && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="bg-white/90 hover:bg-white text-red-600 shadow"
-                    onClick={() => removeImage('cover')}
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Remove
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
+      </header>
 
-        {/* Profile Content */}
-        <div className="px-6 pb-6 relative">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
-            <div className="flex flex-col sm:flex-row items-start gap-6 -mt-16">
-              {/* Profile Picture */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Profile Card */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          {/* Avatar Section */}
+          <div className="p-8 border-b">
+            <div className="flex items-center space-x-6">
               <div className="relative group">
-                <div className="relative">
-                  <Avatar 
-                    className="h-32 w-32 border-4 border-white shadow-lg cursor-pointer"
-                    onClick={() => profileImage !== "/default-avatar.jpg" && openImageModal(profileImage, 'profile')}
-                  >
-                    <AvatarImage src={profileImage} />
-                    <AvatarFallback className="bg-gray-100">
-                      <UserCircle className="h-full w-full text-gray-300" />
-                    </AvatarFallback>
-                  </Avatar>
-                  {profileImage !== "/default-avatar.jpg" && (
-                    <button 
-                      className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-all"
-                      onClick={() => openImageModal(profileImage, 'profile')}
-                    >
-                      <Maximize2 className="h-4 w-4 text-gray-700" />
-                    </button>
-                  )}
-                </div>
-
+                <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg">
+                  <AvatarImage src={profileImage} />
+                  <AvatarFallback className="bg-gray-100">
+                    <UserCircle className="h-full w-full text-gray-300" />
+                  </AvatarFallback>
+                </Avatar>
+                
                 {isOwner && (
                   <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
                     <input
@@ -316,11 +275,11 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
                       accept="image/*"
                       className="hidden"
                     />
-                    <div className="flex flex-col gap-2">
+                    <div className="flex space-x-2">
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="rounded-full h-10 w-10 p-0 bg-white/90 hover:bg-white text-gray-800 shadow"
+                        className="rounded-full h-8 w-8 p-0 bg-white/90 hover:bg-white"
                         onClick={() => fileInputRef.current.click()}
                       >
                         <Camera className="h-4 w-4" />
@@ -329,7 +288,7 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
                         <Button
                           variant="destructive"
                           size="sm"
-                          className="rounded-full h-10 w-10 p-0 bg-white/90 hover:bg-white text-red-600 shadow"
+                          className="rounded-full h-8 w-8 p-0 bg-white/90 hover:bg-white text-red-600"
                           onClick={() => removeImage('profile')}
                         >
                           <X className="h-4 w-4" />
@@ -340,75 +299,222 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
                 )}
               </div>
 
-              <div className="mt-2 sm:mt-12 lg:mt-12 space-y-2">
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                {user.job_title?.name && (
-                  <p className="text-gray-700 font-medium">{user.job_title?.name}</p>
-                )}
-                <p className="text-gray-500 text-sm">
-                  {user.location?.city && `${user.location.city}, `}
-                  {user.personalInfo?.country}
-                </p>
-                
-                {/* Personal Info Section */}
-                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm text-gray-600">
-                  {user.personalInfo?.phone && (
-                    <div className="flex items-center gap-1">
-                      <Phone className="h-4 w-4 text-gray-400" />
-                      <span>{user.personalInfo.phone}</span>
-                    </div>
-                  )}
-                  {user.personalInfo?.email && (
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <span>{user.personalInfo.email}</span>
-                    </div>
-                  )}
-                  {user.personalInfo?.dateOfBirth && (
-                    <div className="flex items-center gap-1">
-                      <Cake className="h-4 w-4 text-gray-400" />
-                      <span>{formatDate(user.personalInfo.dateOfBirth)}</span>
-                    </div>
-                  )}
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    {isOwner && (
+                      <div className="flex items-center space-x-3 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                          onClick={() => fileInputRef.current.click()}
+                        >
+                          Upload new photo
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          onClick={() => removeImage('profile')}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Basic Info Section */}
+          <div className="p-8 border-b">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name*
+                </label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  {user.name}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Job Title
+                </label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  {user.job_title?.name || 'Not specified'}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-4 sm:mt-0 self-end sm:self-auto">
-              <Button variant="outline" className="gap-2 hover:bg-gray-50 border-gray-300">
-                <MessageSquare className="h-4 w-4" />
-                <span className="hidden sm:inline">Message</span>
-              </Button>
-              <Button variant="outline" className="gap-2 hover:bg-gray-50 border-gray-300">
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bio*
+              </label>
+              <div className="p-3 bg-gray-50 rounded-md border min-h-[100px]">
+                {user.bio || 'Write something interesting about you...'}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Brief description for your profile. URLs are hyperlinked.
+              </p>
+            </div>
+          </div>
+
+          {/* Social Media Section */}
+          <div className="p-8 border-b">
+            <h4 className="text-lg font-semibold text-gray-900 mb-6">Social Media</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Network 1
+                </label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  {user.socialMedia?.network1 || '#'}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Network 2
+                </label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  {user.socialMedia?.network2 || '#'}
+                </div>
+              </div>
               {isOwner && (
-                <Button
-                  variant="outline"
-                  className="gap-2 text-brand border-blue-300 hover:bg-blue-50"
-                  onClick={() => setEditOpen(true)}
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="hidden sm:inline">Edit Profile</span>
+                <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add more link
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Status Badge - Only show if user is seeking opportunities */}
-          {user.seekingOpportunities && (
-            <div className="mt-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-brand">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Open to work
-              </span>
+          {/* Address & Location Section */}
+          <div className="p-8">
+            <h4 className="text-lg font-semibold text-gray-900 mb-6">Address & Location</h4>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address*
+                </label>
+                <div className="p-3 bg-gray-50 rounded-md border">
+                  {user.personalInfo?.address || user.location?.address || 'Not specified'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country*
+                  </label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    {user.personalInfo?.country || 'Not specified'}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City*
+                  </label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    {user.location?.city || 'Not specified'}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Zip Code*
+                  </label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    {user.location?.zipCode || 'Not specified'}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    State*
+                  </label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    {user.location?.state || 'Not specified'}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Map Location*
+                </label>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className="p-3 bg-gray-50 rounded-md border pr-12">
+                      {user.location?.coordinates || 'XC23+6XC, Location coordinates'}
+                    </div>
+                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600">
+                      <MapPin className="h-5 w-5" />
+                    </button>
+                  </div>
+                  
+                  {/* Map placeholder */}
+                  <div className="h-64 bg-gray-100 rounded-md border flex items-center justify-center">
+                    <div className="text-center text-gray-500">
+                      <MapPin className="h-12 w-12 mx-auto mb-2" />
+                      <p>Map would be displayed here</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-6 border-t">
+                {user.personalInfo?.phone && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Phone className="h-4 w-4" />
+                    <span>{user.personalInfo.phone}</span>
+                  </div>
+                )}
+                {user.personalInfo?.email && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Mail className="h-4 w-4" />
+                    <span>{user.personalInfo.email}</span>
+                  </div>
+                )}
+                {user.personalInfo?.dateOfBirth && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Cake className="h-4 w-4" />
+                    <span>{formatDate(user.personalInfo.dateOfBirth)}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Action Buttons */}
+            {isOwner && (
+              <div className="flex items-center space-x-4 mt-8 pt-6 border-t">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                  onClick={() => setEditOpen(true)}
+                >
+                  Save
+                </Button>
+                <Button variant="outline" className="px-6">
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </Card>
+
+        {/* Status Badge */}
+        {user.seekingOpportunities && (
+          <div className="mt-6">
+            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Open to work
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Edit Profile Modal */}
       <EditModal
@@ -512,6 +618,6 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
