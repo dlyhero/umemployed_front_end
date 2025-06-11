@@ -26,8 +26,8 @@ const JobCard = ({ job, onToggleSave, loading }) => {
 
   return (
     <div>
-      <div className="item" tabIndex="-1" style={{ width: '100%', display: 'inline-block' }}>
-        <motion.div className=" relative bg-white border border-gray-200 rounded-xl p-4 cursor-pointer max-w-md mx-2">
+      <div className="item md:min-w-[400px] sm:min-w-[350px] min-w-[300px]">
+        <motion.div className="relative bg-white border border-gray-200 rounded-xl p-4 cursor-pointer max-w-md mx-2">
           <div className="flex items-center justify-between">
 
             {/* Logo */}

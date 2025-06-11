@@ -1,6 +1,7 @@
 'use client'
 
 import JobCard from "@/src/app/jobs/_components/JobCard"
+import JobCardListing from "@/src/app/jobs/_components/JobCardListing";
 import { useJobs } from "@/src/hooks/useJob"
 import { useEffect, useState } from "react";
 
@@ -22,9 +23,9 @@ export const RecommendedJobs = () => {
     
     </div>
 
-    <div className="space-y-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-2">
-      {displayJobs.slice(0, 3).map((job) => (
-        <JobCard
+    <div className="space-y-4">
+      {displayJobs.slice(0, 4).map((job) => (
+        <JobCardListing
           key={job.id}
           job={job}
           onToggleSave={() => toggleSaveJob(job.id)}

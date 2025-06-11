@@ -34,11 +34,7 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
       icon: <User className="w-5 h-5" />, 
       label: "My Profile",
     },
-    { 
-      id: "job-search",
-      icon: <Briefcase className="w-5 h-5" />, 
-      label: "Job Search",
-    },
+
     { 
       id: "saved-positions",
       icon: <Bookmark className="w-5 h-5" />, 
@@ -49,21 +45,13 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
       icon: <ClipboardList className="w-5 h-5" />, 
       label: "My Applications",
     },
-    { 
-      id: "resume",
-      icon: <FileText className="w-5 h-5" />, 
-      label: "Resume",
-    },
+   
     { 
       id: "resume-advisor",
       icon: <FileEdit className="w-5 h-5" />, 
       label: "Resume Advisor",
     },
-    { 
-      id: "notifications",
-      icon: <Bell className="w-5 h-5" />, 
-      label: "Notifications",
-    },
+   ,
     { 
       id: "messages",
       icon: <MessageSquare className="w-5 h-5" />,
@@ -100,7 +88,7 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
             title={item.description}
           >
             <motion.a
-              className={`flex items-center w-full p-3 text-lg rounded-lg transition-colors font-semibold cursor-pointer ${
+              className={`flex items-center w-full p-3 rounded-lg transition-colors font-semibold cursor-pointer ${
                 isActive 
                   ? 'bg-brand text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
