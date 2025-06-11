@@ -14,20 +14,22 @@ import { MobileMenu } from './components/MobileMenu'
 import { RecommendedJobs } from './components/RecommendedJobs'
 import { useJobs } from '@/src/hooks/useJob'
 import DashboardHeader from './header-dashoard'
+import EnhancedResumePage from '../resume-enhancer/page'
+import ResumeUploadPage from '../upload-resume/page'
 
-const applicantDashBoard = () => {
+const ApplicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-   const [savedJobs, setSavedJobs] = useState([]);
+  const [savedJobs, setSavedJobs] = useState([])
   
-    const toggleSaveJob = (jobId) => {
-      setSavedJobs(prev => 
-        prev.includes(jobId) 
-          ? prev.filter(id => id !== jobId) 
-          : [...prev, jobId]
-      );
-    };
-  
+  const toggleSaveJob = (jobId) => {
+    setSavedJobs(prev => 
+      prev.includes(jobId) 
+        ? prev.filter(id => id !== jobId) 
+        : [...prev, jobId]
+    )
+  }
+
   // Mock data
   const [stats] = useState([
     { id: 1, name: 'Profile Views', value: '1.2K', change: '+12%', icon: <User className="w-5 h-5" /> },
@@ -36,28 +38,50 @@ const applicantDashBoard = () => {
     { id: 4, name: 'Avg. Response', value: '2.4d', change: '-0.5d', icon: <Clock className="w-5 h-5" /> }
   ])
 
-  
-  
-
-  return (
-    <div className="h-fit pb-2 bg-gray-50 ">
-      <MobileMenu mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-
-      <div className=" pt-2">
-        <div className="flex flex-col lg:flex-row gap-6 ">
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
-          <main className="relative flex-1  mx-auto md:ml-72 rounded-xl">
-            <div className='sticky top-0 '> <DashboardHeader  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/></div>
-
-           <div className=" mx-auto px-4 lg:px-6 bg-blue-50 rounded-xl">                                                                                                                                                                                                                                
-           
+  // Render the appropriate content based on activeTab
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'dashboard':
+        return (
+          <>
             <WelcomeSection />
             <StatsGrid stats={stats} />
             <RecommendedJobs/>
             <CareerTips />
-           </div>
+          </>
+        )
+      case 'shortlisted':
+        return <EnhancedResumePage />
+      case 'resume':
+        return <ResumeUploadPage />
+      // Add more cases for other tabs if needed
+      default:
+        return (
+          <>
+            <WelcomeSection />
+            <StatsGrid stats={stats} />
+            <RecommendedJobs/>
+            <CareerTips />
+          </>
+        )
+    }
+  }
+
+  return (
+    <div className="h-fit pb-2">
+      <MobileMenu mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="pt-2">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+          <main className="relative flex-1 mx-auto md:ml-72">
+            <div className='sticky top-0'> 
+              <DashboardHeader onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/>
+            </div>
+
+            <div className="mx-auto px-4 lg:px-6 bg-gray-100 rounded-xl shadow min-h-screen">                                                                                                                                                                                                                                
+              {renderContent()}
+            </div>
           </main>
         </div>
       </div>
@@ -65,4 +89,4 @@ const applicantDashBoard = () => {
   )
 }
 
-export default applicantDashBoard
+export default ApplicantDashBoard

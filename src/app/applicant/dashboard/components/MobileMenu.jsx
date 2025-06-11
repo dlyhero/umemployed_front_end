@@ -2,9 +2,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { SearchInput } from '../../../../components/common/dashboard/SearchInput'
 import MobileSearchBar from '../../../../components/common/SearchBar/MobileSearchBar'
-import { SidebarNav } from './SidebarNav'
 import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { SidebarNav } from './SidebarNav'
 
 export const MobileMenu = ({ mobileMenuOpen, setMobileMenuOpen, activeTab, setActiveTab }) => {
   const menuRef = useRef(null)
@@ -64,7 +64,7 @@ export const MobileMenu = ({ mobileMenuOpen, setMobileMenuOpen, activeTab, setAc
               </div>
               
               <MobileSearchBar />
-              <SidebarNav 
+              <SidebarNav
                 activeTab={activeTab} 
                 setActiveTab={(tab) => {
                   setActiveTab(tab)

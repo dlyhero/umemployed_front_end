@@ -15,7 +15,7 @@ export const WelcomeSection = (session) => {
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {user.user?.first_name} {user.user?.last_name}!</h1>
-        <p className="opacity-90 max-w-lg">Your personalized dashboard to help you land your dream job faster.</p>
+        <p className=" max-w-lg">Your personalized dashboard to help you land your dream job faster.</p>
       </div>
      
     </div>

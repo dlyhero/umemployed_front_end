@@ -106,7 +106,7 @@ export default function EnhancedResumePage({ params }) {
     if (session) {
       fetchData()
     }
-  }, [session, params.user_id])
+  }, [session])
 
   // Apply filters whenever filters or data changes
   useEffect(() => {
