@@ -98,7 +98,7 @@ const JobCardListing = ({ job, onToggleSave }) => {
                                 className="apply-btn px-4 py-2 bg-brand text-white rounded-full hover:bg-brand/90 transition-colors cursor-pointer"
                                 onClick={handleViewJob}
                             >
-                                {job.is_applied ? 'APPLIED' : 'APPLY'}
+                                {job.is_applied ? 'Applied' : 'Apply'}
                             </button>
                         </div>
                     )}
