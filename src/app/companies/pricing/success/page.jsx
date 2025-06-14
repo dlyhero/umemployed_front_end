@@ -34,6 +34,14 @@ const SuccessPage = () => {
     verifySubscription();
   }, [status, session, router]);
 
+  const handleGoToDashboard = () => {
+    if (companyId) {
+      router.push(`/companies/${companyId}/dashboard`);
+    } else {
+      router.push('/dashboard'); // Fallback if companyId is missing
+    }
+  };
+
   if (status === 'loading') {
     return <Loader />;
   }
@@ -61,7 +69,7 @@ const SuccessPage = () => {
             : 'Verifying your subscription... If this persists, please contact support.'}
         </p>
         <Button
-          disabled={true}
+          onClick={handleGoToDashboard}
           className="bg-brand text-white hover:bg-brand-dark"
         >
           Go to Dashboard

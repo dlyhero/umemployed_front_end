@@ -45,7 +45,12 @@ const RecruiterPricing = () => {
             'recruiter',
             session.accessToken
           );
-          setSubscriptionStatus(statusResponse);
+          // Treat Basic plan as non-active subscription on this page
+          if (statusResponse.tier?.toLowerCase() === 'basic') {
+            setSubscriptionStatus({ has_active_subscription: false, tier: null });
+          } else {
+            setSubscriptionStatus(statusResponse);
+          }
         } catch (error) {
           console.error('Failed to fetch subscription status:', error);
           setSubscriptionStatus({ has_active_subscription: false, error: 'Failed to check subscription status' });
@@ -70,8 +75,9 @@ const RecruiterPricing = () => {
         session.accessToken
       );
 
-      if (statusResponse.has_active_subscription) {
-        toast.error(`You are already subscribed to the ${statusResponse.tier} plan.`);
+      // Only block subscription if user has an active non-Basic subscription
+      if (statusResponse.has_active_subscription && statusResponse.tier?.toLowerCase() !== 'basic') {
+        toast.error(`You are already subscribed to the ${statusResponse.tier} plan. Please cancel your current subscription to switch plans.`);
         return;
       }
 
@@ -85,7 +91,7 @@ const RecruiterPricing = () => {
         }
       } else {
         toast.success(`Successfully subscribed to the ${tier} plan.`);
-        setSubscriptionStatus({ has_active_subscription: true, tier });
+        setSubscriptionStatus({ has_active_subscription: tier.toLowerCase() !== 'basic', tier });
       }
     } catch (error) {
       console.error('Subscription error:', error);
@@ -212,13 +218,13 @@ const RecruiterPricing = () => {
               actionLabel={
                 plan.title.toLowerCase() === 'custom'
                   ? 'Contact Sales'
-                  : subscriptionStatus?.tier?.toLowerCase() === plan.title.toLowerCase()
+                  : subscriptionStatus?.has_active_subscription && subscriptionStatus.tier?.toLowerCase() === plan.title.toLowerCase()
                   ? 'Current Plan'
                   : 'Get Started'
               }
               onAction={() => plan.title !== 'Custom' && handleSubscribe(plan.title.toLowerCase())}
               isLoading={loadingTier === plan.title.toLowerCase()}
-              isActive={subscriptionStatus?.tier?.toLowerCase() === plan.title.toLowerCase()}
+              isActive={subscriptionStatus?.has_active_subscription && subscriptionStatus.tier?.toLowerCase() === plan.title.toLowerCase()}
             />
           </div>
         ))}
