@@ -81,7 +81,6 @@ export const useJobForm = (currentStep) => {
   });
 
   useEffect(() => {
-    // Debug: Log session status
     console.log('useJobForm Debug: Session', { status, userRole: session?.user?.role });
 
     const fetchJobOptions = async () => {
@@ -119,8 +118,6 @@ export const useJobForm = (currentStep) => {
       }
     };
 
-    // Removed redirect to /login
-    // Original: if (status === 'unauthenticated') { router.push('/login'); return; }
     fetchJobOptions();
   }, [form, session, status, router]);
 
@@ -128,7 +125,6 @@ export const useJobForm = (currentStep) => {
     if (currentStep === 'basicinformation') {
       clearStore();
       form.reset();
-      // Debug: Log form initialization
       console.log('useJobForm Debug: Form initialized for basicinformation');
     } else if (currentStep === 'skills' && jobId) {
       const loadSkills = async () => {
@@ -171,7 +167,7 @@ export const useJobForm = (currentStep) => {
       const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
       return skills;
     } catch (error) {
-      console.log('fetchExtractedSkills Debug: Error', { error: error.message }); // Debug
+      console.log('fetchExtractedSkills Debug: Error', { error: error.message });
       return [];
     }
   };
@@ -197,7 +193,7 @@ export const useJobForm = (currentStep) => {
         }
         return verifiedJobId;
       } catch (error) {
-        console.log('verifyJob Debug: Error', { error: error.message }); // Debug
+        console.log('verifyJob Debug: Error', { error: error.message });
         if (i < retries - 1) {
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
@@ -241,7 +237,7 @@ export const useJobForm = (currentStep) => {
 
       return result;
     } catch (error) {
-      console.log('generateTailoredDescription Debug: Error', { error: error.message }); // Debug
+      console.log('generateTailoredDescription Debug: Error', { error: error.message });
       return { error: error.message };
     } finally {
       setIsGeneratingDescription(false);
@@ -250,7 +246,7 @@ export const useJobForm = (currentStep) => {
 
   const checkSubscription = async () => {
     if (!session?.user?.user_id || !session?.accessToken) {
-      return { has_active_subscription: false, error: 'No user ID or token found' };
+      return { has_active_subscription: false, error: 'No user ID or token found. Please log in.' };
     }
     try {
       const statusResponse = await checkSubscriptionStatus(
@@ -258,35 +254,38 @@ export const useJobForm = (currentStep) => {
         'recruiter',
         session.accessToken
       );
+      if (!statusResponse.has_active_subscription) {
+        return { has_active_subscription: false, error: 'No active subscription found. Please subscribe to a plan.' };
+      }
       return statusResponse;
     } catch (error) {
-      console.log('checkSubscription Debug: Error', { error: error.message }); // Debug
-      return { has_active_subscription: false, error: 'Failed to check subscription' };
+      console.log('checkSubscription Debug: Error', { error: error.message });
+      return { has_active_subscription: false, error: 'Failed to check subscription status. Please try again.' };
     }
   };
 
   const onSubmit = async (data) => {
     const baseUrl = 'https://server.umemployed.com/api';
 
-    console.log('onSubmit Debug: Starting submission', { currentStep, data, sessionStatus: status }); // Debug
+    console.log('onSubmit Debug: Starting submission', { currentStep, data, sessionStatus: status });
 
     if (status === 'loading') {
-      console.log('onSubmit Debug: Session loading, exiting'); // Debug
+      console.log('onSubmit Debug: Session loading, exiting');
       return { error: 'Session is still loading' };
     }
     if (status === 'unauthenticated') {
-      console.log('onSubmit Debug: Unauthenticated, exiting'); // Debug
+      console.log('onSubmit Debug: Unauthenticated, exiting');
       return { error: 'Please log in to create a job.' };
     }
 
     const token = session?.accessToken;
     if (!token) {
-      console.log('onSubmit Debug: No token, exiting'); // Debug
+      console.log('onSubmit Debug: No token, exiting');
       return { error: 'No authentication token found' };
     }
 
     if (!jobId && currentStep !== 'basicinformation') {
-      console.log('onSubmit Debug: No jobId for non-basicinformation step', { currentStep }); // Debug
+      console.log('onSubmit Debug: No jobId for non-basicinformation step', { currentStep });
       return { error: 'No job ID found. Please complete previous steps.' };
     }
 
@@ -294,13 +293,14 @@ export const useJobForm = (currentStep) => {
       await form.setValue('isSubmitting', true, { shouldValidate: false });
 
       if (currentStep === 'basicinformation') {
+        // Check subscription status before attempting to create job
         const subscriptionStatus = await checkSubscription();
-        console.log('onSubmit Debug: Subscription Check', { subscriptionStatus }); // Debug
-        if (!subscriptionStatus.has_active_subscription) {
-          setSubscriptionError(subscriptionStatus.error || 'No active subscription found. Please upgrade your plan.');
+        console.log('onSubmit Debug: Subscription Check', { subscriptionStatus });
+        if (subscriptionStatus.error || !subscriptionStatus.has_active_subscription) {
+          setSubscriptionError(subscriptionStatus.error || 'No active subscription found. Please subscribe to a plan.');
           setShowSubscriptionModal(true);
-          console.log('onSubmit Debug: Subscription check failed, showing modal'); // Debug
-          return { error: 'No active subscription' };
+          console.log('onSubmit Debug: Subscription check failed, showing modal');
+          return { error: subscriptionStatus.error || 'No active subscription' };
         }
 
         setIsSubmittingStep1(true);
@@ -309,7 +309,7 @@ export const useJobForm = (currentStep) => {
           category: parseInt(data.category, 10),
           location: data.location,
         };
-        console.log('onSubmit Debug: Sending POST to create-step1', { step1Data }); // Debug
+        console.log('onSubmit Debug: Sending POST to create-step1', { step1Data });
         const response = await fetch(`${baseUrl}/job/create-step1/`, {
           method: 'POST',
           headers: {
@@ -320,13 +320,24 @@ export const useJobForm = (currentStep) => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          const errorMessage = errorData.detail || `Failed to create job: ${response.status}`;
-          console.log('onSubmit Debug: POST failed', { errorMessage, status: response.status }); // Debug
-          if (response.status === 403 && errorMessage.includes('No active subscription')) {
-            setSubscriptionError(errorMessage);
+          let errorMessage = `Failed to create job: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorMessage;
+          } catch (jsonError) {
+            console.error('Non-JSON response:', {
+              status: response.status,
+              responseText: await response.text().slice(0, 200),
+            });
+          }
+          console.log('onSubmit Debug: POST failed', { errorMessage, status: response.status });
+          // If 403 error, show subscription modal
+          if (response.status === 403) {
+            setSubscriptionError(errorMessage.includes('No active subscription')
+              ? 'No active subscription. Please subscribe to a plan.'
+              : 'You do not have permission to create a job. Please check your subscription status.');
             setShowSubscriptionModal(true);
-            console.log('onSubmit Debug: 403 Subscription error, showing modal'); // Debug
+            console.log('onSubmit Debug: 403 error, showing subscription modal');
           }
           throw new Error(errorMessage);
         }
@@ -345,7 +356,7 @@ export const useJobForm = (currentStep) => {
         setFormData(step1Data);
         setJobId(verifiedJobId);
         form.reset({ ...form.getValues(), ...step1Data });
-        console.log('onSubmit Debug: POST successful', { newJobId, verifiedJobId }); // Debug
+        console.log('onSubmit Debug: POST successful', { newJobId, verifiedJobId });
         return { ...result, id: verifiedJobId };
       } else if (currentStep === 'requirements' && jobId) {
         const step2Data = step2Schema.parse(data);
@@ -363,7 +374,7 @@ export const useJobForm = (currentStep) => {
         }
         const result = await response.json();
         setFormData(step2Data);
-        console.log('onSubmit Debug: Step 2 PATCH successful', { result }); // Debug
+        console.log('onSubmit Debug: Step 2 PATCH successful', { result });
         return result;
       } else if (currentStep === 'description' && jobId) {
         const step3Data = step3Schema.parse(data);
@@ -388,7 +399,7 @@ export const useJobForm = (currentStep) => {
           form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
         }
         setFormData(step3Data);
-        console.log('onSubmit Debug: Step 3 PATCH successful', { result }); // Debug
+        console.log('onSubmit Debug: Step 3 PATCH successful', { result });
         return result;
       } else if (currentStep === 'skills' && jobId) {
         const step4Data = {
@@ -419,11 +430,11 @@ export const useJobForm = (currentStep) => {
             }
             const result = await response.json();
             clearStore();
-            console.log('onSubmit Debug: Step 4 PATCH successful', { result }); // Debug
+            console.log('onSubmit Debug: Step 4 PATCH successful', { result });
             return { success: true, data: result };
           })
           .catch((error) => {
-            console.log('onSubmit Debug: Step 4 error', { error: error.message }); // Debug
+            console.log('onSubmit Debug: Step 4 error', { error: error.message });
             toast.error('Failed to post job. Please try again later.');
           });
 
@@ -431,7 +442,7 @@ export const useJobForm = (currentStep) => {
       }
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
-      console.log('onSubmit Debug: Error', { error: error.message }); // Debug
+      console.log('onSubmit Debug: Error', { error: error.message });
       return { error: error.message };
     } finally {
       await form.setValue('isSubmitting', false, { shouldValidate: false });
@@ -443,7 +454,7 @@ export const useJobForm = (currentStep) => {
 
   const stepIsValid = () => {
     const errors = form.formState.errors;
-    console.log('stepIsValid Debug:', { errors }); // Debug
+    console.log('stepIsValid Debug:', { errors });
     if (currentStep === 'basicinformation') {
       return (
         !errors.title &&
@@ -468,19 +479,19 @@ export const useJobForm = (currentStep) => {
   };
 
   const nextStep = async (newJobId) => {
-    console.log('nextStep Debug: Starting', { newJobId, storedJobId, currentStep }); // Debug
+    console.log('nextStep Debug: Starting', { newJobId, storedJobId, currentStep });
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       if (currentStep === 'description' && isLoadingSkills) {
-        console.log('nextStep Debug: Blocked by isLoadingSkills'); // Debug
+        console.log('nextStep Debug: Blocked by isLoadingSkills');
         return;
       }
       const effectiveJobId = newJobId || storedJobId;
       if (!effectiveJobId) {
         form.setError('root', { message: 'Failed to create job. Please try again.' });
         toast.error('Failed to create job. Please try again.');
-        console.log('nextStep Debug: No effectiveJobId'); // Debug
+        console.log('nextStep Debug: No effectiveJobId');
         router.push('/companies/jobs/create/basicinformation');
         return;
       }
@@ -488,23 +499,23 @@ export const useJobForm = (currentStep) => {
       if (!verifiedJobId) {
         form.setError('root', { message: 'Failed to verify job. Please try again.' });
         toast.error('Failed to verify job. Please try again.');
-        console.log('nextStep Debug: Job verification failed'); // Debug
+        console.log('nextStep Debug: Job verification failed');
         return;
       }
       setJobId(verifiedJobId);
       const nextPath = `/companies/jobs/create/${steps[currentIndex + 1]}?jobId=${verifiedJobId}`;
-      console.log('nextStep Debug: Navigating to', { nextPath }); // Debug
+      console.log('nextStep Debug: Navigating to', { nextPath });
       router.push(nextPath);
     }
   };
 
   const prevStep = () => {
-    console.log('prevStep Debug: Starting', { currentStep, jobId }); // Debug
+    console.log('prevStep Debug: Starting', { currentStep, jobId });
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
       const prevPath = `/companies/jobs/create/${steps[currentIndex - 1]}${jobId ? `?jobId=${jobId}` : ''}`;
-      console.log('prevStep Debug: Navigating to', { prevPath }); // Debug
+      console.log('prevStep Debug: Navigating to', { prevPath });
       router.push(prevPath);
     }
   };

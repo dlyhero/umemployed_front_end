@@ -22,8 +22,8 @@ const PricingHeader = ({ title, subtitle }) => (
 );
 
 const RecruiterPricing = () => {
-  const [loadingTier, setLoadingTier] = useState(null); // Track which tier button is loading
-  const [subscriptionStatus, setSubscriptionStatus] = useState(null); // Track subscription status
+  const [loadingTier, setLoadingTier] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const scrollRef = useRef(null);
   const { data: session, status } = useSession();
 
@@ -45,14 +45,10 @@ const RecruiterPricing = () => {
             'recruiter',
             session.accessToken
           );
-          // If no active subscription or tier is 'basic', set to null to indicate default plan
-          if (!statusResponse.has_active_subscription || statusResponse.tier.toLowerCase() === 'basic') {
-            setSubscriptionStatus(null);
-          } else {
-            setSubscriptionStatus(statusResponse);
-          }
+          setSubscriptionStatus(statusResponse);
         } catch (error) {
           console.error('Failed to fetch subscription status:', error);
+          setSubscriptionStatus({ has_active_subscription: false, error: 'Failed to check subscription status' });
           toast.error('Failed to check subscription status');
         }
       }
@@ -66,13 +62,6 @@ const RecruiterPricing = () => {
       return;
     }
 
-    // Handle Basic plan as default, non-subscription plan
-    if (tier === 'basic') {
-      toast.success('Basic plan selected. No subscription required.');
-      setSubscriptionStatus(null); // Reset subscription status for Basic plan
-      return;
-    }
-
     setLoadingTier(tier);
     try {
       const statusResponse = await checkSubscriptionStatus(
@@ -81,17 +70,22 @@ const RecruiterPricing = () => {
         session.accessToken
       );
 
-      if (statusResponse.has_active_subscription && statusResponse.tier.toLowerCase() !== 'basic') {
-        toast.error('You already have an active subscription.');
+      if (statusResponse.has_active_subscription) {
+        toast.error(`You are already subscribed to the ${statusResponse.tier} plan.`);
         return;
       }
 
       const sessionId = await subscribeToPlan(tier, 'recruiter', session.accessToken);
-      const stripe = await getStripe();
-      const { error } = await stripe.redirectToCheckout({ sessionId });
+      if (sessionId) {
+        const stripe = await getStripe();
+        const { error } = await stripe.redirectToCheckout({ sessionId });
 
-      if (error) {
-        throw new Error(error.message);
+        if (error) {
+          throw new Error(error.message);
+        }
+      } else {
+        toast.success(`Successfully subscribed to the ${tier} plan.`);
+        setSubscriptionStatus({ has_active_subscription: true, tier });
       }
     } catch (error) {
       console.error('Subscription error:', error);
@@ -111,7 +105,7 @@ const RecruiterPricing = () => {
     try {
       await cancelSubscription('recruiter', session.accessToken);
       toast.success('Subscription canceled successfully.');
-      setSubscriptionStatus(null); // Reset to default (Basic) plan
+      setSubscriptionStatus({ has_active_subscription: false });
     } catch (error) {
       console.error('Cancel subscription error:', error);
       toast.error(error.message || 'Failed to cancel subscription');
@@ -138,7 +132,7 @@ const RecruiterPricing = () => {
       {subscriptionStatus?.has_active_subscription && (
         <div className="text-center mb-8">
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            Current Plan: <span className="font-bold">{subscriptionStatus.tier}</span>
+            Current Plan: <span className="font-bold">{subscriptionStatus.tier.charAt(0).toUpperCase() + subscriptionStatus.tier.slice(1)}</span>
           </p>
           <Button
             className="mt-4 bg-red-500 text-white hover:bg-red-600"
@@ -147,6 +141,13 @@ const RecruiterPricing = () => {
           >
             {loadingTier === 'cancel' ? 'Processing...' : 'Cancel Subscription'}
           </Button>
+        </div>
+      )}
+      {!subscriptionStatus?.has_active_subscription && (
+        <div className="text-center mb-8">
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            No active subscription. Please choose a plan to start posting jobs.
+          </p>
         </div>
       )}
       <section
@@ -208,10 +209,16 @@ const RecruiterPricing = () => {
           <div key={plan.title} className="snap-center flex-shrink-0 px-2 sm:px-0">
             <PricingCard
               {...plan}
-              actionLabel={plan.title === 'Custom' ? 'Contact Sales' : 'Get Started'}
+              actionLabel={
+                plan.title.toLowerCase() === 'custom'
+                  ? 'Contact Sales'
+                  : subscriptionStatus?.tier?.toLowerCase() === plan.title.toLowerCase()
+                  ? 'Current Plan'
+                  : 'Get Started'
+              }
               onAction={() => plan.title !== 'Custom' && handleSubscribe(plan.title.toLowerCase())}
               isLoading={loadingTier === plan.title.toLowerCase()}
-              isActive={subscriptionStatus?.tier.toLowerCase() === plan.title.toLowerCase()}
+              isActive={subscriptionStatus?.tier?.toLowerCase() === plan.title.toLowerCase()}
             />
           </div>
         ))}
