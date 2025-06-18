@@ -177,7 +177,7 @@ const HeroHeader = () => {
                                 href="/notifications" 
                                 isActive={isNotificationsActive}
                                 icon={Bell}
-                                className="hidden lg:flex text-white"
+                                className=""
                               />
                         {/* Authentication Section */}
                         {status === "loading" ? (

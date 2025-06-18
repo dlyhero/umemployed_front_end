@@ -13,16 +13,16 @@ export default function NavigationLink({
   return (
     <Link 
       href={href} 
-      className={`flex flex-col items-center gap- p-0 rounded-lg ${pathname==='/' ? 'hover-none' : 'hover:bg-gray-50'}  text-sm group ${className} ${
+      className={`flex flex-col items-center gap-4 p-0 rounded-lg ${pathname==='/' ? 'hover-none' : 'hover:bg-gray-50'}  text-sm group ${className} ${
         isActive ? 'rounded-none' : ''
       }`}
     >
       {Icon ? (
         <div className="relative">
-          <Icon className={`w-5 h-5 group-hover:text-brand transition-colors font-bold text-lg mx-5 ${
+          <Icon className={`w-5 h-5 group-hover:text-brand transition-colors font-bold text-lg  ${
           pathname=='/' ? 'text-white group-hover:text-white' : (pathname !== '/' && isActive) ? 'text-brand' : 'text-gray'
         }`} />
-        <div className="absolute -top-2 right-3 bg-red-400 py-0.5 px-1.5 text-[11px] rounded-full">
+        <div className="absolute -top-2 -right-2 bg-red-400 text-white py-0.5 px-1.5 text-[11px] rounded-full">
           0
         </div>
         </div>
