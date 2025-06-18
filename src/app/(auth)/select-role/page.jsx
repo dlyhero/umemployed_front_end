@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Briefcase, User, ArrowRight } from 'lucide-react';
+import { Briefcase, User, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/Spinner';
@@ -13,11 +13,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isRoleLoading, setIsRoleLoading] = useState(false);
   const router = useRouter();
   const { data: session, update } = useSession();
 
   const handleRoleSelect = async (role) => {
     setLoading(true);
+    setIsProcessing(true);
     try {
       const response = await fetch('/api/auth/update-role', {
         method: 'POST',
@@ -43,20 +46,29 @@ export default function SelectRolePage() {
         }
       });
 
-      // Force a hard refresh to ensure all data is properly loaded
-      if (data.redirectTo) {
-        window.location.href = data.redirectTo;
-      } else {
-        // Fallback in case redirectTo is not provided
-        window.location.reload();
-      }
-  
+      // Add a small delay to ensure session is updated
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setSelectedRole(''); // Reset the selection
+      
     } catch (error) {
       console.error('Full error:', error);
       toast.error(error.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
+      setIsProcessing(false);
     }
+  };
+
+  const handleRoleChange = (role) => {
+    console.log('Role selected:', role); // Debug log
+    setSelectedRole(role);
+    setIsRoleLoading(true);
+    
+    // Simulate a delay to show loading state
+    setTimeout(() => {
+      setIsRoleLoading(false);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -110,14 +122,15 @@ export default function SelectRolePage() {
 
         <RadioGroup 
           value={selectedRole} 
-          onValueChange={setSelectedRole}
+          onValueChange={handleRoleChange}
           className="space-y-4 px-4 sm:flex gap-2 mx-auto"
+          disabled={isRoleLoading || isProcessing}
         >
           {roles.map((role) => (
             <motion.div
               key={role.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: isRoleLoading || isProcessing ? 1 : 1.02 }}
+              whileTap={{ scale: isRoleLoading || isProcessing ? 1 : 0.98 }}
               className="flex-1"
             >
               <Label
@@ -126,16 +139,23 @@ export default function SelectRolePage() {
                   selectedRole === role.id
                     ? 'border-brand bg-brand/5'
                     : 'border-[#cedae8] hover:border-blue-200'
-                }`}
+                } ${(isRoleLoading || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className="flex items-center mb-4">
                   <RadioGroupItem 
                     value={role.id} 
                     id={role.id} 
                     className="h-6 w-6 border-2 border-bg-blue-50 data-[state=checked]:border-brand mr-4"
+                    disabled={isRoleLoading || isProcessing}
                   />
                   <div className="flex items-center">
                     <span className="text-gray-700 text-xl font-semibold">{role.label}</span>
+                    {isRoleLoading && selectedRole === role.id && (
+                      <div className="ml-2 flex items-center">
+                        <Loader2 className="h-5 w-5 animate-spin text-brand" />
+                        <span className="ml-2 text-sm text-brand">Loading...</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <p className="text-gray-500 text-[18px] mb-4 ml-10">
@@ -149,18 +169,18 @@ export default function SelectRolePage() {
         <motion.div
           className="mt-12 text-center"
           initial={{ opacity: 0 }}
-          animate={{ opacity: selectedRole ? 1 : 0.5 }}
+          animate={{ opacity: selectedRole && !isRoleLoading ? 1 : 0.5 }}
           transition={{ delay: 0.2 }}
         >
           <Button
-            disabled={!selectedRole || loading}
-            className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
+            disabled={!selectedRole || loading || isProcessing || isRoleLoading}
+            className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole && !isRoleLoading ? 'bg-brand' : 'bg-gray-200'}`}
             onClick={() => handleRoleSelect(selectedRole)}
           >
-            {loading ? (
+            {loading || isProcessing ? (
               <div className="flex items-center gap-2">
-                <Spinner className="h-5 w-5" />
-                <span>Loading...</span>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Processing...</span>
               </div>
             ) : (
               <>
