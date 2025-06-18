@@ -9,6 +9,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { motion } from 'framer-motion';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import DeploymentDebug from '@/src/components/DeploymentDebug';
 
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
@@ -214,6 +215,9 @@ export default function SelectRolePage() {
           <p>You can not change your account type later in settings</p>
         </div>
       </motion.div>
+
+      {/* Debug component to help troubleshoot deployment issues */}
+      <DeploymentDebug />
     </div>
   );
 }

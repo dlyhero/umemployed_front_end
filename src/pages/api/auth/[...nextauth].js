@@ -72,14 +72,34 @@ export const authOptions = {
   },
  // [...nextauth].js
 callbacks: {
+  async signIn({ user, account, profile }) {
+    // Allow sign in
+    return true;
+  },
+  async redirect({ url, baseUrl }) {
+    console.log('🔄 Redirect callback triggered');
+    console.log('🔄 URL:', url);
+    console.log('🔄 BaseURL:', baseUrl);
+    
+    // Handle NextAuth default redirects
+    if (url.startsWith('/')) return `${baseUrl}${url}`;
+    if (new URL(url).origin === baseUrl) return url;
+    
+    // Default redirect for successful sign in
+    return `${baseUrl}/select-role`;
+  },
   async jwt({ token, user, trigger, session }) {
+    console.log('🔧 JWT callback triggered');
+    
     // Handle session updates from client
     if (trigger === "update" ) {
+      console.log('🔧 Updating token with session:', session);
       return { ...token, ...session.user };
     }
     
     // Initial sign in
     if (user) {
+      console.log('🔧 Initial sign in, user:', user);
       return { 
         ...token, 
         role: user.role,
@@ -94,6 +114,7 @@ callbacks: {
     return token;
   },
   async session({ session, token }) {
+    console.log('👤 Session callback triggered');
     session.user.role = token.role;
     session.accessToken = token.accessToken;
     session.refreshToken = token.refreshToken;
@@ -101,6 +122,7 @@ callbacks: {
     session.user.has_company = token.has_company;
     session.user.company_id = token.company_id;
     session.user.user_id = token.user_id;
+    console.log('👤 Session user role:', session.user.role);
     return session;
   },
 }
