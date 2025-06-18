@@ -1,0 +1,10 @@
+{
+  "installCommand": "npm install --legacy-peer-deps",
+  "redirects": [
+    {
+      "source": "/jobs/:id",
+      "destination": "/jobs/:id/details",
+      "permanent": true
+    }
+  ]
+}
