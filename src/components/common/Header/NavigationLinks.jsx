@@ -13,14 +13,19 @@ export default function NavigationLink({
   return (
     <Link 
       href={href} 
-      className={`flex flex-col items-center gap-0 p-0 rounded-lg ${pathname==='/' ? 'hover-none' : 'hover:bg-gray-50'}  text-sm group ${className} ${
+      className={`flex flex-col items-center gap- p-0 rounded-lg ${pathname==='/' ? 'hover-none' : 'hover:bg-gray-50'}  text-sm group ${className} ${
         isActive ? 'rounded-none' : ''
       }`}
     >
       {Icon ? (
-        <Icon className={`w-4 h-4 group-hover:text-brand transition-colors font-bold text-lg ${
-          isActive ? 'text-brand' : 'text-gray-600'
+        <div className="relative">
+          <Icon className={`w-5 h-5 group-hover:text-brand transition-colors font-bold text-lg mx-5 ${
+          pathname=='/' ? 'text-white group-hover:text-white' : (pathname !== '/' && isActive) ? 'text-brand' : 'text-gray'
         }`} />
+        <div className="absolute -top-2 right-3 bg-red-400 py-0.5 px-1.5 text-[11px] rounded-full">
+          0
+        </div>
+        </div>
       ) : (
         <span className={`group-hover:text-brand transition-colors text-[16px] font-semibold ${
           pathname=='/' ? 'text-white group-hover:text-white' : (pathname !== '/' && isActive) ? 'text-brand' : 'text-gray'

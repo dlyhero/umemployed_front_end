@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { Logo } from './Logo';
@@ -173,6 +173,12 @@ const HeroHeader = () => {
 
                     {/* Right Header */}
                     <div className="flex items-center space-x-4">
+                         <NavigationLink 
+                                href="/notifications" 
+                                isActive={isNotificationsActive}
+                                icon={Bell}
+                                className="hidden lg:flex text-white"
+                              />
                         {/* Authentication Section */}
                         {status === "loading" ? (
                             <div className="hidden lg:block">
@@ -264,15 +270,7 @@ const HeroHeader = () => {
                                 exit="closed"
                             >
                                 {/* Close Button */}
-                                <div className="absolute top-0 right-0 -mr-12 pt-2">
-                                    <motion.button
-                                        onClick={handleMobileMenuToggle}
-                                        className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white bg-white/10 backdrop-blur-sm"
-                                        whileTap={{ scale: 0.9 }}
-                                    >
-                                        <X size={24} className="text-white" />
-                                    </motion.button>
-                                </div>
+                               
 
                                 {/* Menu Content */}
                                 <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
