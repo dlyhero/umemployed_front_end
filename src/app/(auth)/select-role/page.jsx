@@ -19,6 +19,8 @@ export default function SelectRolePage() {
   const { data: session, update } = useSession();
 
   const handleRoleSelect = async (role) => {
+    if (!role) return;
+    
     setLoading(true);
     setIsProcessing(true);
     try {
@@ -38,7 +40,7 @@ export default function SelectRolePage() {
       }
   
       // Update session
-      await update({
+      const updatedSession = await update({
         ...session,
         user: {
           ...session?.user,
@@ -46,37 +48,55 @@ export default function SelectRolePage() {
         }
       });
 
+      if (!updatedSession) {
+        throw new Error('Failed to update session');
+      }
+
       // Add a small delay to ensure session is updated
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      setSelectedRole(''); // Reset the selection
+      // Force a hard refresh to ensure all data is properly loaded
+      window.location.reload();
       
     } catch (error) {
       console.error('Full error:', error);
       toast.error(error.message || 'An unexpected error occurred');
+      setSelectedRole(''); // Reset selection on error
     } finally {
       setLoading(false);
       setIsProcessing(false);
     }
   };
 
-  const handleRoleChange = (role) => {
+  const handleRoleChange = async (role) => {
+    if (!role || isRoleLoading) return;
+    
     console.log('Role selected:', role); // Debug log
     setSelectedRole(role);
     setIsRoleLoading(true);
     
-    // Simulate a delay to show loading state
-    setTimeout(() => {
+    try {
+      // Add a small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error) {
+      console.error('Error in role change:', error);
+    } finally {
       setIsRoleLoading(false);
-    }, 1000);
+    }
   };
 
+  // Add error boundary for session updates
   useEffect(() => {
     if (session?.user?.role && session.user.role !== "none") {
-      if (session.user.role === "job_seeker") {
-        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
-      } else {
-        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+      try {
+        if (session.user.role === "job_seeker") {
+          router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+        } else {
+          router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+        }
+      } catch (error) {
+        console.error('Navigation error:', error);
+        toast.error('Failed to navigate to the appropriate page');
       }
     }
   }, [session, router]);
