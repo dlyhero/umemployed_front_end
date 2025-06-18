@@ -1,6 +1,9 @@
 "use client";
 import Link from "next/link";
 import ProfileImage from "./ProfileImage";
+import { usePathname } from "next/navigation";
+
+
 
 export default function UserProfileLink({ 
   session, 
@@ -9,7 +12,12 @@ export default function UserProfileLink({
   setImageLoading, 
   href, 
   isActive 
-}) {
+})  
+  
+  
+  {
+
+    const pathname =usePathname();
   return (
     <Link
       href={href}
@@ -17,7 +25,7 @@ export default function UserProfileLink({
         isActive ? 'rounded-none' : ''
       }`}
     >
-      <div className="relative w-10 h-10 rounded-full border border-gray-200 overflow-hidden">
+      <div className="relative w-12 h-12 rounded-full border border-gray-200 overflow-hidden">
         <ProfileImage 
           session={session} 
           user={user} 
@@ -25,10 +33,8 @@ export default function UserProfileLink({
           setImageLoading={setImageLoading} 
         />
       </div>
-      <span className={`hidden sm:block text-sm font-bold truncate max-w-[120px] group-hover:text-brand transition-colors ${
-        isActive ? 'text-brand' : 'text-gray-700'
-      }`}>
-        {user.user?.username}
+      <span className={`hidden sm:block text-lg font-bold truncate max-w-[120px] ${pathname === '/' ? 'text-white' : 'text-gray-800'} transition-colors`}>
+        {user.user?.first_name}
       </span>
     </Link>
   );

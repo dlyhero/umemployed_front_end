@@ -94,12 +94,16 @@ const JobCardListing = ({ job, onToggleSave }) => {
                             >
                                 <Bookmark className={`w-5 h-5 ${job.is_saved ? 'fill-current' : ''}`} />
                             </button>
-                            <button
-                                className="apply-btn px-4 py-2 bg-brand text-white rounded-full hover:bg-brand/90 transition-colors cursor-pointer"
-                                onClick={handleViewJob}
-                            >
-                                {job.is_applied ? 'Applied' : 'Apply'}
-                            </button>
+
+                            {session && (
+                                <button
+                                    disabled={job.is_applied}
+                                    className={`apply-btn text-center tran3s ${job.is_applied ? "" : "bg-brand hover:bg-brand/90 text-white transition-all duration-300"} px-4 py-2 rounded-full text-sm font-medium    cursor-pointer`}
+                                    onClick={handleViewJob}
+                                >
+                                    {job.is_applied ? 'Applied' : 'Apply'}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

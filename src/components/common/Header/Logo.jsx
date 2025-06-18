@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { usePathname } from "next/navigation"
 
 export function Logo() {
+  const pathname = usePathname();
+  
   const pathVariants = {
     initial: {
       pathLength: 0,
@@ -33,7 +36,7 @@ export function Logo() {
   }
 
   return (
-    <Link href="/" className="inline-block text-brand  font-bold rounded-lg sm:mb-2 ">
+    <Link href="/" className={`${pathname === '/' ? 'text-white' : "text-brand"} inline-block font-bold rounded-lg sm:mb-2`}>
       <motion.svg
         viewBox="0 0 150 100" // Keep this fixed
         fill="none"

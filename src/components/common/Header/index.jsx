@@ -29,11 +29,12 @@ export function Header() {
     <header
      className={
       cn(
-      "bg-white  z-40  top-0 ",
+      "z-40  top-0 ",
       scrolled && "",
-      pathname === '/messages' ? "sticky lg:relative" : "sticky"
+      pathname === '/messages' ? "sticky lg:relative" : "sticky",
+      pathname === '/' ? "bg-transparent" : "bg-white"
     )}>
-      <div className="max-w-[1600px] mx-auto px-2 py-6 flex items-center justify-between">
+      <div className={`${pathname === '/' ? 'max-w-7xl' : 'max-w-[1600px]'} mx-auto px-2 py-6 flex items-center justify-between`}>
         <div className="flex items-center  gap-2">
             <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
@@ -42,9 +43,11 @@ export function Header() {
        {
         !feedBackPages.includes(pathname) && (
          <>
-          <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
-              <SearchBar  />
-          </div>
+          {
+            pathname !== '/' && <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
+            <SearchBar  />
+        </div>
+          }
         
 
         {(pathname !== '/signup' && pathname !== '/login') && (
