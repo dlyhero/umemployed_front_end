@@ -1,6 +1,6 @@
 // src/app/companies/jobs/create/requirements/page.jsx
 'use client';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
@@ -11,6 +11,7 @@ function RequirementsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills, jobId } = useJobForm(currentStep);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!jobId) {
@@ -21,6 +22,7 @@ function RequirementsInner() {
   }, [jobId, router]);
 
   const handleSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       const result = await onSubmit(data);
       if (result?.error) {
@@ -28,11 +30,15 @@ function RequirementsInner() {
         return result;
       }
       toast.success('Requirements saved successfully!');
+      // Delay to show spinner before navigation
+      await new Promise(resolve => setTimeout(resolve, 1000));
       router.push(`/companies/jobs/create/description?jobId=${jobId}`);
       return result;
     } catch (error) {
       toast.error('Failed to save requirements');
       return { error: error.message };
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

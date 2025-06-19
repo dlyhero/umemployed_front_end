@@ -1,3 +1,4 @@
+// src/app/companies/jobs/create/basicinformation/page.jsx
 'use client';
 import { useRouter, useParams } from 'next/navigation';
 import { FormContainer } from '../../components/FormContainer';
@@ -41,14 +42,6 @@ function JobPostingContent() {
     }
   };
 
-  if (isSubmittingStep1) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#1e90ff]"></div>
-        <p className="ml-4 text-white text-lg">Creating job...</p>
-      </div>
-    );
-  }
 
   return (
     <>
