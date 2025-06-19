@@ -4,7 +4,7 @@ import { Languages, Edit, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { AddItemModal } from './AddItemModal';
 import { useState, useRef } from 'react';
-import { Card } from '@/components/ui/card';
+import { div } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -145,7 +145,7 @@ export const LanguagesSection = ({ languages = [], isOwner }) => {
   };
 
   return (
-    <Card className="p-6">
+    <div className="p-6 border-b">
       <div className="flex justify-between items-center mb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export const LanguagesSection = ({ languages = [], isOwner }) => {
             }}
             variant="ghost"
             size="sm"
-            className="text-brand hover:text-brand"
+            className="text-brand hover:text-brand border border-brand py-6 rounded-full"
             disabled={isLoading || userLanguages.length >= MAX_LANGUAGES}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -240,7 +240,6 @@ export const LanguagesSection = ({ languages = [], isOwner }) => {
           </>
         ) : (
           <div className="text-center py-8">
-            <Languages className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No languages added</h3>
             <p className="mt-1 text-sm text-gray-500">
               {isOwner ? 'Add languages you speak to showcase to recruiters.' : 'No languages information available.'}
@@ -298,6 +297,6 @@ export const LanguagesSection = ({ languages = [], isOwner }) => {
           </div>
         </div>
       </AddItemModal>
-    </Card>
+    </div>
   );
 };

@@ -53,7 +53,7 @@ const HeroSection = ({ session, status }) => {
 
             <motion.h1
               variants={itemVariants}
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight text-center md:text-start"
             >
               Unlock Your <span className="text-brand Herotitle">Dream Job</span> <br />
               The Future Starts Now!
@@ -61,7 +61,7 @@ const HeroSection = ({ session, status }) => {
 
             <motion.p
               variants={itemVariants}
-              className="text-lg md:text-xl text-white"
+              className="text-lg md:text-xl text-white text-center md:text-start"
             >
               Browse thousands of job listings <br className="lg:hidden"/> and seize the opportunity<br />
               to advance your career with our platform.
@@ -69,14 +69,14 @@ const HeroSection = ({ session, status }) => {
 
             <motion.div
               variants={itemVariants}
-              className="hidden md:flex flex-col gap-4 pt-6"
+              className="hidden lg:flex flex-col gap-4 pt-6"
             >
               <SearchBar />
             </motion.div>
             
             <motion.div
               variants={itemVariants}
-              className="flex flex-col gap-4 pt-6"
+              className="flex flex-col gap-4 pt-6 items-center md:items-start"
             >
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((item) => (
@@ -88,8 +88,8 @@ const HeroSection = ({ session, status }) => {
                   />
                 ))}
               </div>
-              <div className="text-white text-lg flex">
-                <span className="font-medium">5,000+</span> professionals hired last month
+              <div className="text-white text-lg flex ">
+                <span className="font-bold">5,000+</span> professionals hired last month
               </div>
             </motion.div>
           </motion.div>

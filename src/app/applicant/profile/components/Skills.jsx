@@ -2,7 +2,6 @@
 
 import { Edit, Plus, Trash2, Star, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -183,7 +182,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
     .slice(0, 5); // Limit to 5 suggestions
 
   return (
-    <Card className="p-6 rounded-lg shadow-sm">
+    <div className="p-6 border-b">
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Skills</h2>
@@ -201,7 +200,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="text-brand hover:text-brand/90 hover:bg-blue-50 border border-brand py-6 rounded-full"
                 disabled={isLoading || userSkills.length >= MAX_SKILLS}
                 onClick={() => canAddMore() && setOpenSearch(true)}
               >
@@ -224,7 +223,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
                       onSelect={() => handleAddSkill(searchQuery)}
                       className="cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
                     >
-                      <Plus className="mr-2 h-4 w-4 text-blue-500" />
+                      <Plus className="mr-2 h-4 w-4 text-brand" />
                       <span className="font-medium">Add "{searchQuery}"</span>
                     </CommandItem>
                   )}
@@ -306,7 +305,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAll(!showAll)}
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  className="text-brand hover:text-brand/90 hover:bg-blue-50"
                 >
                   {showAll ? (
                     <>
@@ -325,7 +324,6 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
           </>
         ) : (
           <div className="text-center w-full py-8">
-            <Star className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No skills added</h3>
             <p className="mt-1 text-sm text-gray-500">
               {isOwner ? 'Add your skills to showcase to recruiters.' : 'No skills information available.'}
@@ -373,7 +371,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
               <Button
                 onClick={() => handleEditSkill(editingSkill)}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-brand hover:bg-brand/90"
               >
                 {isLoading ? 'Saving...' : 'Save'}
               </Button>
@@ -381,6 +379,6 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
