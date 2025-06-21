@@ -2,7 +2,6 @@
 
 import { FileText, Upload, Download, Eye, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,7 +46,7 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
     };
 
     return (
-        <Card className="p-6">
+        <div className="p-6">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold text-gray-900">CV/Resume</h2>
@@ -150,6 +149,6 @@ export const CVSection = ({ cv, isOwner, onUpload, onDelete }) => {
                     )}
                 </div>
             )}
-        </Card>
+        </div>
     );
 };

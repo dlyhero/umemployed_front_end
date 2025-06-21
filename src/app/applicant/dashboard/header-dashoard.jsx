@@ -38,7 +38,7 @@ function DashboardHeader({ onClick }) {
     }
 
     return (
-        <header className="bg-white  px-4 md:px-8 py-4 w-fullz-40">
+        <header className="bg-white px-4 md:px-8 py-2 w-fullz-40 border-b border-gray-300 mb-2">
             <div className="flex items-center justify-end">
             <div className='md:hidden'>
                 <Logo />

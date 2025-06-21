@@ -4,7 +4,6 @@ import { MapPin, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EditModal } from './EditModal';
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -23,7 +22,7 @@ export const LocationSection = ({ location, isOwner, onSave }) => {
   };
 
   return (
-    <Card className="p-6">
+    <div className="p-6 border-b">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold text-gray-900">Location</h2>
@@ -99,6 +98,6 @@ export const LocationSection = ({ location, isOwner, onSave }) => {
           </div>
         </div>
       </EditModal>
-    </Card>
+    </div>
   );
 };

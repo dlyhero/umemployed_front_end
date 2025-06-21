@@ -16,7 +16,6 @@ export default function RootLayout({ children }) {
         className={` antialiased text-[15px]`}
       >  
         <AuthProvider>
-          <Header />
           {children}
           <Footer />
           <Toaster position="top-center" richColors/>

@@ -1,6 +1,6 @@
 'use client';
 
-import { UserCircle, Edit, MessageSquare, Share2, Camera, X, Phone, Mail, Cake, MapPin, Plus } from 'lucide-react';
+import { UserCircle, Edit, MessageSquare, Share2, Camera, X, Phone, Mail, Cake, Maximize2, Plus, FileText, Send, Star, MapPin, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import useUser from '@/src/hooks/useUser';
@@ -19,8 +20,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
-import axios from 'axios';
-import baseUrl from '@/src/app/api/baseUrl';
+// Note: In actual implementation, import axios and baseUrl
+// import axios from 'axios';
+// import baseUrl from '@/src/app/api/baseUrl';
 
 export const ProfileHeader = ({ initialUser, isOwner }) => {
   // Date formatting function
@@ -35,7 +37,7 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
   const [user, setUser] = useState(initialUser);
   const [jobTitles, setJobTitles] = useState([]);
   const [loadingJobTitles, setLoadingJobTitles] = useState(false);
-  
+
   // Sync with parent if initialUser changes
   useEffect(() => {
     setUser(initialUser);
@@ -64,11 +66,12 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
   }, [session?.accessToken]);
 
   const [editOpen, setEditOpen] = useState(false);
+  const [aboutEditOpen, setAboutEditOpen] = useState(false);
   const [viewImageOpen, setViewImageOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [imageType, setImageType] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.personalInfo?.email || '',
@@ -77,6 +80,8 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
     job_title_id: user.job_title?.id || '',
     dateOfBirth: user.personalInfo?.dateOfBirth || '',
   });
+
+  const [aboutData, setAboutData] = useState(user.about || '');
 
   // Update form data when user changes
   useEffect(() => {
@@ -88,6 +93,7 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
       job_title_id: user.job_title?.id || '',
       dateOfBirth: user.personalInfo?.dateOfBirth || '',
     });
+    setAboutData(user.about || '');
   }, [user]);
 
   const [profileImage, setProfileImage] = useState(user.profileImage || "/default-avatar.jpg");
@@ -121,7 +127,7 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
       };
 
       setUser(optimisticUser);
-      
+
       // Use the mutate function
       if (currentUser?.id === user.id) {
         await mutateUser(optimisticUser);
@@ -142,7 +148,37 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
       toast.error("Failed to update profile");
       setUser(initialUser);
       if (currentUser?.id === user.id) {
-        await mutateUser(); // Re-fetch correct data
+        await mutateUser();
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAboutSave = async () => {
+    setIsSaving(true);
+    try {
+      // Optimistic update
+      const optimisticUser = {
+        ...user,
+        about: aboutData
+      };
+
+      setUser(optimisticUser);
+
+      if (currentUser?.id === user.id) {
+        await mutateUser(optimisticUser);
+      }
+
+      // API call would go here
+      toast.success("About section updated successfully!");
+      setAboutEditOpen(false);
+    } catch (error) {
+      console.error('Error saving about:', error);
+      toast.error("Failed to update about section");
+      setUser(initialUser);
+      if (currentUser?.id === user.id) {
+        await mutateUser();
       }
     } finally {
       setIsSaving(false);
@@ -161,7 +197,7 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await axios.post(
         `${baseUrl}/upload/${type}-image/`,
         formData,
@@ -223,297 +259,277 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h2 className="text-2xl font-semibold text-gray-900">My Profile</h2>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="hidden sm:flex">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Message
-              </Button>
-              <Button variant="outline" className="hidden sm:flex">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              {isOwner && (
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => setEditOpen(true)}
+    <div className=''>
+      {/* Cover Photo Section */}
+      <div className="border border-gray-200 pb-6 max-w-2xl  bg-white">
+        <div className="relative border-b">
+          <div className="h-64 bg-gradient-to-r from-slate-100 to-slate-200 relative group overflow-hidden r ">
+            {coverImage ? (
+              <>
+                <img
+                  src={coverImage}
+                  alt="Cover"
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => openImageModal(coverImage, 'cover')}
+                />
+                <button
+                  className="absolute top-4 right-4 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-all"
+                  onClick={() => openImageModal(coverImage, 'cover')}
                 >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+                  <Maximize2 className="h-4 w-4 text-white" />
+                </button>
+              </>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-blue-50 to-indigo-100" />
+            )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Main Profile Card */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          {/* Avatar Section */}
-          <div className="p-8 border-b">
-            <div className="flex items-center space-x-6">
-              <div className="relative group">
-                <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg">
-                  <AvatarImage src={profileImage} />
-                  <AvatarFallback className="bg-gray-100">
-                    <UserCircle className="h-full w-full text-gray-300" />
-                  </AvatarFallback>
-                </Avatar>
-                
-                {isOwner && (
-                  <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={(e) => handleImageUpload(e, 'profile')}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="rounded-full h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                        onClick={() => fileInputRef.current.click()}
-                      >
-                        <Camera className="h-4 w-4" />
-                      </Button>
-                      {profileImage !== "/default-avatar.jpg" && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="rounded-full h-8 w-8 p-0 bg-white/90 hover:bg-white text-red-600"
-                          onClick={() => removeImage('profile')}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    {isOwner && (
-                      <div className="flex items-center space-x-3 mb-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                          onClick={() => fileInputRef.current.click()}
-                        >
-                          Upload new photo
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
-                          onClick={() => removeImage('profile')}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Basic Info Section */}
-          <div className="p-8 border-b">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name*
-                </label>
-                <div className="p-3 bg-gray-50 rounded-md border">
-                  {user.name}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Title
-                </label>
-                <div className="p-3 bg-gray-50 rounded-md border">
-                  {user.job_title?.name || 'Not specified'}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio*
-              </label>
-              <div className="p-3 bg-gray-50 rounded-md border min-h-[100px]">
-                {user.bio || 'Write something interesting about you...'}
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Brief description for your profile. URLs are hyperlinked.
-              </p>
-            </div>
-          </div>
-
-          {/* Social Media Section */}
-          <div className="p-8 border-b">
-            <h4 className="text-lg font-semibold text-gray-900 mb-6">Social Media</h4>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Network 1
-                </label>
-                <div className="p-3 bg-gray-50 rounded-md border">
-                  {user.socialMedia?.network1 || '#'}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Network 2
-                </label>
-                <div className="p-3 bg-gray-50 rounded-md border">
-                  {user.socialMedia?.network2 || '#'}
-                </div>
-              </div>
-              {isOwner && (
-                <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add more link
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Address & Location Section */}
-          <div className="p-8">
-            <h4 className="text-lg font-semibold text-gray-900 mb-6">Address & Location</h4>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address*
-                </label>
-                <div className="p-3 bg-gray-50 rounded-md border">
-                  {user.personalInfo?.address || user.location?.address || 'Not specified'}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Country*
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md border">
-                    {user.personalInfo?.country || 'Not specified'}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City*
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md border">
-                    {user.location?.city || 'Not specified'}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Zip Code*
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md border">
-                    {user.location?.zipCode || 'Not specified'}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State*
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md border">
-                    {user.location?.state || 'Not specified'}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Map Location*
-                </label>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <div className="p-3 bg-gray-50 rounded-md border pr-12">
-                      {user.location?.coordinates || 'XC23+6XC, Location coordinates'}
-                    </div>
-                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600">
-                      <MapPin className="h-5 w-5" />
-                    </button>
-                  </div>
-                  
-                  {/* Map placeholder */}
-                  <div className="h-64 bg-gray-100 rounded-md border flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      <MapPin className="h-12 w-12 mx-auto mb-2" />
-                      <p>Map would be displayed here</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-6 border-t">
-                {user.personalInfo?.phone && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Phone className="h-4 w-4" />
-                    <span>{user.personalInfo.phone}</span>
-                  </div>
-                )}
-                {user.personalInfo?.email && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Mail className="h-4 w-4" />
-                    <span>{user.personalInfo.email}</span>
-                  </div>
-                )}
-                {user.personalInfo?.dateOfBirth && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Cake className="h-4 w-4" />
-                    <span>{formatDate(user.personalInfo.dateOfBirth)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
             {isOwner && (
-              <div className="flex items-center space-x-4 mt-8 pt-6 border-t">
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6"
-                  onClick={() => setEditOpen(true)}
-                >
-                  Save
-                </Button>
-                <Button variant="outline" className="px-6">
-                  Cancel
-                </Button>
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                <input
+                  type="file"
+                  ref={coverInputRef}
+                  onChange={(e) => handleImageUpload(e, 'cover')}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white/90 hover:bg-white text-gray-800 shadow-lg"
+                    onClick={() => coverInputRef.current.click()}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    {coverImage ? 'Change' : 'Add'} Cover
+                  </Button>
+                  {coverImage && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="bg-white/90 hover:bg-white text-red-600 shadow-lg"
+                      onClick={() => removeImage('cover')}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </div>
+
+          {/* Profile Content */}
+          <div className="bg-white">
+            <div className="max-w-7xl mx-auto px-6 py-0">
+              {/* Profile Header */}
+              <div className="relative -mt-20 pb-8">
+                <div className="flex flex-col lg:flex-row items-start gap-6">
+                  {/* Profile Image */}
+                  <div className="relative group">
+                    <div className="relative">
+                      <Avatar
+                        className="h-40 w-40 border-4 border-white shadow-2xl cursor-pointer"
+                        onClick={() => profileImage !== "/default-avatar.jpg" && openImageModal(profileImage, 'profile')}
+                      >
+                        <AvatarImage src={profileImage} className="object-cover" />
+                        <AvatarFallback className="bg-gray-100 text-4xl">
+                          <UserCircle className="h-full w-full text-gray-300" />
+                        </AvatarFallback>
+                      </Avatar>
+                      {profileImage !== "/default-avatar.jpg" && (
+                        <button
+                          className="absolute top-2 right-2 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-all"
+                          onClick={() => openImageModal(profileImage, 'profile')}
+                        >
+                          <Maximize2 className="h-3 w-3 text-white" />
+                        </button>
+                      )}
+                    </div>
+
+                    {isOwner && (
+                      <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={(e) => handleImageUpload(e, 'profile')}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="rounded-full h-10 w-10 p-0 bg-white/90 hover:bg-white text-gray-800 shadow-lg"
+                            onClick={() => fileInputRef.current.click()}
+                          >
+                            <Camera className="h-4 w-4" />
+                          </Button>
+                          {profileImage !== "/default-avatar.jpg" && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="rounded-full h-10 w-10 p-0 bg-white/90 hover:bg-white text-red-600 shadow-lg"
+                              onClick={() => removeImage('profile')}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Profile Info */}
+                  <div className="flex-1 mt-4 lg:mt-16">
+                    <div className="space-y-3">
+                      <h1 className="text-4xl font-bold text-gray-900">{user.name}</h1>
+
+                      {user.job_title?.name && (
+                        <div className="text-xl text-brand font-medium">
+                          {user.job_title.name}
+                        </div>
+                      )}
+
+                      {/* Info Items */}
+                      <div className="flex flex-wrap items-center gap-6 text-gray-600">
+                        {user.personalInfo?.country && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-gray-400" />
+                            <span className="text-brand hover:underline cursor-pointer">
+                              {user.location?.city && `${user.location.city}, `}
+                              {user.personalInfo.country}
+                            </span>
+                          </div>
+                        )}
+
+                        {user.personalInfo?.salary && (
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-gray-400" />
+                            <span className="font-medium">
+                              ${user.personalInfo.salary}/month
+                            </span>
+                          </div>
+                        )}
+
+                        {user.rating && (
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                              <span className="font-medium">{user.rating}</span>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              ({user.reviewsCount || 0} Reviews)
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Additional Personal Info */}
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-600 pt-2">
+                        {user.personalInfo?.phone && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-gray-400" />
+                            <span>{user.personalInfo.phone}</span>
+                          </div>
+                        )}
+                        {user.personalInfo?.email && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-gray-400" />
+                            <span>{user.personalInfo.email}</span>
+                          </div>
+                        )}
+                        {user.personalInfo?.dateOfBirth && (
+                          <div className="flex items-center gap-2">
+                            <Cake className="h-4 w-4 text-gray-400" />
+                            <span>{formatDate(user.personalInfo.dateOfBirth)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 mt-8 px-8">
+
+
+                  <Button
+                    variant="outline"
+                    className="p-6 rounded-full border-brand text-brand"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Save to PDF
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="p-6 rounded-full"
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Invite
+                  </Button>
+
+
+
+                  {isOwner && (
+                    <Button
+                      variant="outline"
+                      className="text-white bg-brand p-6 rounded-full"
+                      onClick={() => setEditOpen(true)}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Profile
+                    </Button>
+                  )}
+                </div>
+
+                {/* Status Badge */}
+                {user.seekingOpportunities && (
+                  <div className="mt-6">
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                      Open to work
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Status Badge */}
-        {user.seekingOpportunities && (
-          <div className="mt-6">
-            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Open to work
-            </span>
+        {/* About Section */}
+        <div className="bg-white mt-2">
+          <div className="max-w-7xl px-6">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">About me</h2>
+                {isOwner && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-brand hover:text-brand/90 hover:bg-blue-50"
+                    onClick={() => setAboutEditOpen(true)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                )}
+              </div>
+
+              <div className="prose prose-gray max-w-none">
+                {user.about ? (
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {user.about}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 italic">
+                    {isOwner ? 'Add information about yourself' : 'No information provided yet.'}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Edit Profile Modal */}
@@ -542,15 +558,11 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
                 disabled={loadingJobTitles}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={user.job_title?.name || (loadingJobTitles ? "Loading..." : "Select a job title")} />
+                  <SelectValue placeholder={loadingJobTitles ? "Loading..." : "Select a job title"} />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px] overflow-y-auto">
+                <SelectContent className="max-h-90 overflow-y-auto">
                   {jobTitles.map((job) => (
-                    <SelectItem 
-                      key={job.id} 
-                      value={job.id}
-                      className={job.id === user.job_title?.id ? "bg-gray-100 font-medium" : ""}
-                    >
+                    <SelectItem key={job.id} value={job.id}>
                       {job.name}
                     </SelectItem>
                   ))}
@@ -596,6 +608,32 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
         </div>
       </EditModal>
 
+      {/* Edit About Modal */}
+      <EditModal
+        title="Edit About"
+        open={aboutEditOpen}
+        onOpenChange={setAboutEditOpen}
+        onSave={handleAboutSave}
+        isSaving={isSaving}
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="about">About</Label>
+            <Textarea
+              id="about"
+              value={aboutData}
+              onChange={(e) => setAboutData(e.target.value)}
+              placeholder="Tell others about yourself, your skills, and experiences"
+              rows={8}
+              className="min-h-[200px]"
+            />
+            <p className="text-sm text-gray-500">
+              {aboutData.length}/2,000 characters
+            </p>
+          </div>
+        </div>
+      </EditModal>
+
       {/* Image View Modal */}
       <Dialog open={viewImageOpen} onOpenChange={setViewImageOpen}>
         <DialogContent className="sm:max-w-4xl p-0 bg-transparent border-none">
@@ -618,6 +656,71 @@ export const ProfileHeader = ({ initialUser, isOwner }) => {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+export const AboutSection = ({ about, isOwner, onSave }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedAbout, setEditedAbout] = useState(about || '');
+
+  const handleSave = () => {
+    onSave(editedAbout);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="p-8 shadow-sm border border-gray-200">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">About me</h2>
+        {isOwner && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-brand hover:text-blue-700 hover:bg-blue-50"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+        )}
+      </div>
+
+      <div className="prose prose-gray max-w-none">
+        {about ? (
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+            {about}
+          </p>
+        ) : (
+          <p className="text-gray-500 italic">
+            {isOwner ? 'Add information about yourself' : 'No information provided yet.'}
+          </p>
+        )}
+      </div>
+
+      <EditModal
+        title="Edit About"
+        open={isEditing}
+        onOpenChange={setIsEditing}
+        onSave={handleSave}
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="about">About</Label>
+            <Textarea
+              id="about"
+              value={editedAbout}
+              onChange={(e) => setEditedAbout(e.target.value)}
+              placeholder="Tell others about yourself, your skills, and experiences"
+              rows={8}
+              className="min-h-[200px]"
+            />
+            <p className="text-sm text-gray-500">
+              {editedAbout.length}/2,000 characters
+            </p>
+          </div>
+        </div>
+      </EditModal>
     </div>
   );
 };

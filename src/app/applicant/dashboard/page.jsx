@@ -71,18 +71,18 @@ const ApplicantDashBoard = () => {
   }
 
   return (
-    <div className="h-fit pb-2">
+    <div className="h-fit pb-2 ">
       <MobileMenu mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="pt-2">
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 bg-white">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <main className="relative flex-1 mx-auto md:ml-72">
-            <div className='fixed md:sticky top-0 left-0 right-0 z-10 md:px-4 bg-white'> 
+          <main className="relative flex-1 mx-auto md:ml-72 ">
+            <div className=' right-0 z-10'> 
               <DashboardHeader onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/>
             </div>
 
-            <div className="mx-auto px-4 lg:px-6 bg-gray-100 rounded-xl shadow min-h-screen mt-16 md:mt-0">                                                                                                                                                                                                                                
+            <div className=" px-2 lg:p-0 bg-gray-100 rounded-2xl shadow min-h-screen mt-16 md:mt-0">                                                                                                                                                                                                                                
               {renderContent()}
             </div>
           </main>

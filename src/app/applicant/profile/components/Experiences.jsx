@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { AddItemModal } from './AddItemModal';
 import { Button } from '@/components/ui/button';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, BriefcaseIcon } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -226,13 +225,10 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-6 border-b bg-white   border rounded-xl max-w-2xl">
+      <div className="flex justify-between items-center mb-6">
         <div>
-        <div className="flex items-center gap-2">
-          <BriefcaseIcon className="text-gray-700 h-4 w-4 " />
-          <h2 className="text-xl font-bold">Experience</h2>
-        </div>
+          <h4 className="text-xl font-bold text-gray-800 mb-2">Work Experience</h4>
           <p className="text-sm text-gray-500">
             {userExperiences.length}/{MAX_EXPERIENCES} experiences added
           </p>
@@ -247,7 +243,7 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
             }}
             size="sm"
             variant="outline"
-            className="text-brand hover:bg-white hover:text-brand"
+            className="text-brand hover:bg-white p-6 rounded-full border-brand hover:text-brand"
             disabled={isLoading || userExperiences.length >= MAX_EXPERIENCES}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -259,57 +255,67 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
       {userExperiences.length === 0 ? (
         <p className="text-gray-500">No experiences added yet.</p>
       ) : (
-        <div className="space-y-4">
+        <div className="block-archive-inner candidate-single-field">
           {visibleExperiences.map((exp) => (
-            <div key={exp.id} className="flex gap-4 pb-4 last:border-0 group">
-               <div className="flex-shrink-0 mt-1">
-                  <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
-                    <BriefcaseIcon className="text-brand h-4 w-4" />
-                  </div>
-                </div>
-              <div className="flex flex-1 justify-between items-start">
-                <div>
-                  <h3 className="font-medium">{exp.role}</h3>
-                  <p className="text-gray-700">{exp.company_name}</p>
-                  <p className="text-gray-500 text-sm">
-                    {getYearFromDate(exp.start_date)} - {exp.end_date ? getYearFromDate(exp.end_date) : 'Present'}
-                  </p>
-                  {exp.description && (
-                    <p className="text-gray-600 mt-2 text-sm">{exp.description}</p>
+            <div key={exp.id} className="single candidate-experience mb-6 last:mb-0 group relative">
+              <div className="experience-title time-dot relative pl-6 mb-2">
+                {/* Timeline dot */}
+                <div className="absolute left-0 top-1 w-3 h-3 bg-brand rounded-full border-2 border-white shadow-md"></div>
+                {/* Timeline line */}
+                <div className="absolute left-1.5 top-4 w-0.5 h-full bg-gray-200 -z-10"></div>
+                
+                <div className="flex items-start justify-between">
+                  <h3 className="font-semibold text-gray-800 text-lg">{exp.role}</h3>
+                  
+                  {isOwner && (
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Edit Experience"
+                        onClick={() => {
+                          setEditingExperience(exp);
+                          setIsAddOpen(true);
+                          setValidationErrors({});
+                        }}
+                        disabled={isLoading}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Delete Experience"
+                        onClick={() => handleDeleteExperience(exp.id)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   )}
                 </div>
-                {isOwner && (
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label="Edit Experience"
-                      onClick={() => {
-                        setEditingExperience(exp);
-                        setIsAddOpen(true);
-                        setValidationErrors({});
-                      }}
-                      disabled={isLoading}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label="Delete Experience"
-                      onClick={() => handleDeleteExperience(exp.id)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
+              </div>
+              
+              <div className="experience-details time-line pl-6">
+                <div className="flex flex-wrap items-center gap-2 text-gray-600 mb-2">
+                  <span className="font-medium">{exp.company_name}</span>
+                  <span className="text-gray-400">•</span>
+                  <span>{getYearFromDate(exp.start_date)}</span>
+                  <span>-</span>
+                  <span>{exp.end_date ? getYearFromDate(exp.end_date) : 'Present'}</span>
+                </div>
+                
+                {exp.description && (
+                  <span className="des block text-gray-600 text-sm leading-relaxed">
+                    {exp.description}
+                  </span>
                 )}
               </div>
             </div>
           ))}
 
           {userExperiences.length > initialVisibleCount && (
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center pt-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -427,6 +433,6 @@ export const ExperienceSection = ({ experiences, isOwner }) => {
           )}
         </AddItemModal>
       )}
-    </Card>
+    </div>
   );
 };
