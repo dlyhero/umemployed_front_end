@@ -51,6 +51,7 @@ export default function NotificationsPage() {
         setIsLoading(true)
         const response = await axios.get(`${baseUrl}/notifications/notifications/`, axiosConfig)
         setNotifications(response.data)
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching notifications:", error)
       } finally {
@@ -249,7 +250,7 @@ export default function NotificationsPage() {
                           <Avatar className="h-7 sm:h-8 w-7 sm:w-8 mr-2">
                             <AvatarImage src={notification.user.avatar} />
                             <AvatarFallback>
-                              {notification.user.name.charAt(0)}
+                              {notification?.user?.name?.charAt(0) ?? "?"}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
