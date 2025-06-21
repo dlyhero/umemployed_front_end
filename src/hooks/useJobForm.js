@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { step1Schema, step2Schema, step3Schema, step4Schema } from '../app/companies/jobs/schemas/jobSchema';
@@ -148,29 +148,28 @@ export const useJobForm = (currentStep) => {
       toast.error('No job ID found. Please complete the Basic Information step first.');
       router.push('/companies/jobs/create/basicinformation');
     }
-  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router]);
+  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router, fetchExtractedSkills]);
 
-  const fetchExtractedSkills = async (jobId) => {
-    try {
-      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.accessToken}`,
-        },
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
+  const fetchExtractedSkills = useCallback(
+    async (jobId) => {
+      try {
+        const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.accessToken}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch extracted skills');
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
       }
-      const data = await response.json();
-      const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
-      return skills;
-    } catch (error) {
-      console.log('fetchExtractedSkills Debug: Error', { error: error.message });
-      return [];
-    }
-  };
+    },
+    [session]
+  );
 
   const verifyJob = async (jobId, retries = 3, delay = 1000) => {
     for (let i = 0; i < retries; i++) {

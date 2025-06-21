@@ -1,5 +1,5 @@
 // hooks/useJobs.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import baseUrl from '../app/api/baseUrl';
@@ -58,7 +58,7 @@ export const useJobs = () => {
     return typeMap[type] || type;
   };
 
-  const fetchJos = async () => {
+  const fetchJos = useCallback(async () => {
    try {
     const api = axios.create({
       baseURL: baseUrl,
@@ -150,9 +150,9 @@ export const useJobs = () => {
   } finally {
     setLoading(false);
   }
-  }
+  }, [baseUrl]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const api = axios.create({
@@ -253,12 +253,12 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [baseUrl, session]);
 
   useEffect(() => {
     if (session) fetchData();
     else fetchJos();
-  }, [session]);
+  }, [session, fetchData, fetchJos]);
 
   const toggleSaveJob = async (jobId) => {
     try {
