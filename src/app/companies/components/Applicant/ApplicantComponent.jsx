@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -12,6 +12,7 @@ import ApplicationList from './ApplicationList';
 import CandidateModal from './CandidateModal';
 import InterviewModal from './InterviewModal';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
+import baseUrl from '../../../api/baseUrl';
 
 const ApplicantComponent = ({ type = 'job' }) => {
   const { companyId, jobId } = useParams();
@@ -24,20 +25,21 @@ const ApplicantComponent = ({ type = 'job' }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState({});
+
+  useEffect(() => {
+    console.log('ApplicantComponent: Session status:', status, 'session:', session);
+  }, [status, session]);
 
   const handleTabChange = (tab) => {
-    if (tab === 'shortlist') {
-      router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
-    } else if (tab === 'archived') {
-      router.push(`/companies/${companyId}/jobs/${jobId}/archived`);
-    } else {
-      setActiveTab(tab);
-    }
+    console.log('handleTabChange: Switching to tab:', tab);
+    setActiveTab(tab);
   };
 
   const handleViewDetails = (candidate) => {
     if (!candidate || !candidate.profile) {
-      console.warn('Invalid candidate passed to handleViewDetails:', candidate);
+      console.warn('handleViewDetails: Invalid candidate:', candidate);
+      toast.error('Invalid candidate data.');
       return;
     }
     setSelectedCandidate(candidate);
@@ -45,6 +47,7 @@ const ApplicantComponent = ({ type = 'job' }) => {
   };
 
   const handleSchedule = (candidateId) => {
+    setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], schedule: true } }));
     const candidate = applications.find((app) => app.user_id === candidateId);
     if (candidate) {
       setSelectedCandidate(candidate);
@@ -52,27 +55,19 @@ const ApplicantComponent = ({ type = 'job' }) => {
     } else {
       toast.error('Candidate not found.');
     }
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCandidate(null);
-  };
-
-  const closeInterviewModal = () => {
-    setIsInterviewModalOpen(false);
-    setSelectedCandidate(null);
+    setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], schedule: false } }));
   };
 
   const handleShortlist = async (candidateId) => {
     if (!session?.accessToken) {
-      toast.error('Unauthorized: No access token available');
+      toast.error('Unauthorized: Please sign in.');
       return;
     }
 
+    setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], shortlist: true } }));
     try {
       const response = await fetch(
-        `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/job/${jobId}/shortlist/`,
+        `${baseUrl}/company/company/${companyId}/job/${jobId}/shortlist/`,
         {
           method: 'POST',
           headers: {
@@ -84,13 +79,8 @@ const ApplicantComponent = ({ type = 'job' }) => {
       );
 
       if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { message: `Server error: ${response.statusText || 'Unknown error'}` };
-        }
-        throw new Error(`Failed to shortlist candidate: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to shortlist candidate.');
       }
 
       toast.success('Candidate shortlisted successfully!');
@@ -99,10 +89,50 @@ const ApplicantComponent = ({ type = 'job' }) => {
           app.user_id === candidateId ? { ...app, isShortlisted: true } : app
         )
       );
-      router.push(`/companies/${companyId}/jobs/${jobId}/shortlist`);
     } catch (err) {
-      console.error('Shortlist error:', err);
+      console.error('handleShortlist: Error:', err);
       toast.error(err.message || 'Failed to shortlist candidate.');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], shortlist: false } }));
+    }
+  };
+
+  const handleUnshortlist = async (candidateId) => {
+    if (!session?.accessToken) {
+      toast.error('Unauthorized: Please sign in.');
+      return;
+    }
+
+    setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], unshortlist: true } }));
+    try {
+      const response = await fetch(
+        `${baseUrl}/company/company/${companyId}/job/${jobId}/unshortlist/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`,
+          },
+          body: JSON.stringify({ candidate_id: candidateId }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to unshortlist candidate.');
+      }
+
+      toast.success('Candidate removed from shortlist successfully!');
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.user_id === candidateId ? { ...app, isShortlisted: false } : app
+        )
+      );
+    } catch (err) {
+      console.error('handleUnshortlist: Error:', err);
+      toast.error(err.message || 'Failed to unshortlist candidate.');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [candidateId]: { ...prev[candidateId], unshortlist: false } }));
     }
   };
 
@@ -161,23 +191,33 @@ const ApplicantComponent = ({ type = 'job' }) => {
               handleTabChange={handleTabChange}
               handleViewDetails={handleViewDetails}
               handleShortlist={handleShortlist}
+              handleUnshortlist={handleUnshortlist}
               handleSchedule={handleSchedule}
               companyId={companyId}
               jobId={jobId}
               type={type}
+              actionLoading={actionLoading}
             />
           </main>
         </div>
       </div>
       <CandidateModal
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => {
+          console.log('CandidateModal: Closed');
+          setIsModalOpen(false);
+          setSelectedCandidate(null);
+        }}
         candidate={selectedCandidate}
         type={type}
       />
       <InterviewModal
         isOpen={isInterviewModalOpen}
-        onClose={closeInterviewModal}
+        onClose={() => {
+          console.log('InterviewModal: Closed');
+          setIsInterviewModalOpen(false);
+          setSelectedCandidate(null);
+        }}
         candidate={selectedCandidate}
         companyId={companyId}
         jobId={jobId}

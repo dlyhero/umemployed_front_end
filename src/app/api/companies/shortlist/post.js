@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function POST(req) {
   const { companyId, jobId, candidate_id } = await req.json();
-  const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+  const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
 
   if (!token) {

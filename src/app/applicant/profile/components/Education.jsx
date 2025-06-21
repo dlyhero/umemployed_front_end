@@ -169,19 +169,19 @@ export const EducationSection = ({ educations = [], isOwner }) => {
     }
   };
 
-  return (
-    <Card className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <GraduationCap className="text-gray-700 h-5 w-5" />
-            <h2 className="text-xl font-bold text-gray-900">Education</h2>
-          </div>
-          <p className="text-sm text-gray-500 ml-7">
-            {userEducations.length}/{MAX_EDUCATIONS} entries
-          </p>
-        </div>
+  const formatDateRange = (edu) => {
+    if (edu.start_date && edu.end_date) {
+      return `${edu.start_date} - ${edu.end_date}`;
+    } else if (edu.graduation_year) {
+      return `Graduated: ${edu.graduation_year}`;
+    }
+    return '';
+  };
 
+  return (
+    <div className="block-archive-inner candidate-single-field border rounded-xl max-w-2xl ">
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="title-candidate">Education</h4>
         {isOwner && (
           <Button 
             onClick={() => {
@@ -192,105 +192,93 @@ export const EducationSection = ({ educations = [], isOwner }) => {
             }}
             variant="ghost" 
             size="sm" 
-            className="text-brand hover:text-brand"
+            className="text-brand/90 hover:text--brand rounded-full border p-6 border-brand"
             disabled={isLoading || userEducations.length >= MAX_EDUCATIONS}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Add
+            Add ({userEducations.length}/{MAX_EDUCATIONS})
           </Button>
         )}
       </div>
 
-      <div className="space-y-6">
-        {visibleEducations.length > 0 ? (
-          <>
-            {visibleEducations.map((edu) => (
-              <div key={edu.id} className="flex gap-4 group relative">
-                <div className="flex-shrink-0 mt-1">
-                  <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
-                    <GraduationCap className="text-brand h-5 w-5" />
+      {visibleEducations.length > 0 ? (
+        <>
+          {visibleEducations.map((edu) => (
+            <div key={edu.id} className="single candidate-education group relative">
+              <div className="education-title time-dot">
+                {edu.institution_name}
+                {isOwner && (
+                  <div className="inline-flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-brand/90 hover:text--brand"
+                      onClick={() => {
+                        setEditingEducation(edu);
+                        setValidationErrors({});
+                      }}
+                      disabled={isLoading}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-red-500 hover:text-red-600"
+                      onClick={() => handleDeleteEducation(edu.id)}
+                      disabled={isLoading}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{edu.institution_name}</h3>
-                      <p className="text-gray-700">{edu.degree}</p>
-                      {edu.field_of_study && (
-                        <p className="text-gray-700">{edu.field_of_study}</p>
-                      )}
-                      <p className="text-gray-500 text-sm">
-                        Graduated: {edu.graduation_year}
-                      </p>
-                      {edu.description && (
-                        <p className="text-gray-700 mt-2 whitespace-pre-line">{edu.description}</p>
-                      )}
-                    </div>
-                    
-                    {isOwner && (
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-brand hover:text-brand"
-                          onClick={() => {
-                            setEditingEducation(edu);
-                            setValidationErrors({});
-                          }}
-                          disabled={isLoading}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-600"
-                          onClick={() => handleDeleteEducation(edu.id)}
-                          disabled={isLoading}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
-            ))}
+              <div className="education-details time-line">
+                <span>{edu.degree}</span>
+                {edu.field_of_study && <span>{edu.field_of_study}</span>}
+                {edu.start_date && <span>{edu.start_date}</span>}
+                {edu.start_date && edu.end_date && <span>-</span>}
+                {edu.end_date && <span>{edu.end_date}</span>}
+                {!edu.start_date && !edu.end_date && edu.graduation_year && (
+                  <span>Graduated: {edu.graduation_year}</span>
+                )}
+                {edu.description && <span className="des">{edu.description}</span>}
+              </div>
+            </div>
+          ))}
 
-            {userEducations.length > initialVisibleCount && (
-              <div className="flex justify-center pt-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAll(!showAll)}
-                  className="text-brand hover:text-brand"
-                >
-                  {showAll ? (
-                    <>
-                      <ChevronUp className="mr-2 h-4 w-4" />
-                      Show Less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="mr-2 h-4 w-4" />
-                      View All ({userEducations.length})
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No education added</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {isOwner ? 'Add your education history to showcase to recruiters.' : 'No education information available.'}
-            </p>
-          </div>
-        )}
-      </div>
+          {userEducations.length > initialVisibleCount && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAll(!showAll)}
+                className="text-brand/90 hover:text--brand"
+              >
+                {showAll ? (
+                  <>
+                    <ChevronUp className="mr-2 h-4 w-4" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-2 h-4 w-4" />
+                    View All ({userEducations.length})
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <GraduationCap className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No education added</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {isOwner ? 'Add your education history to showcase to recruiters.' : 'No education information available.'}
+          </p>
+        </div>
+      )}
 
       <AddItemModal
         title={editingEducation ? 'Edit Education' : 'Add Education'}
@@ -318,72 +306,186 @@ export const EducationSection = ({ educations = [], isOwner }) => {
           </div>
         ) : (
           <form ref={formRef} className="space-y-4">
-<div className="space-y-2">
-  <Label htmlFor="institution_name">Institution *</Label>
-  <Input 
-    id="institution_name" 
-    name="institution_name"
-    defaultValue={editingEducation?.institution_name || ''}
-    placeholder="e.g. Stanford University" 
-    required
-  />
-  {validationErrors.institution_name && (
-    <p className="text-sm text-red-500">{validationErrors.institution_name}</p>
-  )}
-</div>
+            <div className="space-y-2">
+              <Label htmlFor="institution_name">Institution *</Label>
+              <Input 
+                id="institution_name" 
+                name="institution_name"
+                defaultValue={editingEducation?.institution_name || ''}
+                placeholder="e.g. Stanford University" 
+                required
+              />
+              {validationErrors.institution_name && (
+                <p className="text-sm text-red-500">{validationErrors.institution_name}</p>
+              )}
+            </div>
 
-<div className="space-y-2">
-  <Label htmlFor="degree">Degree *</Label>
-  <Input 
-    id="degree" 
-    name="degree"
-    defaultValue={editingEducation?.degree || ''}
-    placeholder="e.g. Bachelor's Degree" 
-    required
-  />
-  {validationErrors.degree && (
-    <p className="text-sm text-red-500">{validationErrors.degree}</p>
-  )}
-</div>
+            <div className="space-y-2">
+              <Label htmlFor="degree">Degree *</Label>
+              <Input 
+                id="degree" 
+                name="degree"
+                defaultValue={editingEducation?.degree || ''}
+                placeholder="e.g. Bachelor's Degree" 
+                required
+              />
+              {validationErrors.degree && (
+                <p className="text-sm text-red-500">{validationErrors.degree}</p>
+              )}
+            </div>
 
-<div className="space-y-2">
-  <Label htmlFor="field_of_study">Field of Study</Label>
-  <Input 
-    id="field_of_study" 
-    name="field_of_study"
-    defaultValue={editingEducation?.field_of_study || ''}
-    placeholder="e.g. Computer Science" 
-  />
-</div>
+            <div className="space-y-2">
+              <Label htmlFor="field_of_study">Field of Study</Label>
+              <Input 
+                id="field_of_study" 
+                name="field_of_study"
+                defaultValue={editingEducation?.field_of_study || ''}
+                placeholder="e.g. Computer Science" 
+              />
+            </div>
 
-<div className="space-y-2">
-  <Label htmlFor="graduation_year">Graduation Year *</Label>
-  <Input
-    id="graduation_year"
-    name="graduation_year"
-    defaultValue={editingEducation?.graduation_year || ''}
-    placeholder="e.g. 2015"
-    required
-  />
-  {validationErrors.graduation_year && (
-    <p className="text-sm text-red-500">{validationErrors.graduation_year}</p>
-  )}
-</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start_date">Start Date</Label>
+                <Input
+                  id="start_date"
+                  name="start_date"
+                  type="date"
+                  defaultValue={editingEducation?.start_date || ''}
+                />
+              </div>
 
-<div className="space-y-2">
-  <Label htmlFor="description">Description</Label>
-  <Textarea
-    id="description"
-    name="description"
-    defaultValue={editingEducation?.description || ''}
-    placeholder="Any achievements or specializations"
-    rows={3}
-  />
-</div>
-</form>
+              <div className="space-y-2">
+                <Label htmlFor="end_date">End Date</Label>
+                <Input
+                  id="end_date"
+                  name="end_date"
+                  type="date"
+                  defaultValue={editingEducation?.end_date || ''}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="graduation_year">Graduation Year *</Label>
+              <Input
+                id="graduation_year"
+                name="graduation_year"
+                defaultValue={editingEducation?.graduation_year || ''}
+                placeholder="e.g. 2015"
+                required
+              />
+              {validationErrors.graduation_year && (
+                <p className="text-sm text-red-500">{validationErrors.graduation_year}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                defaultValue={editingEducation?.description || ''}
+                placeholder="Any achievements or specializations"
+                rows={3}
+              />
+            </div>
+          </form>
         )}
       </AddItemModal>
-    </Card>
+
+      <style jsx>{`
+        .block-archive-inner {
+          background: #fff;
+          padding: 30px;
+          border-radius: 8px;
+          margin-bottom: 30px;
+        }
+
+        .title-candidate {
+          font-size: 22px;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 25px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid #f0f0f0;
+        }
+
+        .single.candidate-education {
+          position: relative;
+          padding-left: 30px;
+          margin-bottom: 30px;
+        }
+
+        .single.candidate-education:last-child {
+          margin-bottom: 0;
+        }
+
+        .education-title.time-dot {
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 10px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .education-title.time-dot::before {
+          content: '';
+          position: absolute;
+          left: -22px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 12px;
+          height: 12px;
+          background: #007bff;
+          border-radius: 50%;
+          border: 3px solid #fff;
+          box-shadow: 0 0 0 3px #007bff;
+        }
+
+        .education-details.time-line {
+          position: relative;
+          padding-left: 0;
+        }
+
+        .single.candidate-education::after {
+          content: '';
+          position: absolute;
+          left: -16px;
+          top: 25px;
+          bottom: -30px;
+          width: 2px;
+          background: #e0e0e0;
+        }
+
+        .single.candidate-education:last-child::after {
+          display: none;
+        }
+
+        .education-details.time-line span {
+          display: inline-block;
+          margin-right: 10px;
+          color: #666;
+          font-size: 14px;
+        }
+
+        .education-details.time-line span:first-child {
+          font-weight: 500;
+          color: #333;
+          font-size: 16px;
+        }
+
+        .education-details.time-line span.des {
+          display: block;
+          margin-top: 10px;
+          margin-right: 0;
+          line-height: 1.6;
+          color: #777;
+        }
+      `}</style>
+    </div>
   );
 };
-

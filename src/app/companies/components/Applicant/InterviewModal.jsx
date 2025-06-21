@@ -43,7 +43,7 @@ const InterviewModal = ({ isOpen, onClose, candidate, companyId, jobId, accessTo
     try {
       console.log('Sending interview creation request:', { payload });
       const response = await fetch(
-        'https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/create-interview/',
+        'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/create-interview/',
         {
           method: 'POST',
           headers: {

@@ -15,42 +15,39 @@ export default function LoginForm() {
     const [loading, setLoading] = useState(false);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
+    // Get callbackUrl from query parameters or default to dashboard
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
+    
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    useEffect(() => {
-        if (status === "authenticated") {
-            // Add a small delay to ensure session is fully loaded
-            const timer = setTimeout(() => {
-                const role = session?.user?.role;
-                console.log("Current session:", session);
-        
-
-                // Handle redirects based on role and status
-                switch(role) {
-                    case 'job_seeker':
-                        if (session?.user?.has_resume) {
-                            router.replace('/applicant/dashboard');
-                        } else {
-                            router.replace('applicant/upload-resume');
-                        }
-                        break;
-                    case 'recruiter':
-                        if (session?.user?.has_company) {
-                        if (session?.user?.has_company && session?.user?.company_id){
-                            router.replace(`/companies/${session.user.company_id}/dashboard`);
-                        }
-                        } else {
-                            router.replace('/companies/create');
-                        }
-                        break;
-                    case 'none':
-                    default:
-                        router.replace('/select-role');
+    const handleRoleBasedRedirect = (user) => {
+        // Handle default redirects based on role and status
+        switch(user?.role) {
+            case 'job_seeker':
+                if (user?.has_resume) {
+                    router.push('/applicant/dashboard');
+                } else {
+                    router.push('/applicant/upload-resume');
                 }
-            }, 100);
+                break;
+            case 'recruiter':
+                if (user?.has_company && user?.company_id) {
+                    router.push(`/companies/${user.company_id}/dashboard`);
+                } else {
+                    router.push('/companies/create');
+                }
+                break;
+            case 'none':
+            default:
+                router.push('/select-role');
+        }
+    };
 
-            return () => clearTimeout(timer);
+    useEffect(() => {
+        if (status === "authenticated" && session?.user) {
+            handleRoleBasedRedirect(session.user);
         }
     }, [status, session, router]);
 
@@ -62,7 +59,7 @@ export default function LoginForm() {
             const result = await signIn("credentials", {
                 email: data.email,
                 password: data.password,
-                redirect: false
+                redirect: false,
             });
 
             if (result?.error === "EMAIL_NOT_VERIFIED") {
@@ -76,6 +73,7 @@ export default function LoginForm() {
                 throw new Error("Please make sure you are connected to the internet");
             }
             
+            // If no error, the session change will trigger the redirect
         } catch (err) {
             setError(err.message);
         } finally {
@@ -96,7 +94,7 @@ export default function LoginForm() {
                     Email
                 </label>
                 <div className="relative">
-                        <Mail className="h-4 w-4  absolute left-3 top-1/2 -translate-y-1/2 h text-gray-400" />
+                    <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         {...register("email", { 
                             required: "Email is required",
@@ -122,7 +120,7 @@ export default function LoginForm() {
                     Password
                 </label>
                 <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         {...register("password", { 
                             required: "Password is required",

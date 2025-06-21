@@ -9,15 +9,13 @@ import {Header} from "@/src/components/common/Header";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={` antialiased text-[15px]`}
       >  
         <AuthProvider>
           <Header />
           {children}
         </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

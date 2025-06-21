@@ -2,7 +2,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const companyId = searchParams.get('companyId');
   const jobId = searchParams.get('jobId');
-  const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
+  const baseUrl = 'https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net';
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
 
   if (!token) {

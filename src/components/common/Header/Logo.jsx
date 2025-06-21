@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { usePathname } from "next/navigation"
 
 export function Logo() {
+  const pathname = usePathname();
+  
   const pathVariants = {
     initial: {
       pathLength: 0,
@@ -33,12 +36,12 @@ export function Logo() {
   }
 
   return (
-    <Link href="/" className="inline-block text-brand text-4xl sm:text-5xl md:text-6xl font-bold rounded-lg sm:mb-2 ">
+    <Link href="/" className={`${pathname === '/' ? 'text-white' : "text-brand"} inline-block font-bold rounded-lg sm:mb-2`}>
       <motion.svg
         viewBox="0 0 150 100" // Keep this fixed
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-[1em] h-[1em]" // This makes it scale with font-size
+        className="w-[4em] h-[4Sem]" // This makes it scale with font-size
         whileHover="hover"
         initial="initial"
         animate="animate"

@@ -1,7 +1,11 @@
+
 'use client';
 
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Archive, Bookmark, MessageSquare, Star, Calendar } from 'lucide-react';
+import { Bookmark, MessageSquare, Star, Calendar, Loader2 } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
 const CandidateActions = ({
   candidate = {},
@@ -11,188 +15,153 @@ const CandidateActions = ({
   handleShortlist = () => {},
   handleEndorse = () => {},
   handleSchedule = () => {},
-  loading = false,
+  handleGiveEndorsement = () => {},
+  handleMessage = () => {},
+  isShortlistLoading = false,
+  isEndorseLoading = false,
+  isScheduleLoading = false,
+  isGiveEndorsementLoading = false,
+  isMessageLoading = false,
+  isAuthenticated = false,
+  jobId = '',
+  companyId = '',
+  accessToken = '',
 }) => {
+  const { data: session } = useSession();
   const userId = candidate.user_id || '';
 
   return (
     <>
-      <div className="flex md:hidden flex-row flex-nowrap gap-2 w-full">
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Archive className="w-5 h-5" />
-        </Button>
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Bookmark className="w-5 h-5" />
-        </Button>
+      <Toaster />
+      <div className="grid grid-cols-2 gap-3 w-full">
         {activeTab === 'shortlist' ? (
           <>
             <Button
               variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
+              size="sm"
+              className="w-full border-brand text-brand hover:bg-brand/10 transition-colors"
+              onClick={() => handleMessage(userId)}
+              disabled={isMessageLoading || !isAuthenticated}
             >
-              <MessageSquare className="w-5 h-5 mr-1" />
+              {isMessageLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <MessageSquare className="w-4 h-4 mr-2" />
+              )}
               Message
             </Button>
             <Button
-              className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-              disabled={loading}
+              variant="outline"
+              size="sm"
+              className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
-              {loading ? (
-                <svg
-                  className="animate-spin h-5 w-5 mr-2 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              ) : (
-                <Star className="w-5 h-5 mr-1" />
-              )}
-              Endorse
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save
             </Button>
             <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand text-white hover:bg-brand/90 transition-colors"
               onClick={() => handleSchedule(userId)}
+              disabled={isScheduleLoading || !isAuthenticated}
             >
-              <Calendar className="w-5 h-5 mr-1" />
+              {isScheduleLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Calendar className="w-4 h-4 mr-2" />
+              )}
               Schedule Interview
+            </Button>
+            <Button
+              size="sm"
+              className="w-full bg-brand/80 text-white hover:bg-brand transition-colors"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={isGiveEndorsementLoading || !isAuthenticated}
+            >
+              {isGiveEndorsementLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                'Give Endorsement'
+              )}
             </Button>
           </>
         ) : (
           <>
             <Button
               variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
+              size="sm"
+              className="w-full border-brand text-brand hover:bg-brand/10 transition-colors"
+              onClick={() => handleMessage(userId)}
+              disabled={isMessageLoading || !isAuthenticated}
             >
-              <MessageSquare className="w-5 h-5 mr-1" />
-              Message
-            </Button>
-            {isShortlisted ? (
-              <Button
-                className="flex-1 bg-gray-400 text-white cursor-not-allowed min-w-0 px-4 py-2 text-sm truncate"
-                disabled
-              >
-                Shortlisted
-              </Button>
-            ) : (
-              <Button
-                className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-                onClick={() => handleShortlist(userId)}
-              >
-                Shortlist
-              </Button>
-            )}
-            <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleViewDetails(candidate)}
-            >
-              View Details
-            </Button>
-          </>
-        )}
-      </div>
-      <div className="hidden md:flex flex-row flex-nowrap gap-2 w-full">
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Archive className="w-5 h-5" />
-        </Button>
-        <Button variant="outline" size="icon" className="bg-gray-100 min-w-0 px-4 py-2">
-          <Bookmark className="w-5 h-5" />
-        </Button>
-        {activeTab === 'shortlist' ? (
-          <>
-            <Button
-              variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-            >
-              <MessageSquare className="w-5 h-5 mr-1" />
-              Message
-            </Button>
-            <Button
-              className="flex-1 bg-yellow-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
-              disabled={loading}
-            >
-              {loading ? (
-                <svg
-                  className="animate-spin h-5 w-5 mr-2 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+              {isMessageLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Star className="w-5 h-5 mr-1" />
+                <MessageSquare className="w-4 h-4 mr-2" />
               )}
-              Endorse
+              Message
             </Button>
-            <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleSchedule(userId)}
-            >
-              <Calendar className="w-5 h-5 mr-1" />
-              Schedule Interview
-            </Button>
-          </>
-        ) : (
-          <>
             <Button
               variant="outline"
-              className="flex-1 border-brand/50 text-brand/50 cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
-              onClick={() => handleEndorse(userId)}
+              size="sm"
+              className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
-              <MessageSquare className="w-5 h-5 mr-1" />
-              Message
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save
             </Button>
             {isShortlisted ? (
               <Button
-                className="flex-1 bg-gray-400 text-white cursor-not-allowed min-w-0 px-4 py-2 text-sm truncate"
+                size="sm"
+                className="w-full bg-gray-400 text-white cursor-not-allowed"
                 disabled
               >
                 Shortlisted
               </Button>
             ) : (
               <Button
-                className="flex-1 bg-green-500 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+                size="sm"
+                className="w-full bg-green-500 text-white hover:bg-green-600 transition-colors"
                 onClick={() => handleShortlist(userId)}
+                disabled={isShortlistLoading || !isAuthenticated}
               >
+                {isShortlistLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Star className="w-4 h-4 mr-2" />
+                )}
                 Shortlist
               </Button>
             )}
             <Button
-              className="flex-1 bg-brand/50 text-white cursor-pointer min-w-0 px-4 py-2 text-sm truncate"
+              size="sm"
+              className="w-full bg-brand text-white hover:bg-brand/90 transition-colors"
               onClick={() => handleViewDetails(candidate)}
             >
               View Details
+            </Button>
+            <Button
+              size="sm"
+              className="w-full bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+              onClick={() => handleEndorse(userId)}
+              disabled={isEndorseLoading || !isAuthenticated}
+            >
+              {isEndorseLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Star className="w-4 h-4 mr-2" />
+              )}
+              See Endorsements
+            </Button>
+            <Button
+              size="sm"
+              className="w-full bg-brand/80 text-white hover:bg-brand transition-colors"
+              onClick={() => handleGiveEndorsement(userId)}
+              disabled={isGiveEndorsementLoading || !isAuthenticated}
+            >
+              {isGiveEndorsementLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                'Give Endorsement'
+              )}
             </Button>
           </>
         )}

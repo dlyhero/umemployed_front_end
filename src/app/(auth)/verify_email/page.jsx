@@ -60,7 +60,7 @@ function EmailConfirmationContent() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="absolute inset-0 bg-blue-100 rounded-full"
+                className="absolute inset-0  rounded-full"
               />
             </>
           )}

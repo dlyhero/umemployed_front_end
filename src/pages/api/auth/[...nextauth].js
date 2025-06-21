@@ -5,7 +5,6 @@ import axios from "axios";
 import baseUrl from "@/src/app/api/baseUrl";
 
 export const authOptions = {
-
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -66,38 +65,45 @@ export const authOptions = {
   },
   pages: {
     signIn: "/login",
-    error: "404",
-    OfflinePage: "/offline",
+    signOut: "/",  // Redirect to homepage after logout
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request",
+    newUser: "/select-role", // Redirect to role selection for new users
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role || 'none';
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.has_resume = user.has_resume;
-        token.has_company = user.has_company;
-        token.company_id = user.company_id;
-        token.user_id = user.user_id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.role = token.role;
-      session.user.name = token.name || session.user.name;
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      session.user.has_resume = token.has_resume;
-      session.user.has_company = token.has_company;
-      session.user.company_id = token.company_id;
-      session.user.user_id = token.user_id;
-      
-      return session;
-    },
-    async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : baseUrl;
+ // [...nextauth].js
+callbacks: {
+  async jwt({ token, user, trigger, session }) {
+    // Handle session updates from client
+    if (trigger === "update" ) {
+      return { ...token, ...session.user };
     }
+    
+    // Initial sign in
+    if (user) {
+      return { 
+        ...token, 
+        role: user.role,
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+        has_resume: user.has_resume,
+        has_company: user.has_company,
+        company_id: user.company_id,
+        user_id: user.user_id
+      };
+    }
+    return token;
   },
+  async session({ session, token }) {
+    session.user.role = token.role;
+    session.accessToken = token.accessToken;
+    session.refreshToken = token.refreshToken;
+    session.user.has_resume = token.has_resume;
+    session.user.has_company = token.has_company;
+    session.user.company_id = token.company_id;
+    session.user.user_id = token.user_id;
+    return session;
+  },
+}
 };
 
 export default NextAuth(authOptions);

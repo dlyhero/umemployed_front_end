@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
 import { MenuLinks } from './MenuLinks';
-import  MenuAuthButtons  from '../MenuAuthButtons'
+import  MenuAuthButtons  from '../SidebarAuthButtons'
 
 // 6. MobileMenu.js
 export function MobileMenu({ isOpen, onClose }) {

@@ -134,19 +134,14 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@font-face {
-  font-family: "Quicksand";
-  src: url("/Quicksand-Regular.woff2") format("woff2"), url("/Quicksand-Regular.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
-
-body {
-  font-family: "Quicksand", sans-serif;
-  font-weight: 400;
-  background-color: white;
-}
-
 
 Button{
   font-size: 16 !important 
@@ -155,6 +150,8 @@ Button{
 Link{
   font-size: 10px !important;
 }
+
+
 
 /* Responsive font sizing - reduce font size on small screens */
 @media (max-width: 640px) {
@@ -171,7 +168,9 @@ Link{
   button {
     font-size: 0.85rem; /* Further reduce for specific elements */
   }
-
+  .Hero-title{
+    font-size: 1.8rem;
+  }
   h1 {
     font-size: 1.8rem;
   }
@@ -180,9 +179,7 @@ Link{
     font-size: 1.8rem;
   }
 
-  .ctAtitle{
-    font-size: 1.25rem;
-  }
+  
   .heroName{
     font-size: 1.8rem;
   }
@@ -243,6 +240,9 @@ Button{
 }
 }
 
+.logo{
+  font-size: 30px;
+}
 
 @layer base {
   * {
@@ -251,21 +251,4 @@ Button{
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Brand colors */
-.bg-brand-600 {
-  background-color: #0070f3;
-}
-
-.bg-brand-100 {
-  background-color: #e0eefe;
-}
-
-.hover\:bg-brand-700:hover {
-  background-color: #0057c6;
-}
-
-.text-brand-600 {
-  color: #0070f3;
 }

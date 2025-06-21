@@ -1,10 +1,7 @@
 'use client';
 
-import { Edit, Plus, Trash2, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { Edit, Plus, Trash2, Star, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AddItemModal } from './AddItemModal';
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,24 +9,82 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import baseUrl from '@/src/app/api/baseUrl';
 import { useSession } from 'next-auth/react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const SkillsSection = ({ skills = [], isOwner }) => {
   const { data: session } = useSession();
   const [userSkills, setSkills] = useState(skills);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [availableSkills, setAvailableSkills] = useState([]);
   const [editingSkill, setEditingSkill] = useState(null);
-  const [newSkill, setNewSkill] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [showAll, setShowAll] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [openSearch, setOpenSearch] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
-  // Default category ID (you may need to adjust this based on your actual categories)
-  const DEFAULT_CATEGORY_ID = 1;
-
-  // Limits and display
   const MAX_SKILLS = 20;
   const initialVisibleCount = 6;
   const visibleSkills = showAll ? userSkills : userSkills.slice(0, initialVisibleCount);
+  const DEFAULT_CATEGORY_ID = 1;
+
+  // Fetch user skills on mount and when session changes
+  const fetchUserSkills = async () => {
+    try {
+      setIsFetching(true);
+      const response = await axios.get(`${baseUrl}/resume/skills/`, {
+        headers: { Authorization: `Bearer ${session?.accessToken}` }
+      });
+      setSkills(response.data);
+    } catch (error) {
+      console.error('Error fetching user skills:', error);
+    } finally {
+      setIsFetching(false);
+    }
+  }
+  // Fetch available skills with debounce
+  const fetchAvailableSkills = useCallback(async (query = '') => {
+    try {
+      const response = await axios.get(`${baseUrl}/resume/skills-list/`, {
+        headers: { Authorization: `Bearer ${session?.accessToken}` },
+        params: { search: query }
+      });
+      setAvailableSkills(response.data);
+    } catch (error) {
+      console.error('Error fetching available skills:', error);
+    }
+  }, [session?.accessToken]);
+
+  useEffect(() => {
+    if (isOwner) {
+      fetchUserSkills();
+      // Preload available skills when component mounts
+      fetchAvailableSkills();
+    }
+  }, [isOwner, fetchUserSkills, fetchAvailableSkills]);
+
+  useEffect(() => {
+    if (openSearch) {
+      // Clear previous timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      
+      // Set new timeout for debouncing
+      searchTimeoutRef.current = setTimeout(() => {
+        fetchAvailableSkills(searchQuery);
+      }, 200);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, openSearch, fetchAvailableSkills]);
 
   const canAddMore = () => {
     if (userSkills.length >= MAX_SKILLS) {
@@ -49,31 +104,33 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSkill = async () => {
-    if (!validateSkill({ name: newSkill })) return;
+  const handleAddSkill = async (skillName) => {
+    if (!validateSkill({ name: skillName })) return;
     
     setIsLoading(true);
     try {
       const response = await axios.post(`${baseUrl}/resume/skills/`, {
-        name: newSkill,
+        name: skillName.trim(),
         is_extracted: false,
         user: session?.user?.id,
-        categories: [DEFAULT_CATEGORY_ID] // Ensure categories array is not empty
+        categories: [DEFAULT_CATEGORY_ID]
       }, {
         headers: { Authorization: `Bearer ${session?.accessToken}` },
       });
       
-      setSkills([...userSkills, response.data]);
-      setNewSkill('');
-      setIsAddOpen(false);
+      setSkills(prev => [...prev, response.data]);
+      setSearchQuery('');
+      setOpenSearch(false);
       toast.success('Skill added successfully');
     } catch (error) {
       toast.error('Failed to add skill');
-      console.error('Error adding skill:', error);
+      console.error('Error adding skill:', error.response?.data || error.message);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ... (keep handleEditSkill and handleDeleteSkill the same as before)
 
   const handleEditSkill = async (updatedSkill) => {
     if (!validateSkill(updatedSkill)) return;
@@ -87,7 +144,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
         headers: { Authorization: `Bearer ${session?.accessToken}` },
       });
       
-      setSkills(userSkills.map(skill => 
+      setSkills(prev => prev.map(skill => 
         skill.id === updatedSkill.id ? response.data : skill
       ));
       setEditingSkill(null);
@@ -107,7 +164,7 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
         headers: { Authorization: `Bearer ${session?.accessToken}` },
       });
       
-      setSkills(userSkills.filter(skill => skill.id !== skillId));
+      setSkills(prev => prev.filter(skill => skill.id !== skillId));
       toast.success('Skill deleted successfully');
     } catch (error) {
       toast.error('Failed to delete skill');
@@ -117,163 +174,211 @@ export const SkillsSection = ({ skills = [], isOwner }) => {
     }
   };
 
-  return (
-    <Card className="p-6">
-    <div className="flex justify-between items-center mb-4">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-        <p className="text-sm text-gray-500">
-          {userSkills.length}/{MAX_SKILLS} skills
-        </p>
-      </div>
-      
-      {isOwner && (
-        <Button 
-          onClick={() => {
-            if (!canAddMore()) return;
-            setIsAddOpen(true);
-            setEditingSkill(null);
-            setValidationErrors({});
-          }}
-          variant="ghost" 
-          size="sm" 
-          className="text-brand hover:text-brand"
-          disabled={isLoading || userSkills.length >= MAX_SKILLS}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Skill
-        </Button>
-      )}
-    </div>
-    
-    <div className="flex flex-wrap gap-2">
-      {visibleSkills.length > 0 ? (
-        <>
-          {visibleSkills.map((skill) => (
-            <div key={skill.id} className="group relative">
-              <Badge variant="outline" className="px-3 py-2 rounded-full hover:bg-gray-50">
-                <div className="flex items-center gap-1">
-                  <span>{skill.name}</span>
-                  {skill.endorsements > 0 && (
-                    <span className="text-xs text-gray-500">({skill.endorsements})</span>
-                  )}
-                </div>
-                
-                {isOwner && (
-                  <div className="absolute -right-2 -top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-6 w-6 rounded-full bg-white"
-                      onClick={() => {
-                        setEditingSkill(skill);
-                        setValidationErrors({});
-                      }}
-                      disabled={isLoading}
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-6 w-6 rounded-full bg-white text-red-500 hover:text-red-600"
-                      onClick={() => handleDeleteSkill(skill.id)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </Badge>
-            </div>
-          ))}
+  const filteredSkills = availableSkills
+    .filter(skill => 
+      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !userSkills.some(userSkill => userSkill.name.toLowerCase() === skill.name.toLowerCase())
+    )
+    .slice(0, 5); // Limit to 5 suggestions
 
-          {userSkills.length > initialVisibleCount && (
-            <div className="w-full flex justify-center pt-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAll(!showAll)}
-                className="text-brand hover:text-brand"
-              >
-                {showAll ? (
-                  <>
-                    <ChevronUp className="mr-2 h-4 w-4" />
-                    Show Less
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="mr-2 h-4 w-4" />
-                    View All ({userSkills.length})
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="text-center w-full py-8">
-          <Star className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No skills added</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {isOwner ? 'Add your skills to showcase to recruiters.' : 'No skills information available.'}
+  return (
+    <div className="p-6 border-b">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Skills</h2>
+          <p className="text-sm text-gray-500">
+            {userSkills.length}/{MAX_SKILLS} skills
           </p>
         </div>
-      )}
-    </div>
-
-    {/* Add Skill Modal */}
-    <AddItemModal
-      title="Add Skill"
-      open={isAddOpen}
-      onOpenChange={setIsAddOpen}
-      onSave={handleAddSkill}
-      isLoading={isLoading}
-    >
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="skill">Skill Name *</Label>
-          <Input
-            id="skill"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            placeholder="e.g. React, Project Management"
-            maxLength={100}
-            required
-          />
-          {validationErrors.name && (
-            <p className="text-sm text-red-500">{validationErrors.name}</p>
-          )}
-        </div>
+        
+        {isOwner && (
+          <Popover open={openSearch} onOpenChange={(open) => {
+            setOpenSearch(open);
+            if (!open) setSearchQuery('');
+          }}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-brand hover:text-brand/90 hover:bg-blue-50 border border-brand py-6 rounded-full"
+                disabled={isLoading || userSkills.length >= MAX_SKILLS}
+                onClick={() => canAddMore() && setOpenSearch(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Skill
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[320px] p-0" align="end" sideOffset={8}>
+              <Command shouldFilter={false}>
+                <CommandInput
+                  placeholder="Search skills..."
+                  value={searchQuery}
+                  onValueChange={(value) => {
+                    setSearchQuery(value);
+                  }}
+                />
+                <CommandList>
+                  {searchQuery && (
+                    <CommandItem 
+                      onSelect={() => handleAddSkill(searchQuery)}
+                      className="cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
+                    >
+                      <Plus className="mr-2 h-4 w-4 text-brand" />
+                      <span className="font-medium">Add "{searchQuery}"</span>
+                    </CommandItem>
+                  )}
+                  <CommandEmpty className="py-3 text-center text-sm text-gray-500">
+                    {searchQuery ? 'No matching skills found' : 'Start typing to search'}
+                  </CommandEmpty>
+                  {filteredSkills.length > 0 && (
+                    <CommandGroup heading="Suggested Skills">
+                      {filteredSkills.map((skill) => (
+                        <CommandItem
+                          key={skill.id}
+                          value={skill.name}
+                          onSelect={() => {
+                            handleAddSkill(skill.name);
+                            setSearchQuery('');
+                          }}
+                          className="cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
+                        >
+                          <Search className="mr-2 h-4 w-4 text-gray-400" />
+                          {skill.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
-    </AddItemModal>
+      
+      {/* ... (rest of the component remains the same) ... */}
 
-    {/* Edit Skill Modal */}
-    {editingSkill && (
-      <AddItemModal
-        title="Edit Skill"
-        open={!!editingSkill}
-        onOpenChange={(open) => !open && setEditingSkill(null)}
-        onSave={() => handleEditSkill(editingSkill)}
-        isLoading={isLoading}
-      >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="edit-skill">Skill Name *</Label>
-            <Input
-              id="edit-skill"
-              value={editingSkill.name}
-              onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})}
-              maxLength={100}
-              required
-            />
-            {validationErrors.name && (
-              <p className="text-sm text-red-500">{validationErrors.name}</p>
+      <div className="flex flex-wrap gap-2">
+        {visibleSkills.length > 0 ? (
+          <>
+            {visibleSkills.map((skill) => (
+              <div key={skill.id} className="group relative">
+                <Badge variant="outline" className="px-3 py-1.5 rounded-full hover:bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm">{skill.name}</span>
+                    {skill.endorsements > 0 && (
+                      <span className="text-xs text-gray-500">({skill.endorsements})</span>
+                    )}
+                  </div>
+                  
+                  {isOwner && (
+                    <div className="absolute -right-2 -top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6 rounded-full bg-white hover:bg-gray-100"
+                        onClick={() => {
+                          setEditingSkill(skill);
+                          setValidationErrors({});
+                        }}
+                        disabled={isLoading}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6 rounded-full bg-white text-red-500 hover:bg-red-50"
+                        onClick={() => handleDeleteSkill(skill.id)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </Badge>
+              </div>
+            ))}
+
+            {userSkills.length > initialVisibleCount && (
+              <div className="w-full flex justify-center pt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAll(!showAll)}
+                  className="text-brand hover:text-brand/90 hover:bg-blue-50"
+                >
+                  {showAll ? (
+                    <>
+                      <ChevronUp className="mr-2 h-4 w-4" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="mr-2 h-4 w-4" />
+                      View All ({userSkills.length})
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
+          </>
+        ) : (
+          <div className="text-center w-full py-8">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No skills added</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {isOwner ? 'Add your skills to showcase to recruiters.' : 'No skills information available.'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Edit Skill Modal */}
+      {editingSkill && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Edit Skill</h3>
+              <button 
+                onClick={() => setEditingSkill(null)}
+                className="rounded-full p-1 hover:bg-gray-100"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-skill">Skill Name *</Label>
+                <Input
+                  id="edit-skill"
+                  value={editingSkill.name}
+                  onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})}
+                  maxLength={100}
+                  required
+                />
+                {validationErrors.name && (
+                  <p className="text-sm text-red-500">{validationErrors.name}</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditingSkill(null)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleEditSkill(editingSkill)}
+                disabled={isLoading}
+                className="bg-brand hover:bg-brand/90"
+              >
+                {isLoading ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
           </div>
         </div>
-      </AddItemModal>
-    )}
-  </Card>
+      )}
+    </div>
   );
 };

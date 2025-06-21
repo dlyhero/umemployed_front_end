@@ -14,6 +14,15 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import baseUrl from '@/src/app/api/baseUrl';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import SubscriptionModal from '@/src/components/common/modal/Subscription-modal';
 
 const AssessmentFlow = () => {
   const router = useRouter();
@@ -34,6 +43,7 @@ const AssessmentFlow = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [skillIdMap, setSkillIdMap] = useState({});
   const [timerInterval, setTimerInterval] = useState(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Check if desktop
   useEffect(() => {
@@ -72,9 +82,10 @@ const AssessmentFlow = () => {
         });
         setSkillIdMap(skillIds);
       } catch (err) {
-        console.error('Error fetching assessment:', err);
-        toast.error('Failed to load assessment');
-        router.push(`/jobs/${jobId}`);
+        console.error('Error fetching assessment:', err.response?.data);
+        if (err.response?.data?.message === "No active user subscription found.") {
+          setShowSubscriptionModal(true);
+        } 
       } finally {
         setIsLoading(false);
       }
@@ -196,7 +207,9 @@ const AssessmentFlow = () => {
       toast.success('Assessment submitted successfully!');
     } catch (err) {
       console.error('Submission error:', err);
-      toast.error('Failed to submit assessment');
+      if (err.response?.data?.message === "No active user subscription found.") {
+        setShowSubscriptionModal(true);
+      }
     }
   };
 
@@ -226,28 +239,17 @@ const AssessmentFlow = () => {
   if (!assessment) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Card className="w-full max-w-md text-center border-0 ">
-          <CardHeader>
-            <CardTitle>Assessment Unavailable</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Could not load assessment questions.</p>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button 
-              onClick={() => router.push(`/jobs/${jobId}`)}
-              className="bg-brand hover:bg-brand/90 text-white px-6 py-3 rounded-full"
-            >
-              Return to Job
-            </Button>
-          </CardFooter>
-        </Card>
+        {/* Subscription Modal - non-removable */}
+        <SubscriptionModal showSubscriptionModal={showSubscriptionModal}/>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Subscription Modal - non-removable */}
+      <SubscriptionModal showSubscriptionModal={showSubscriptionModal}/>
+
       {/* Floating desktop camera */}
       {isDesktop && showCamera && step === 'assessment' && (
         <div className="fixed bottom-6 right-6 w-64 h-48 rounded-lg overflow-hidden border border-gray-200 z-50 bg-black">
@@ -265,6 +267,7 @@ const AssessmentFlow = () => {
         </div>
       )}
 
+      {/* Rest of your existing component code remains the same */}
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Intro Step */}
         {step === 'intro' && (
@@ -514,13 +517,6 @@ const AssessmentFlow = () => {
               </CardContent>
 
               <CardFooter className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/jobs/${jobId}`)}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3"
-                >
-                  Return to Job Posting
-                </Button>
                 <Button
                   onClick={() => router.push('/jobs')}
                   className="bg-brand hover:bg-brand/90 text-white px-6 py-3"

@@ -11,7 +11,7 @@ const QuickActions = ({ companyId }) => {
     {
       icon: <Briefcase />,
       label: 'Post a Job',
-      route: `/companies/jobs`,
+      route: `/companies/jobs/create/basicinformation`, // Updated route
     },
     {
       icon: <Users />,

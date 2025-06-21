@@ -1,7 +1,10 @@
+
 'use client';
 
 import { useEffect } from 'react';
-import { toast } from 'sonner';
+import { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import baseUrl from '../../../api/baseUrl';
 
 const ApplicationFetch = ({
   companyId,
@@ -12,8 +15,6 @@ const ApplicationFetch = ({
   setLoading,
   setError,
 }) => {
-  const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com';
-
   useEffect(() => {
     const fetchApplications = async () => {
       if (status === 'loading' || !session) {
@@ -23,14 +24,32 @@ const ApplicationFetch = ({
       if (!session.accessToken) {
         setError('Unauthorized: No access token available');
         setLoading(false);
+        toast.error('Please sign in to view applications');
         return;
       }
 
       try {
         setLoading(true);
 
+        // Fetch job details
+        const jobResponse = await fetch(`${baseUrl}/job/jobs/${jobId}/`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`,
+          },
+        });
+
+        let jobTitle = 'Unknown';
+        if (jobResponse.ok) {
+          const jobData = await jobResponse.json();
+          jobTitle = jobData.title || 'Unknown';
+        } else {
+          console.warn('Failed to fetch job details:', jobResponse.status);
+          toast.error('Failed to fetch job details');
+        }
+
         // Fetch applications
-        const apiUrl = `${baseUrl}/api/company/company/${companyId}/job/${jobId}/applications/`;
+        const apiUrl = `${baseUrl}/company/company/${companyId}/job/${jobId}/applications/`;
         const response = await fetch(apiUrl, {
           headers: {
             'Content-Type': 'application/json',
@@ -52,11 +71,12 @@ const ApplicationFetch = ({
         if (applicationsArray.length === 0) {
           setError('No applications found.');
           setLoading(false);
+          toast.error('No applications found');
           return;
         }
 
         // Fetch shortlisted candidates
-        const shortlistApiUrl = `${baseUrl}/api/company/company/${companyId}/job/${jobId}/shortlisted/`;
+        const shortlistApiUrl = `${baseUrl}/company/company/${companyId}/job/${jobId}/shortlisted/`;
         const shortlistResponse = await fetch(shortlistApiUrl, {
           headers: {
             'Content-Type': 'application/json',
@@ -70,6 +90,7 @@ const ApplicationFetch = ({
           shortlistedCandidates = Array.isArray(shortlistData) ? shortlistData : shortlistData.results || [];
         } else {
           console.warn('Failed to fetch shortlisted candidates:', shortlistResponse.status);
+          toast.error('Failed to fetch shortlisted candidates');
         }
 
         const shortlistedIds = new Set(shortlistedCandidates.map((candidate) => candidate.candidate_id));
@@ -78,7 +99,7 @@ const ApplicationFetch = ({
           applicationsArray.map(async (app) => {
             try {
               const userProfileResponse = await fetch(
-                `${baseUrl}/api/resume/user-profile/${app.user_id}/`,
+                `${baseUrl}/resume/user-profile/${app.user_id}/`,
                 {
                   headers: {
                     'Content-Type': 'application/json',
@@ -94,13 +115,13 @@ const ApplicationFetch = ({
               return {
                 id: app.application_id,
                 user_id: app.user_id,
-                job: { title: 'Unknown' },
-                matchingPercentage: app.overall_match_percentage || 0,
+                job: { title: jobTitle },
+                matchingPercentage: app.overall_match_percentage * 100 || 0,
                 quizScore: app.quiz_score || 0,
                 status: app.status,
                 isShortlisted: shortlistedIds.has(app.user_id),
                 profile: {
-                  firstName: userProfile.contact_info?.name?.split(' ')[0] || 'Unknown',
+                  firstName: userProfile.contact_info?.name?.split(' ')[0] || app.user || 'Unknown',
                   lastName: userProfile.contact_info?.name?.split(' ').slice(1).join(' ') || '',
                   location: userProfile.contact_info?.city
                     ? `${userProfile.contact_info.city}, ${userProfile.contact_info.country}`
@@ -135,13 +156,15 @@ const ApplicationFetch = ({
 
         if (validApplications.length === 0) {
           setError('No valid applications found.');
+          toast.error('No valid applications found');
         } else {
           setError(null);
+          toast.success('Applications loaded successfully');
         }
       } catch (err) {
         console.error('Fetch applications error:', err);
         setError('Unable to load applications due to a server error.');
-        toast.error(err.message || 'Failed to load applications.');
+        toast.error(err.message || 'Failed to load applications');
       } finally {
         setLoading(false);
       }
@@ -152,7 +175,7 @@ const ApplicationFetch = ({
     }
   }, [companyId, jobId, session, status, setApplications, setLoading, setError]);
 
-  return null;
+  return <Toaster />;
 };
 
 export default ApplicationFetch;

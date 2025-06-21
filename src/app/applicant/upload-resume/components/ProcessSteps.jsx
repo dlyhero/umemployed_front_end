@@ -25,7 +25,7 @@ export const ProcessSteps = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3 }}
-      className="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-md"
+      className="bg-gray-50 p-6 rounded-xl border border-gray-200"
     >
       <h3 className="text-lg font-medium mb-6 flex items-center gap-2">
         <Clock className="w-5 h-5 text-brand" />

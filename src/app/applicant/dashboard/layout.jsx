@@ -31,16 +31,12 @@ export const metadata = {
 
 export default function DashboardLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={` antialiased text-[15px]`}
       > 
        <AuthProvider>
-       <Header />
        {children}                                     
        </AuthProvider>
-       <Footer />
-      </body>
-    </html>
+      </div>
   );
 }

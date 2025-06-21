@@ -6,10 +6,11 @@ export const MobileMenu = ({ mobileMenuOpen, setMobileMenuOpen, activeTab, setAc
   <AnimatePresence>
     {mobileMenuOpen && (
       <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="md:hidden bg-white shadow-lg z-40 absolute top-0 left-0 w-full"
+        initial={{ opacity: 0, y: '-100%' }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: '-100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="md:hidden bg-white shadow-lg z-50 fixed top-0 left-0 w-full"
       >
         <div className="px-4 py-4 space-y-4">
           <MobileNav

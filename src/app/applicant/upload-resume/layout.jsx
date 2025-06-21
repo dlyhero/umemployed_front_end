@@ -12,15 +12,13 @@ export const metadata = {
 
 export default function ResumeLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={` antialiased text-[15px]`}
       > 
        <AuthProvider>
        <Header />
        {children}  
        </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

@@ -1,61 +1,80 @@
-'use client';
 
-import { useRouter, useSearchParams, useParams } from 'next/navigation';
-import { useState } from 'react';
+'use client';
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
 
-export default function SkillsContent() {
+function SkillsContent() {
   const currentStep = 'skills';
-  const searchParams = useSearchParams();
-  const { companyId } = useParams();
-  const jobId = searchParams.get('jobId');
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extracted_skills, isLoadingSkills } = useJobForm(currentStep);
-  const [loading, setLoading] = useState(false);
-
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const jobId = searchParams.get('jobId');
+  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills } = useJobForm(currentStep);
+
+  useEffect(() => {
+    if (!jobId) {
+      console.warn('No jobId for skills step, redirecting to basicinformation');
+      toast.error('Please complete the Basic Information step first.');
+      router.push('/companies/jobs/create/basicinformation');
+    }
+  }, [jobId, router]);
 
   const handleSubmit = async (data) => {
-    setLoading(true);
     try {
       const result = await onSubmit(data);
       if (result?.error) {
         toast.error(result.error);
-        return;
+        return result;
       }
-      toast.success('Job created successfully!');
-      router.push(`/companies/${companyId}/dashboard`);
+      // Toast and redirect handled in useJobForm.js, but ensure companyId is valid
+      const companyId = session?.user?.company_id || session?.companyid;
+      if (!companyId) {
+        console.error('No companyId found in session');
+        toast.error('Failed to redirect: Company ID not found.');
+        return { error: 'No company ID found' };
+      }
+      return result;
     } catch (error) {
-      toast.error('Failed to create job');
-    } finally {
-      setLoading(false);
+      toast.error('Failed to save skills');
+      return { error: error.message };
     }
   };
 
-  if (!jobId) return <div className="text-center p-6">Please complete the previous step first.</div>;
+  if (!jobId) {
+    return (
+      <div className="text-center p-6">
+        <p>Redirecting to Basic Information...</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <Toaster position="top-right" />
-      {loading || form.formState.isSubmitting ? (
-        <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
-        </div>
-      ) : (
-        <FormContainer
-          step={step}
-          form={form}
-          nextStep={() => form.handleSubmit(handleSubmit)()}
-          prevStep={prevStep}
-          onSubmit={handleSubmit}
-          stepIsValid={stepIsValid}
-          jobOptions={jobOptions}
-          extracted_skills={extracted_skills}
-          isLoadingSkills={isLoadingSkills}
-          currentStep={currentStep}
-        />
-      )}
+      <FormContainer
+        step={step}
+        form={form}
+        nextStep={() => form.handleSubmit(handleSubmit)()}
+        prevStep={prevStep}
+        onSubmit={handleSubmit}
+        stepIsValid={stepIsValid}
+        jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
+        isLoadingSkills={isLoadingSkills}
+        isLoadingOptions={isLoadingOptions}
+      />
     </>
+  );
+}
+
+export default function Skills() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading...</div>}>
+      <SkillsContent />
+    </Suspense>
   );
 }

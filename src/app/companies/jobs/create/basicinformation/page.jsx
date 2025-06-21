@@ -1,40 +1,59 @@
+// src/app/companies/jobs/create/basicinformation/page.jsx
 'use client';
 import { useRouter, useParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { FormContainer } from '../../components/FormContainer';
 import { useJobForm } from '../../../../../hooks/useJobForm';
+import { Suspense, useState } from 'react';
+import { SubscriptionModal } from '../../../../../components/common/SubscriptionModal';
 
-function BasicInformationContent() {
-  const currentStep = 'basicinformation';
-  const { companyId } = useParams();
-  const { step, form, onSubmit, stepIsValid, prevStep, jobOptions } = useJobForm(currentStep);
-  const [loading, setLoading] = useState(false);
+function JobPostingContent() {
   const router = useRouter();
+  const { companyId } = useParams();
+  const { step, form, onSubmit: handleSubmit, stepIsValid, nextStep, prevStep, jobOptions, extractedSkills, isLoadingOptions, isLoadingSkills, isSubmittingStep1 } = useJobForm('basicinformation');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalErrorMessage, setModalErrorMessage] = useState('');
 
-  const handleSubmit = async (data) => {
+  const onSubmit = async (data) => {
+    console.log('FormContainer handleSubmit called with data:', data);
     try {
-      const result = await onSubmit(data);
+      const result = await handleSubmit(data);
       if (result?.error) {
-        toast.error(result.error);
-        return result;
+        console.error('Step 1 submission error:', result.error);
+        if (result.error.includes('No active recruiter subscription found')) {
+          setModalErrorMessage('No active recruiter subscription found. Please upgrade to continue.');
+          setIsModalOpen(true);
+        } else {
+          toast.error(result.error);
+        }
+        return { error: result.error };
       }
-      toast.success('Basic information saved successfully!');
-      if (result.id) {
-        setLoading(true);
-        router.push(`/companies/jobs/create/requirements?jobId=${result.id}`);
+      if (!result?.id) {
+        console.error('No jobId in Step 1 response:', result);
+        toast.error('Failed to create job: No job ID returned');
+        return { error: 'No job ID returned' };
       }
-      return result;
+      console.log('Step 1 submitted successfully with jobId:', result.id);
+      toast.success(`Step ${step} saved successfully!`);
+      await nextStep(result.id);
+      return { success: true, jobId: result.id };
     } catch (error) {
-      toast.error('Failed to save basic information');
+      console.error('Step 1 submission failed:', error.message);
+      if (error.message.includes('No active recruiter subscription found')) {
+        setModalErrorMessage('No active recruiter subscription found. Please upgrade to continue.');
+        setIsModalOpen(true);
+      } else {
+        toast.error('Failed to submit step');
+      }
       return { error: error.message };
     }
   };
 
-  if (loading) {
+  if (isSubmittingStep1) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1e90ff]"></div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#1e90ff]"></div>
+        <p className="ml-4 text-white text-lg">Creating job...</p>
       </div>
     );
   }
@@ -42,20 +61,28 @@ function BasicInformationContent() {
   return (
     <>
       <Toaster position="top-right" />
+      <SubscriptionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        errorMessage={modalErrorMessage}
+      />
       <FormContainer
         step={step}
         form={form}
-        nextStep={() => form.handleSubmit(handleSubmit)()}
+        nextStep={() => form.handleSubmit(onSubmit)()}
         prevStep={prevStep}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         stepIsValid={stepIsValid}
         jobOptions={jobOptions}
+        extractedSkills={extractedSkills}
+        isLoadingSkills={isLoadingSkills}
+        isLoadingOptions={isLoadingOptions}
       />
     </>
   );
 }
 
-export default function BasicInformation() {
+export default function JobPostingPage() {
   return (
     <Suspense
       fallback={
@@ -64,7 +91,7 @@ export default function BasicInformation() {
         </div>
       }
     >
-      <BasicInformationContent />
+      <JobPostingContent />
     </Suspense>
   );
 }

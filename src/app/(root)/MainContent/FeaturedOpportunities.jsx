@@ -8,7 +8,7 @@ import JobCard from "../../jobs/_components/JobCard";
 import { useJobs } from "@/src/hooks/useJob";
 
 const FeaturedOpportunities = () => {
-  const { allJobs, toggleSaveJob, saveJobs } = useJobs();
+  const { allJobs, toggleSaveJob, saveJobs, loading } = useJobs();
   const [displayJobs, setDisplayJobs] = useState([]);
 
   // Set jobs from allJobs
@@ -48,7 +48,7 @@ const FeaturedOpportunities = () => {
 
 
   return (
-    <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16 bg-slate-100">
+    <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16              ">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -66,11 +66,12 @@ const FeaturedOpportunities = () => {
         {displayJobs.length > 0 ? (
           <div className="relative">
             <Slider {...settings}>
-              {displayJobs.slice(0, 8).map((job) => (
+              {displayJobs.slice(0, 6).map((job) => (
                 <div key={job.id} className="focus:outline-none px-2">
                   <JobCard
                         key={job.id}
                         job={job}
+                        loading={loading}
                         onToggleSave={() => toggleSaveJob(job.id)}
                       />
                 </div>

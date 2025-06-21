@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import JobCard from '../../../jobs/_components/JobCard';
+import JobListingCard from './JobListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import baseUrl from '../../../api/baseUrl';
 
 const RecentJobListings = ({ companyData }) => {
   const { companyId } = useParams();
@@ -12,6 +13,14 @@ const RecentJobListings = ({ companyData }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Country code to name mapping (partial, expand as needed)
+  const countryCodeToName = {
+    'AS': 'American Samoa',
+    // Add more mappings as needed, e.g.:
+    // 'US': 'United States of America',
+    // 'CA': 'Canada',
+  };
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -23,13 +32,14 @@ const RecentJobListings = ({ companyData }) => {
           throw new Error('Not authenticated. Please log in.');
         }
 
-        const token = session?.accessToken; // Adjust if token is elsewhere (e.g., session.user.token)
+        const token = session?.accessToken; // Adjust if token is elsewhere
         if (!token) {
           throw new Error('No authentication token found.');
         }
 
+        // Step 1: Fetch the list of job IDs and titles
         const response = await fetch(
-          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company/${companyId}/jobs`,
+          `${baseUrl}/company/company/${companyId}/jobs`,
           {
             method: 'GET',
             headers: {
@@ -46,8 +56,45 @@ const RecentJobListings = ({ companyData }) => {
           throw new Error('Failed to fetch jobs');
         }
 
-        const data = await response.json();
-        setJobs(data.slice(0, 5));
+        const jobList = await response.json();
+
+        // Step 2: Fetch full details for each job
+        const jobDetailsPromises = jobList.map(async (job) => {
+          const jobResponse = await fetch(
+            `${baseUrl}/job/jobs/${job.id}/`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!jobResponse.ok) {
+            console.warn(`Failed to fetch details for job ID ${job.id}`);
+            return null; // Handle gracefully
+          }
+
+          const jobDetails = await jobResponse.json();
+          return {
+            ...jobDetails,
+            company_id: companyId, // Add company_id for routing
+            application_count: job.application_count, // Retain application_count
+            location: countryCodeToName[jobDetails.location] || jobDetails.location, // Map country code to name
+          };
+        });
+
+        const jobDetails = (await Promise.all(jobDetailsPromises)).filter(
+          (job) => job !== null
+        );
+
+        // Step 3: Sort by created_at (descending) and take top 5
+        const sortedJobs = jobDetails
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5);
+
+        setJobs(sortedJobs);
       } catch (err) {
         setError(err.message);
         toast.error(err.message);
@@ -80,10 +127,9 @@ const RecentJobListings = ({ companyData }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {jobs.map((job) => (
-        <JobCard
+        <JobListingCard
           key={job.id}
-          job={{ ...job, company_id: companyId }}
-          isRecruiter={true}
+          job={job}
         />
       ))}
     </div>

@@ -13,8 +13,7 @@ export const metadata = {
 
 export default function PerfectJobLayout({ children }) {
   return (
-    <html lang="en">
-      <body
+      <div
         className={` antialiased text-[15px] bg-white`}
       >  
         <AuthProvider>
@@ -24,7 +23,6 @@ export default function PerfectJobLayout({ children }) {
           </div>
           <Toaster position="top-center" richColors/>
         </AuthProvider>
-      </body>
-    </html>
+      </div>
   );
 }

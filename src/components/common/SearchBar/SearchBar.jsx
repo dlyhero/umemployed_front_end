@@ -155,8 +155,8 @@ const SearchBar = () => {
   return (
     <div className="flex flex-1">
       {/* Desktop Search */}
-      <div className="relative hidden md:block flex-1 max-w-xl mx-auto">
-        <form onSubmit={handleSearchSubmit} className="relative w-full ">
+      <div className="relative hidden md:block flex-1 max-w-xl mx-auto rounded-full">
+        <form onSubmit={handleSearchSubmit} className="relative w-full rounded-full">
           <div className="flex items-center gap-2">
             <div className="relative flex-1 w-full ">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -167,7 +167,7 @@ const SearchBar = () => {
                     ? "Search for jobs" 
                     : "Enter salary range"
                 }
-                className="w-full flex-1 pl-10 pr-4 bg-blue-50"
+                className="w-full flex-1 pl-10 pr-4 py-6  rounded-full"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);

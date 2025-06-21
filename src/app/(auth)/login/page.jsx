@@ -6,7 +6,7 @@ import Footer from '@/src/components/common/Footer/Footer';
 import Link from "next/link";
 import { UilGoogle } from '@iconscout/react-unicons';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Spinner from "@/src/components/common/Spinner";
 import { signIn } from 'next-auth/react';
 
@@ -15,8 +15,9 @@ function Login() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="flex-1 flex items-center justify-center p-4">
+    <Suspense>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="sm:flex-1 flex sm:items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-8">
@@ -59,6 +60,7 @@ function Login() {
       </div>
       <Footer />
     </div>
+    </Suspense>
   );
 }
 

@@ -13,13 +13,16 @@ const ApplicationList = ({
   handleTabChange,
   handleViewDetails,
   handleShortlist,
+  handleUnshortlist,
   handleSchedule,
   companyId,
   jobId,
   type,
+  actionLoading = {},
 }) => {
   const topCandidates = applications.slice(0, 5);
   const waitingList = applications.slice(5);
+  const shortlistedCandidates = applications.filter((app) => app.isShortlisted);
 
   return (
     <>
@@ -46,14 +49,18 @@ const ApplicationList = ({
                 {topCandidates.length > 0 ? (
                   topCandidates.map((app) => (
                     <CandidateCard
-                      key={app.id}
+                      key={app.user_id}
                       candidate={app}
                       type={type}
                       handleViewDetails={handleViewDetails}
                       handleShortlist={handleShortlist}
+                      handleUnshortlist={handleUnshortlist}
                       handleSchedule={handleSchedule}
                       activeTab={activeTab}
-                      isShortlisted={app.isShortlisted}
+                      isShortlisted={app.isShortlisted || false}
+                      isShortlistLoading={actionLoading[app.user_id]?.shortlist || false}
+                      isUnshortlistLoading={actionLoading[app.user_id]?.unshortlist || false}
+                      isScheduleLoading={actionLoading[app.user_id]?.schedule || false}
                     />
                   ))
                 ) : (
@@ -67,14 +74,18 @@ const ApplicationList = ({
                 {waitingList.length > 0 ? (
                   waitingList.map((app) => (
                     <CandidateCard
-                      key={app.id}
+                      key={app.user_id}
                       candidate={app}
                       type={type}
                       handleViewDetails={handleViewDetails}
                       handleShortlist={handleShortlist}
+                      handleUnshortlist={handleUnshortlist}
                       handleSchedule={handleSchedule}
                       activeTab={activeTab}
-                      isShortlisted={app.isShortlisted}
+                      isShortlisted={app.isShortlisted || false}
+                      isShortlistLoading={actionLoading[app.user_id]?.shortlist || false}
+                      isUnshortlistLoading={actionLoading[app.user_id]?.unshortlist || false}
+                      isScheduleLoading={actionLoading[app.user_id]?.schedule || false}
                     />
                   ))
                 ) : (
@@ -86,15 +97,40 @@ const ApplicationList = ({
             </TabsContent>
             <TabsContent value="shortlist">
               <div className="space-y-4">
-                <p className="text-gray-600">
-                  View shortlisted candidates at{' '}
-                  <a
-                    href={`/companies/${companyId}/jobs/${jobId}/shortlist`}
-                    className="text-brand/50 underline hover:text-brand/70"
-                  >
-                    Shortlist Page
-                  </a>
-                </p>
+                <h2 className="text-xl font-semibold border-b-4 border-brand/50 w-fit">
+                  Shortlisted Candidates
+                </h2>
+                {shortlistedCandidates.length > 0 ? (
+                  shortlistedCandidates.map((app) => (
+                    <CandidateCard
+                      key={app.user_id}
+                      candidate={app}
+                      type={type}
+                      handleViewDetails={handleViewDetails}
+                      handleShortlist={handleShortlist}
+                      handleUnshortlist={handleUnshortlist}
+                      handleSchedule={handleSchedule}
+                      activeTab={activeTab}
+                      isShortlisted={app.isShortlisted || false}
+                      isShortlistLoading={actionLoading[app.user_id]?.shortlist || false}
+                      isUnshortlistLoading={actionLoading[app.user_id]?.unshortlist || false}
+                      isScheduleLoading={actionLoading[app.user_id]?.schedule || false}
+                    />
+                  ))
+                ) : (
+                  <div className="flex justify-center items-center h-[200px]">
+                    <p className="text-gray-500">
+                      No shortlisted candidates.{' '}
+                      <a
+                        href={`/companies/${companyId}/jobs/${jobId}/applications`}
+                        className="text-brand/50 underline hover:text-brand/70"
+                      >
+                        View candidates
+                      </a>{' '}
+                      to shortlist.
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="archived">

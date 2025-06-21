@@ -10,6 +10,7 @@ import useScrollTop from "@/src/hooks/useScrollTop";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useIsMessagesPage } from "@/src/utils/path";
+import AuthenticatedNav from "./AuthenticatedNav";
 
 
 
@@ -20,35 +21,38 @@ export function Header() {
   const pathname = usePathname();
   const {data: session} = useSession();
  
-  const feedBackPages = ["/verify_email", "/reset_password",];
+  const feedBackPages = ["/verify_email", "/reset_password", "/login", 
+    "/signup"
+  ];
 
   return (
     <header
      className={
       cn(
-      "bg-white md:bg-transparent md:backdrop-blur-sm z-40  top-0 ",
+      "z-40  top-0 ",
       scrolled && "",
-      pathname === '/messages' ? "sticky lg:relative" : "sticky"
+      pathname === '/messages' ? "sticky lg:relative" : "sticky",
+      pathname === '/' ? "bg-transparent" : "bg-white"
     )}>
-      <div className="max-w-[1400px] mx-auto px-2 py-3 flex items-center justify-between">
+      <div className={`${pathname === '/' ? 'max-w-7xl' : 'max-w-[1600px]'} mx-auto px-2 py-6 flex items-center justify-between`}>
         <div className="flex items-center  gap-2">
-          <Logo />
+            <Logo />
           {!feedBackPages.includes(pathname) && <NavLinks /> }
         </div>
 
        {
         !feedBackPages.includes(pathname) && (
          <>
-          <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
-            {session && (
-              <SearchBar  />
-            )}
-          </div>
+          {
+            pathname !== '/' && <div className="flex-1 max-w-5xl flex justify-center mx-4 ">
+            <SearchBar  />
+        </div>
+          }
         
 
         {(pathname !== '/signup' && pathname !== '/login') && (
           <div className="flex items-center gap-4">
-            <AuthButtons className="hidden md:flex" />
+            {session ? <AuthenticatedNav /> : <AuthButtons />}
             <Menu />
           </div>
         )}

@@ -32,7 +32,7 @@ const DashboardPage = () => {
 
       try {
         const response = await fetch(
-          `https://umemployed-app-afec951f7ec7.herokuapp.com/api/company/company-details/${companyId}/`,
+          `https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/company/company-details/${companyId}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

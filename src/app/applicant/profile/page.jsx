@@ -9,6 +9,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import baseUrl from "../../api/baseUrl";
+import Loader from "@/src/components/common/Loader/Loader";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -38,7 +39,6 @@ export default function ProfilePage() {
           axios.get(`${baseUrl}/resume/contact-info/`, {headers: {'Authorization': `Bearer ${token}`}})
         ]);
         
-
         const details = detailsResponse.data;
         const transformedData = {
           name: `${details.first_name || ''} ${details.surname || ''}`.trim() || 'Anonymsous',
@@ -92,47 +92,11 @@ export default function ProfilePage() {
   const resetError = () => setError(null);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col justify-center">
       {/* Loading Modal with Animation */}
-      <AnimatePresence>
-        {(status === "loading" || loading) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full shadow-xl"
-            >
-              <div className="flex flex-col items-center gap-4">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                >
-                  <Loader2 className="h-12 w-12 text-brand animate-spin" />
-                </motion.div>
-                <h3 className="text-xl font-semibold">Loading Profile</h3>
-                <p className="text-gray-500 text-center">
-                  We're gathering your profile information. Please wait a moment...
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
-                  <motion.div
-                    className="bg-brand h-2.5 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: "80%" }}
-                    transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {
+        loading &&  <Loader />
+      }
 
       {/* Error Modal with Animation */}
       <AnimatePresence>

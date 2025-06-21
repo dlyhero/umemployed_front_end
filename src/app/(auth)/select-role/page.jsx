@@ -1,141 +1,177 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
-import Loader from "@/src/components/common/Loader/Loader";
-import { ACCOUNT_TYPES, selectAccountType } from "@/src/app/api/auth/select-role";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Briefcase, User, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
+import { Spinner } from '@/components/ui/Spinner';
+import { motion } from 'framer-motion';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export default function SelectRolePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const user = useSession();
-  console.log(user);
-    
+  const [selectedRole, setSelectedRole] = useState('');
+  const router = useRouter();
+  const { data: session, update } = useSession();
 
-  const handleAccountTypeSelect = async (accountType) => {
-    if (status !== "authenticated" || loading) return;
-
+  const handleRoleSelect = async (role) => {
     setLoading(true);
-    setError(null);
-    setSuccess(null);
-
     try {
-      const token = session?.accessToken || session?.user?.accessToken;
-      if (!token) throw new Error("Authentication required");
+      const response = await fetch('/api/auth/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role }),
+        credentials: 'same-origin'
+      });
+  
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to update role');
+      }
+  
+      // Update session
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          role: role
+        }
+      });
 
-      await selectAccountType(accountType, token);
-      
-      setSuccess("Account type selected successfully!");
-      
-      // Immediate redirect without delay
-      if (accountType === ACCOUNT_TYPES.RECRUITER.value) {
+      // Force a hard refresh to ensure all data is properly loaded
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
       } else {
-        router.push("/applicant/upload-resume");
+        // Fallback in case redirectTo is not provided
+        window.location.reload();
       }
-
-    } catch (err) {
-      setError(err.message);
-      if (err.message.includes("expired") || err.message.includes("required")) {
-        
-      }
+  
+    } catch (error) {
+      console.error('Full error:', error);
+      toast.error(error.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3, delay: i * 0.1 }
-    }),
-    hover: {
-      y: -4,
-      transition: { duration: 0.2 }
-    },
-    tap: {
-      scale: 0.98
+  useEffect(() => {
+    if (session?.user?.role && session.user.role !== "none") {
+      if (session.user.role === "job_seeker") {
+        router.push(session.user.has_resume ? "/applicant/dashboard" : "/applicant/upload-resume");
+      } else {
+        router.push(session.user.has_company ? `/companies/${session.user.company_id}/dashboard` : "/companies/create");
+      }
     }
-  };
+  }, [session, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <Loader className="h-8 w-8" />
-      </div>
-    );
-  }
+  const roles = [
+    { 
+      id: 'job_seeker', 
+      label: "I'm a Job Seeker", 
+      description: "Looking for work opportunities and want to showcase my skills to potential Recruiters.",
+      icon: <User className="h-5 w-5" />,
+      benefits: [
+        "Find work opportunities",
+        "Build your professional profile",
+        "Get paid for your skills"
+      ]
+    },
+    { 
+      id: 'recruiter', 
+      label: "I'm a Recruiter", 
+      description: "Looking to hire professionals for projects and grow my business with top talent.",
+      icon: <Briefcase className="h-5 w-5" />,
+      benefits: [
+        "Find skilled professionals",
+        "Manage projects and payments",
+        "Build your dream team"
+      ]
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-      <motion.div 
-        className="w-full max-w-2xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+    <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
       >
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Choose Your Account Type
-          </h1>
-          <p className="text-gray-600">
-            Select the option that best describes your goals
-          </p>
-        </header>
+        <h1 className="text-[#0d141c] text-3xl font-bold  text-center sm:text-4xl mb-8">
+          Join as a Recruiter <br className='sm:hidden'/> or Job Seeker
+        </h1>
+        <p className="text-gray-600 text-center mb-10  mx-auto text-lg">
+         This will help us tailor your experience and connect you with the right opportunities.
+        </p>
 
-        {error && (
-          <motion.div
-            className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-100"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            {error}
-          </motion.div>
-        )}
-
-        {success && (
-          <motion.div
-            className="mb-6 p-4 bg-green-50 text-green-600 rounded-lg border border-green-100"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            {success}
-          </motion.div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.values(ACCOUNT_TYPES).map((type, index) => (
-            <motion.button
-              key={type.value}
-              variants={cardVariants}
-              custom={index}
-              initial="hidden"
-              animate="visible"
-              whileHover={!loading ? "hover" : {}}
-              whileTap={!loading ? "tap" : {}}
-              onClick={() => handleAccountTypeSelect(type.value)}
-              disabled={loading}
-              className={`p-6 bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all ${
-                loading ? "opacity-70 cursor-not-allowed" : "hover:shadow-md"
-              }`}
+        <RadioGroup 
+          value={selectedRole} 
+          onValueChange={setSelectedRole}
+          className="space-y-4 px-4 sm:flex gap-2 mx-auto"
+        >
+          {roles.map((role) => (
+            <motion.div
+              key={role.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1"
             >
-              <div className="mb-4 p-3 bg-blue-50 rounded-full">
-                <type.icon className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                {type.label}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {type.description}
-              </p>
-            </motion.button>
+              <Label
+                htmlFor={role.id}
+                className={`flex flex-col h-full p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedRole === role.id
+                    ? 'border-brand bg-brand/5'
+                    : 'border-[#cedae8] hover:border-blue-200'
+                }`}
+              >
+                <div className="flex items-center mb-4">
+                  <RadioGroupItem 
+                    value={role.id} 
+                    id={role.id} 
+                    className="h-6 w-6 border-2 border-bg-blue-50 data-[state=checked]:border-brand mr-4"
+                  />
+                  <div className="flex items-center">
+                    <span className="text-gray-700 text-xl font-semibold">{role.label}</span>
+                  </div>
+                </div>
+                <p className="text-gray-500 text-[18px] mb-4 ml-10">
+                  {role.description}
+                </p>
+              </Label>
+            </motion.div>
           ))}
+        </RadioGroup>
+
+        <motion.div
+          className="mt-12 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: selectedRole ? 1 : 0.5 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Button
+            disabled={!selectedRole || loading}
+            className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
+            onClick={() => handleRoleSelect(selectedRole)}
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Spinner className="h-5 w-5" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+              <>
+                Continue 
+              </>
+            )}
+          </Button>
+        </motion.div>
+
+        <div className="text-center text-gray-600 font-semibold text-sm mt-8">
+          <p>You can not change your account type later in settings</p>
         </div>
       </motion.div>
     </div>

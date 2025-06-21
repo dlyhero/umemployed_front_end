@@ -13,28 +13,32 @@ import CompanyCard from "../../companies/listing/CompanyCard"
 const Companies = () => {
   const [companies, setCompanies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
 
   const { data: session, status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    const fetchCompanies = async () => {
-      if (status === "unauthenticated") {
-        router.push("/api/auth/signin")
-        return
-      }
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768) // Tailwind's 'md' breakpoint
+    }
 
-      const token = session?.user?.accessToken || session?.accessToken
-      if (!token) {
-        setLoading(false)
-        return
-      }
+    handleResize() // Check initially
+    window.addEventListener("resize", handleResize)
+
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+  
+
+  
 
       try {
         const response = await axios.get(`${baseUrl}/company/companies/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        
         })
         setCompanies(response.data)
       } catch (err) {
@@ -49,6 +53,9 @@ const Companies = () => {
       fetchCompanies()
     }
   }, [status, session, router])
+
+  const visibleCompanies = isMobile ? companies.slice(0, 1) : companies.slice(0, 3)
+
 
   if (loading) {
     return <CompaniesLoading />

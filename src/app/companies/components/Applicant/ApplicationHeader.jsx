@@ -14,13 +14,13 @@ const ApplicationHeader = ({ companyId, activeTab, setActiveTab }) => {
     <>
       <header className="flex justify-between items-center md:hidden mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Job Applications</h1>
-        <Button
+        {/* <Button
           variant="ghost"
           className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <Menu className="w-6 h-6" />
-        </Button>
+        </Button> */}
       </header>
       <MobileMenu
         mobileMenuOpen={mobileMenuOpen}

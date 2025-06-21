@@ -1,18 +1,30 @@
+// src/hooks/useJobForm.js
 'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { step1Schema, step2Schema, step3Schema, step4Schema } from '../app/companies/jobs/schemas/jobSchema';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { useJobStore } from '../store/jobStore';
+import { toast } from 'react-hot-toast';
 
 export const useJobForm = (currentStep) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const jobIdFromParams = searchParams.get('jobId');
   const { data: session, status } = useSession();
-  const [jobId, setJobId] = useState(jobIdFromParams);
-  const [extractedSkills, setExtractedSkills] = useState([]);
+  const {
+    formData,
+    setFormData,
+    jobId: storedJobId,
+    setJobId,
+    extractedSkills,
+    setExtractedSkills,
+    getExtractedSkills,
+    isSubmittingStep1,
+    setIsSubmittingStep1,
+    clearStore,
+  } = useJobStore();
   const [jobOptions, setJobOptions] = useState({
     categories: [],
     salary_ranges: {},
@@ -24,6 +36,10 @@ export const useJobForm = (currentStep) => {
     locations: [],
   });
   const [isLoadingSkills, setIsLoadingSkills] = useState(false);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+
+  const jobId = searchParams.get('jobId') || storedJobId;
 
   const stepSchemas = {
     basicinformation: step1Schema,
@@ -42,21 +58,21 @@ export const useJobForm = (currentStep) => {
   const form = useForm({
     resolver: zodResolver(stepSchemas[currentStep]),
     defaultValues: {
-      title: '',
-      hire_number: 1,
-      job_type: '',
-      job_location_type: '',
-      location: '',
-      salary_range: 'Not specified',
-      category: null,
-      experience_levels: '',
-      weekly_ranges: '',
-      shifts: '',
-      description: '',
-      responsibilities: '',
-      benefits: '',
-      requirements: [],
-      level: 'Beginner',
+      title: formData.title || '',
+      hire_number: formData.hire_number || 1,
+      job_type: formData.job_type || '',
+      job_location_type: formData.job_location_type || '',
+      location: formData.location || '',
+      salary_range: formData.salary_range || 'Not specified',
+      category: formData.category || null,
+      experience_levels: formData.experience_levels || '',
+      weekly_ranges: formData.weekly_ranges || '',
+      shifts: formData.shifts || '',
+      description: formData.description || '',
+      responsibilities: formData.responsibilities || '',
+      benefits: formData.benefits || '',
+      requirements: formData.requirements || [],
+      level: formData.level || 'Beginner',
       isSubmitting: false,
     },
     mode: 'onChange',
@@ -64,80 +80,89 @@ export const useJobForm = (currentStep) => {
 
   useEffect(() => {
     const fetchJobOptions = async () => {
+      setIsLoadingOptions(true);
       try {
-        const token = session?.accessToken || session?.token;
         const headers = {
           'Content-Type': 'application/json',
         };
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        } else {
-          console.warn('No token available for fetchJobOptions');
+        if (session?.accessToken || session?.token) {
+          headers['Authorization'] = `Bearer ${session.accessToken || session.token}`;
         }
-
-        const response = await fetch('https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/job-options/', {
+        const response = await fetch('https://server.umemployed.com/api/job/job-options/', {
+          method: 'GET',
           headers,
         });
         if (!response.ok) {
-          const text = await response.text();
-          console.error('fetchJobOptions response:', text);
-          throw new Error(`Failed to fetch job options: ${response.status} ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch job options: ${response.status} ${errorText}`);
         }
         const data = await response.json();
         setJobOptions({
-          categories: data.categories || [],
-          salary_ranges: data.salary_ranges || {},
-          job_location_types: data.job_location_types || {},
-          job_types: data.job_types || {},
-          experience_levels: data.experience_levels || {},
-          weekly_ranges: data.weekly_ranges || {},
-          shifts: data.shifts || {},
-          locations: data.locations || [],
+          categories: Array.isArray(data.categories) ? data.categories : [],
+          salary_ranges: data.salary_ranges && typeof data.salary_ranges === 'object' ? data.salary_ranges : {},
+          job_location_types: data.job_location_types && typeof data.job_location_types === 'object' ? data.job_location_types : {},
+          job_types: data.job_types && typeof data.job_types === 'object' ? data.job_types : {},
+          experience_levels: data.experience_levels && typeof data.experience_levels === 'object' ? data.experience_levels : {},
+          weekly_ranges: data.weekly_ranges && typeof data.weekly_ranges === 'object' ? data.weekly_ranges : {},
+          shifts: data.shifts && typeof data.shifts === 'object' ? data.shifts : {},
+          locations: Array.isArray(data.locations) ? data.locations : [],
         });
       } catch (error) {
         console.error('Error fetching job options:', error.message);
-        form.setError('root', { message: 'Failed to load job options.' });
+        form.setError('root', { message: 'Failed to load job options. Please try again.' });
+      } finally {
+        setIsLoadingOptions(false);
       }
     };
-    if (status === 'authenticated') {
-      fetchJobOptions();
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
     }
-  }, [form, session, status]);
+    fetchJobOptions();
+  }, [form, session, status, router]);
 
   useEffect(() => {
-    if (currentStep === 'skills' && jobId && status === 'authenticated') {
+    if (currentStep === 'basicinformation') {
+      clearStore();
+      form.reset();
+    } else if (currentStep === 'skills' && jobId) {
       const loadSkills = async () => {
         setIsLoadingSkills(true);
-        const skills = await fetchExtractedSkills(jobId);
-        setExtractedSkills(skills);
-        setIsLoadingSkills(false);
-        if (skills.length === 0) {
-          form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+        try {
+          const skills = await fetchExtractedSkills(jobId);
+          setExtractedSkills(skills);
+          if (skills.length === 0) {
+            form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
+          } else {
+            form.clearErrors('root');
+          }
+        } catch (error) {
+          console.error('Error loading skills:', error.message);
+          form.setError('root', { message: 'Failed to load skills. Please try again.' });
+        } finally {
+          setIsLoadingSkills(false);
         }
       };
       loadSkills();
+    } else if (!jobId && currentStep !== 'basicinformation') {
+      toast.error('No job ID found. Please complete the Basic Information step first.');
+      router.push('/companies/jobs/create/basicinformation');
     }
-  }, [currentStep, jobId, status]);
+  }, [currentStep, jobId, form, setExtractedSkills, clearStore, router]);
 
   const fetchExtractedSkills = async (jobId) => {
-    console.log('fetchExtractedSkills called with jobId:', jobId, 'token:', session?.accessToken || session?.token);
+    console.log('fetchExtractedSkills called with jobId:', jobId);
     try {
-      const token = session?.accessToken || session?.token;
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-      const response = await fetch(`https://umemployed-app-afec951f7ec7.herokuapp.com/api/job/jobs/${jobId}/extracted-skills/`, {
+      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/extracted-skills/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
         },
       });
-      console.log('fetchExtractedSkills response status:', response.status);
       if (!response.ok) {
-        const text = await response.text();
-        console.error('fetchExtractedSkills response:', text);
-        throw new Error(`Failed to fetch extracted skills: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch extracted skills: ${response.status} ${errorText}`);
       }
       const data = await response.json();
       const skills = Array.isArray(data.extracted_skills) ? data.extracted_skills : [];
@@ -145,38 +170,107 @@ export const useJobForm = (currentStep) => {
       return skills;
     } catch (error) {
       console.error('Error fetching extracted skills:', error.message);
-      form.setError('root', { message: error.message });
       return [];
     }
   };
 
-  const onSubmit = async (data) => {
-    const baseUrl = 'https://umemployed-app-afec951f7ec7.herokuapp.com/api';
-    console.log('onSubmit called with data:', data, 'session status:', status, 'token:', session?.accessToken || session?.token);
+  const verifyJob = async (jobId, retries = 3, delay = 1000) => {
+    console.log('Verifying job with jobId:', jobId);
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to verify job: ${response.status} ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('Job verification response:', data);
+        const verifiedJobId = data.id || data.job_id || null;
+        if (!verifiedJobId) {
+          throw new Error('No job ID found in verification response');
+        }
+        return verifiedJobId;
+      } catch (error) {
+        console.error('Error verifying job:', error.message);
+        if (i < retries - 1) {
+          console.warn(`Retrying job verification (${i + 1}/${retries})...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        return null;
+      }
+    }
+    return null;
+  };
 
-    if (status === 'loading') {
-      form.setError('root', { message: 'Session is still loading. Please wait.' });
-      return { error: 'Session is still loading. Please wait.' };
+  const generateTailoredDescription = async (skills) => {
+    if (!jobId) {
+      throw new Error('No job ID available for generating tailored description.');
     }
-    if (status === 'unauthenticated') {
-      console.warn('User is unauthenticated, redirecting to login');
-      signIn(null, { callbackUrl: `/companies/jobs/create/${currentStep}${jobId ? `?jobId=${jobId}` : ''}` });
-      form.setError('root', { message: 'Please log in to create a job.' });
-      return { error: 'Please log in to create a job.' };
+    setIsGeneratingDescription(true);
+    try {
+      const response = await fetch(`https://server.umemployed.com/api/job/jobs/${jobId}/tailored-description/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.accessToken || session?.token}`,
+        },
+        body: JSON.stringify({
+          skills: skills, // Updated key from required_skills to skills
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to generate tailored description: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Tailored description response:', result);
+
+      // Update form fields with the response
+      form.setValue('description', result.description || '', { shouldValidate: true });
+      form.setValue('responsibilities', result.responsibilities || '', { shouldValidate: true });
+      form.setValue('benefits', result.benefits || '', { shouldValidate: true });
+
+      // Update store
+      setFormData({
+        description: result.description,
+        responsibilities: result.responsibilities,
+        benefits: result.benefits,
+      });
+
+      return result;
+    } finally {
+      setIsGeneratingDescription(false);
     }
+  };
+
+  const onSubmit = async (data) => {
+    const baseUrl = 'https://server.umemployed.com/api';
+    console.log('onSubmit called with data:', data);
+
+    if (status === 'loading') return { error: 'Session is still loading' };
+    if (status === 'unauthenticated') return { error: 'Please log in to create a job.' };
 
     const token = session?.accessToken || session?.token;
-    if (!token) {
-      console.warn('No token found, redirecting to login');
-      signIn(null, { callbackUrl: `/companies/jobs/create/${currentStep}${jobId ? `?jobId=${jobId}` : ''}` });
-      form.setError('root', { message: 'No authentication token found. Please log in.' });
-      return { error: 'No authentication token found. Please log in.' };
+    if (!token) return { error: 'No authentication token found' };
+
+    if (!jobId && currentStep !== 'basicinformation') {
+      return { error: 'No job ID found. Please complete previous steps.' };
     }
 
     try {
       await form.setValue('isSubmitting', true, { shouldValidate: false });
 
       if (currentStep === 'basicinformation') {
+        setIsSubmittingStep1(true);
         const step1Data = {
           ...step1Schema.parse(data),
           category: parseInt(data.category, 10),
@@ -193,19 +287,26 @@ export const useJobForm = (currentStep) => {
         });
 
         if (!response.ok) {
-          const text = await response.text();
-          console.error('Step 1 response:', text);
-          try {
-            const errorData = JSON.parse(text);
-            throw new Error(errorData.message || `Failed to create job: ${response.status} ${response.statusText}`);
-          } catch (jsonError) {
-            throw new Error(`Failed to create job: ${response.status} ${response.statusText} - Response: ${text.substring(0, 100)}`);
-          }
+          const errorText = await response.text();
+          throw new Error(`Failed to create job: ${response.status} ${errorText}`);
         }
 
         const result = await response.json();
-        setJobId(result.id);
-        return result;
+        console.log('Step 1 response:', JSON.stringify(result, null, 2));
+        const newJobId = result.id || result.job_id || null;
+        if (!newJobId) {
+          throw new Error('No job ID returned in Step 1 response');
+        }
+
+        const verifiedJobId = await verifyJob(newJobId);
+        if (!verifiedJobId) {
+          throw new Error('Job verification failed. Please try again.');
+        }
+
+        setFormData(step1Data);
+        setJobId(verifiedJobId);
+        form.reset({ ...form.getValues(), ...step1Data });
+        return { ...result, id: verifiedJobId };
       } else if (currentStep === 'requirements' && jobId) {
         const step2Data = step2Schema.parse(data);
         console.log('Submitting Step 2 data:', step2Data);
@@ -218,16 +319,11 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step2Data),
         });
         if (!response.ok) {
-          const text = await response.text();
-          console.error('Step 2 response:', text);
-          try {
-            const errorData = JSON.parse(text);
-            throw new Error(errorData.message || `Failed to update step 2: ${response.status} ${response.statusText}`);
-          } catch (jsonError) {
-            throw new Error(`Failed to update step 2: ${response.status} ${response.statusText} - Response: ${text.substring(0, 100)}`);
-          }
+          const errorText = await response.text();
+          throw new Error(`Failed to update step 2: ${response.status} ${errorText}`);
         }
         const result = await response.json();
+        setFormData(step2Data);
         return result;
       } else if (currentStep === 'description' && jobId) {
         const step3Data = step3Schema.parse(data);
@@ -241,14 +337,8 @@ export const useJobForm = (currentStep) => {
           body: JSON.stringify(step3Data),
         });
         if (!response.ok) {
-          const text = await response.text();
-          console.error('Step 3 response:', text);
-          try {
-            const errorData = JSON.parse(text);
-            throw new Error(errorData.message || `Failed to update step 3: ${response.status} ${response.statusText}`);
-          } catch (jsonError) {
-            throw new Error(`Failed to update step 3: ${response.status} ${response.statusText} - Response: ${text.substring(0, 100)}`);
-          }
+          const errorText = await response.text();
+          throw new Error(`Failed to update step 3: ${response.status} ${errorText}`);
         }
         const result = await response.json();
         setIsLoadingSkills(true);
@@ -258,40 +348,58 @@ export const useJobForm = (currentStep) => {
         if (skills.length === 0) {
           form.setError('root', { message: 'No skills extracted. Please go back and update the description.' });
         }
+        setFormData(step3Data);
         return result;
       } else if (currentStep === 'skills' && jobId) {
         const step4Data = {
           requirements: Array.isArray(data.requirements) ? data.requirements : [],
-          level: data.level || 'Beginner',
+          level: data.level || 'Mid',
         };
         console.log('Submitting Step 4 data:', step4Data);
-        const response = await fetch(`${baseUrl}/job/${jobId}/create-step4/`, {
+
+        toast.success('Good! Your job will be posted in 03 minutes');
+        const companyId = session?.user?.company_id || session?.companyid;
+        if (companyId) {
+          router.push(`/companies/${companyId}/dashboard`);
+        } else {
+          console.error('No companyId found in session');
+          form.setError('root', { message: 'Failed to redirect: Company ID not found.' });
+        }
+
+        fetch(`${baseUrl}/job/${jobId}/create-step4/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(step4Data),
-        });
-        if (!response.ok) {
-          const text = await response.text();
-          console.error('Step 4 response:', text);
-          try {
-            const errorData = JSON.parse(text);
-            throw new Error(errorData.message || `Failed to save job: ${response.status} ${response.statusText}`);
-          } catch (jsonError) {
-            throw new Error(`Failed to save job: ${response.status} ${response.statusText} - Response: ${text.substring(0, 100)}`);
-          }
-        }
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Failed to save step 4: ${response.status} ${errorText}`);
+            }
+            const result = await response.json();
+            console.log('Step 4 response:', result);
+            clearStore();
+            return { success: true, data: result };
+          })
+          .catch((error) => {
+            console.error('Background API error:', error.message);
+            toast.error('Failed to post job. Please try again later.');
+          });
+
         return { success: true };
       }
       throw new Error('Invalid step or missing job ID');
     } catch (error) {
       console.error('API error:', error.message);
-      form.setError('root', { message: error.message });
       return { error: error.message };
     } finally {
       await form.setValue('isSubmitting', false, { shouldValidate: false });
+      if (currentStep === 'basicinformation') {
+        setIsSubmittingStep1(false);
+      }
     }
   };
 
@@ -320,7 +428,7 @@ export const useJobForm = (currentStep) => {
     return false;
   };
 
-  const nextStep = () => {
+  const nextStep = async (newJobId) => {
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
@@ -328,7 +436,25 @@ export const useJobForm = (currentStep) => {
         console.log('Waiting for skills to load before navigating to Step 4...');
         return;
       }
-      router.push(`/companies/jobs/create/${steps[currentIndex + 1]}${jobId ? `?jobId=${jobId}` : ''}`);
+      const effectiveJobId = newJobId || storedJobId;
+      if (!effectiveJobId) {
+        console.error('Cannot navigate to next step: No jobId available');
+        form.setError('root', { message: 'Failed to create job. Please try again.' });
+        toast.error('Failed to create job. Please try again.');
+        router.push('/companies/jobs/create/basicinformation');
+        return;
+      }
+      const verifiedJobId = await verifyJob(effectiveJobId);
+      if (!verifiedJobId) {
+        console.error('Job verification failed for jobId:', effectiveJobId);
+        form.setError('root', { message: 'Failed to verify job. Please try again.' });
+        toast.error('Failed to verify job. Please try again.');
+        return;
+      }
+      setJobId(verifiedJobId);
+      const nextPath = `/companies/jobs/create/${steps[currentIndex + 1]}?jobId=${verifiedJobId}`;
+      console.log('Navigating to next step:', steps[currentIndex + 1], 'with jobId:', verifiedJobId);
+      router.push(nextPath);
     }
   };
 
@@ -336,7 +462,9 @@ export const useJobForm = (currentStep) => {
     const steps = ['basicinformation', 'requirements', 'description', 'skills'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
-      router.push(`/companies/jobs/create/${steps[currentIndex - 1]}${jobId ? `?jobId=${jobId}` : ''}`);
+      const prevPath = `/companies/jobs/create/${steps[currentIndex - 1]}${jobId ? `?jobId=${jobId}` : ''}`;
+      console.log('Navigating to previous step:', steps[currentIndex - 1], 'with jobId:', jobId);
+      router.push(prevPath);
     }
   };
 
@@ -350,8 +478,12 @@ export const useJobForm = (currentStep) => {
     nextStep,
     prevStep,
     jobId,
-    extracted_skills: extractedSkills,
+    extractedSkills: getExtractedSkills(),
     jobOptions,
     isLoadingSkills,
+    isLoadingOptions,
+    isSubmittingStep1,
+    generateTailoredDescription,
+    isGeneratingDescription,
   };
 };

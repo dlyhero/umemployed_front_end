@@ -14,7 +14,7 @@ import CandidateTabs from '../Applicant/CandidateTabs';
 import { TabsContent } from '@/components/ui/tabs';
 import { MobileMenu } from '../../[companyId]/dashboard/MobileMenu';
 import { Sideba } from '../../[companyId]/dashboard/recruiter/Sideba';
-import  ShortlistFetch  from './ShortlistFetch';
+import ShortlistFetch from './ShortlistFetch';
 
 const ShortlistComponent = () => {
   const { companyId, jobId } = useParams();
@@ -74,6 +74,11 @@ const ShortlistComponent = () => {
     setIsModalOpen(true);
   };
 
+  const handleUnshortlist = (candidateId) => {
+    console.log('Unshortlisting candidate:', candidateId);
+    setShortlisted((prev) => prev.filter((app) => app.user_id !== candidateId));
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCandidate(null);
@@ -109,13 +114,13 @@ const ShortlistComponent = () => {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-auto">
         <header className="flex justify-between items-center md:hidden mb-6">
-          <Button
+          {/* <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="w-6 h-6" />
-          </Button>
+          </Button> */}
         </header>
         <MobileMenu
           mobileMenuOpen={mobileMenuOpen}
@@ -177,8 +182,12 @@ const ShortlistComponent = () => {
                             handleViewDetails={handleViewDetails}
                             handleEndorse={handleEndorse}
                             handleSchedule={handleSchedule}
+                            handleUnshortlist={handleUnshortlist}
                             activeTab={activeTab}
                             isShortlisted={true}
+                            jobId={jobId}
+                            companyId={companyId}
+                            accessToken={session?.accessToken}
                           />
                         ))
                       ) : (

@@ -1,6 +1,4 @@
-// src/app/companies/[companyId]/jobs/listing/page.jsx
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -25,15 +23,15 @@ export default function CompanyJobsListing() {
   const [locationFilter, setLocationFilter] = useState('');
   const [keywordFilter, setKeywordFilter] = useState('');
   const [filteredJobs, setFilteredJobs] = useState([]);
-  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/jobs/listing`);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(`/companies/${companyId}/jobs/listing`);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function getJobs() {
       if (status === 'loading' || !session) {
-        return; // Wait for session
+        return;
       }
 
       if (!session.accessToken) {
@@ -121,16 +119,15 @@ export default function CompanyJobsListing() {
       className="min-h-screen bg-gray-50 py-8"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Mobile Header */}
         <header className="flex justify-between items-center md:hidden mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Available Jobs</h1>
-          <Button
+          {/* <Button
             variant="ghost"
             className="p-2 text-gray-900 hover:bg-gray-100 rounded-full"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="w-6 h-6" />
-          </Button>
+          </Button> */}
         </header>
         <MobileMenu
           mobileMenuOpen={mobileMenuOpen}
@@ -139,26 +136,17 @@ export default function CompanyJobsListing() {
           setActiveTab={setActiveTab}
           companyId={companyId}
         />
-
-        {/* Mobile Search */}
         <div className="md:hidden mb-6">
           <MobileSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
-
         <div className="flex gap-6">
-          {/* Sidebar (Desktop, Scrolls with Content) */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <Sideba activeTab={activeTab} setActiveTab={setActiveTab} companyId={companyId} />
           </div>
-
-          {/* Main Content */}
           <main className="flex-1">
-            {/* Desktop Header */}
             <div className="hidden md:block mb-6">
               <JobHeader />
             </div>
-
-            {/* Job List */}
             {isLoading ? (
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto" />

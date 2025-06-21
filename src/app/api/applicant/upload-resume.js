@@ -2,7 +2,7 @@ import axios from "axios"
 
 const upload_resume = async () => {
     try {
-        const response = await axios.post('https://umemployed-app-afec951f7ec7.herokuapp.com/api/resume/upload-resume/')
+        const response = await axios.post('https://umemployed-f6fdddfffmhjhjcj.canadacentral-01.azurewebsites.net/api/resume/upload-resume/')
     } catch (error) {
         
     }

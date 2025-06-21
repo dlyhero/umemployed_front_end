@@ -8,9 +8,11 @@ import { ManualEntryOption } from "./components/ManualEntryOption";
 import { FileUpload } from "./components/FileUpload";
 import { ProgressBar } from "./components/ProgressBar";
 import { ProcessSteps } from "./components/ProcessSteps";
+import useUser from "@/src/hooks/useUser";
 
 export default function ResumeUploadPage() {
   const { data: session, status } = useSession();
+  const user = useUser();
   const token = session?.accessToken; // Added optional chaining
   const {
     fileName,
