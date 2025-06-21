@@ -48,7 +48,7 @@ const FeaturedOpportunities = () => {
 
 
   return (
-    <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16 bg-slate-100">
+    <section className="w-full overflow-hidden sm:px-6 lg:px-8 py-16              ">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

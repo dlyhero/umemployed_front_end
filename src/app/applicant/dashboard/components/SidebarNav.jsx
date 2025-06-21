@@ -1,54 +1,76 @@
 'use client'
 import { motion } from 'framer-motion'
-import { BarChart2, Bookmark, Briefcase, ChevronRight, LayoutDashboard, Settings, User, FileText, ClipboardList } from 'lucide-react'
+import { 
+  BarChart2, 
+  Bookmark, 
+  Briefcase, 
+  ChevronRight, 
+  LayoutDashboard, 
+  Settings, 
+  User, 
+  FileText, 
+  ClipboardList,
+  MessageSquare,
+  Bell,
+  BookOpen,
+  FileEdit,
+  BookmarkCheck
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export const SidebarNav = ({ activeTab, setActiveTab }) => {
   const pathname = usePathname()
 
+ 
   const navItems = [
     { 
+      id: "dashboard",
+      icon: <LayoutDashboard className="w-5 h-5" />, 
+      label: "Dashboard",
+    },
+    { 
+      id: "profile",
       icon: <User className="w-5 h-5" />, 
       label: "My Profile",
-      path: "/applicant/profile",
-      description: "Manage your personal information"
     },
+
     { 
-      icon: <Briefcase className="w-5 h-5" />, 
-      label: "Job Search",
-      path: "/jobs",
-      description: "Browse available job opportunities"
-    },
-    { 
+      id: "saved-positions",
       icon: <Bookmark className="w-5 h-5" />, 
       label: "Saved Positions",
-      path: "/jobs?tab=saved",
-      description: "Your shortlisted job opportunities"
     },
     { 
+      id: "my-applications",
       icon: <ClipboardList className="w-5 h-5" />, 
       label: "My Applications",
-      path: "/jobs?tab=applied",
-      description: "Track your job applications"
     },
+   
     { 
-      icon: <FileText className="w-5 h-5" />, 
+      id: "resume-advisor",
+      icon: <FileEdit className="w-5 h-5" />, 
       label: "Resume Advisor",
-      path: "/applicant/resume-advisor",
-      description: "Create and optimize your resume"
+    },
+   ,
+    { 
+      id: "messages",
+      icon: <MessageSquare className="w-5 h-5" />,
+      label: "Messages",
     },
     { 
+      id: "shortlisted",
+      icon: <BookmarkCheck className="w-5 h-5" />, 
+      label: "Shortlisted Jobs", 
+    },
+    { 
+      id: "perfect-job",
       icon: <BarChart2 className="w-5 h-5" />, 
       label: "Perfect Job Title",
-      path: "/applicant/perfect-job",
-      description: "Your job search statistics"
     },
     { 
+      id: "account-settings",
       icon: <Settings className="w-5 h-5" />, 
       label: "Account Settings", 
-      path: "/settings",
-      description: "Update your account preferences"
     }
   ]
 
@@ -56,33 +78,31 @@ export const SidebarNav = ({ activeTab, setActiveTab }) => {
     <nav className="space-y-1">
       {navItems.map((item, index) => {
         const isActive = pathname?.startsWith(item.path) || 
-                         activeTab === item.label.toLowerCase()
+            activeTab === item.label.toLowerCase()
         
         return (
-          <Link 
-            href={item.path} 
+          <div
             key={index} 
             passHref 
             legacyBehavior
             title={item.description}
           >
             <motion.a
-              whileHover={{ x: 5 }}
-              className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+              className={`flex items-center w-full p-3 rounded-lg transition-colors font-semibold cursor-pointer ${
                 isActive 
-                  ? 'bg-indigo-50 text-brand font-semibold' 
+                  ? 'bg-brand text-white' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => setActiveTab(item.label.toLowerCase())}
-              aria-label={item.description}
+              onClick={() => setActiveTab(item.id)}
             >
-              <span className={isActive ? 'text-brand' : 'text-gray-500'}>
+              <span className={isActive ? 'text-white' : 'text-brand'}>
                 {item.icon}
               </span>
-              <span className="ml-3">{item.label}</span>
-              <ChevronRight className="ml-auto w-4 h-4 text-gray-400" />
+              <span className={`ml-3 ${isActive ? 'text-white' : 'text-gray-700'}`}>
+                {item.label}
+              </span>
             </motion.a>
-          </Link>
+          </div>
         )
       })}
     </nav>

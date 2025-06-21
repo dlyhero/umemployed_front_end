@@ -1,13 +1,11 @@
 'use client'
-import { motion } from 'framer-motion'
 
 export const StatCard = ({ stat }) => (
-  <motion.div
-    whileHover={{ y: -5 }}
-    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+  <div
+    className="bg-white p-4 rounded-xl border border-gray-100"
   >
     <div className="flex items-center justify-between">
-      <h3 className="text-gray-600 text-sm font-medium">{stat.name}</h3>
+      <h3 className="text-gray-900 text-lg font-bold">{stat.name}</h3>
       <div className="p-2 rounded-lg bg-indigo-50 text-brand">
         {stat.icon}
       </div>
@@ -18,5 +16,5 @@ export const StatCard = ({ stat }) => (
         {stat.change}
       </span>
     </div>
-  </motion.div>
+  </div>
 )

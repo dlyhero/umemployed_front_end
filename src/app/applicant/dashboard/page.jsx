@@ -13,20 +13,24 @@ import { Sidebar } from './components/Sidebar'
 import { MobileMenu } from './components/MobileMenu'
 import { RecommendedJobs } from './components/RecommendedJobs'
 import { useJobs } from '@/src/hooks/useJob'
+import DashboardHeader from './header-dashoard'
+import EnhancedResumePage from '../resume-enhancer/page'
+import ResumeUploadPage from '../upload-resume/page'
+import ProfilePage from '../profile/page'
 
-const applicantDashBoard = () => {
+const ApplicantDashBoard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-   const [savedJobs, setSavedJobs] = useState([]);
+  const [savedJobs, setSavedJobs] = useState([])
   
-    const toggleSaveJob = (jobId) => {
-      setSavedJobs(prev => 
-        prev.includes(jobId) 
-          ? prev.filter(id => id !== jobId) 
-          : [...prev, jobId]
-      );
-    };
-  
+  const toggleSaveJob = (jobId) => {
+    setSavedJobs(prev => 
+      prev.includes(jobId) 
+        ? prev.filter(id => id !== jobId) 
+        : [...prev, jobId]
+    )
+  }
+
   // Mock data
   const [stats] = useState([
     { id: 1, name: 'Profile Views', value: '1.2K', change: '+12%', icon: <User className="w-5 h-5" /> },
@@ -35,32 +39,52 @@ const applicantDashBoard = () => {
     { id: 4, name: 'Avg. Response', value: '2.4d', change: '-0.5d', icon: <Clock className="w-5 h-5" /> }
   ])
 
-  
-  
-
-  return (
-    <div className="h-fit pb-2 ">
-      <MobileMenu mobileMenuOpen={mobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
-          <main className="flex-1">
-
-            <div className="flex justify-end mb-2 lg:hidden px-1">
-              <button
-                className=" p-2 flex items-center justify-end bg-gradient-to-r from-brand to-purple-600 py-2 px-4 rounded-md  text-white"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                side menu
-                <ChevronDoubleDownIcon className="w-4 h-4" />
-              </button></div>
+  // Render the appropriate content based on activeTab
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'dashboard':
+        return (
+          <>
             <WelcomeSection />
             <StatsGrid stats={stats} />
             <RecommendedJobs/>
             <CareerTips />
+          </>
+        )
+      case 'shortlisted':
+        return <EnhancedResumePage />
+      case 'resume':
+        return <ResumeUploadPage />
+      case "profile":
+        return <ProfilePage />
+      // Add more cases for other tabs if needed
+      default:
+        return (
+          <>
+            <WelcomeSection />
+            <StatsGrid stats={stats} />
+            <RecommendedJobs/>
+            <CareerTips />
+          </>
+        )
+    }
+  }
+
+  return (
+    <div className="h-fit pb-2 ">
+      <MobileMenu mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="pt-2">
+        <div className="flex flex-col lg:flex-row gap-6 bg-white">
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+          <main className="relative flex-1 mx-auto md:ml-72 ">
+            <div className=' right-0 z-10'> 
+              <DashboardHeader onClick={() => setMobileMenuOpen(!mobileMenuOpen)}/>
+            </div>
+
+            <div className=" px-2 lg:p-0 bg-gray-100 rounded-2xl shadow min-h-screen mt-16 md:mt-0">                                                                                                                                                                                                                                
+              {renderContent()}
+            </div>
           </main>
         </div>
       </div>
@@ -68,4 +92,4 @@ const applicantDashBoard = () => {
   )
 }
 
-export default applicantDashBoard
+export default ApplicantDashBoard

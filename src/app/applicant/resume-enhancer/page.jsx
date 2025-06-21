@@ -71,6 +71,7 @@ export default function EnhancedResumePage({ params }) {
         { headers }
       );
       const jobsData = jobsResponse.data;
+      console.log("data",jobsData)
       
       // Transform the API response to match our expected format
       const transformedJobs = jobsData.map(job => ({
@@ -106,7 +107,7 @@ export default function EnhancedResumePage({ params }) {
     if (session) {
       fetchData()
     }
-  }, [session, params.user_id])
+  }, [session])
 
   // Apply filters whenever filters or data changes
   useEffect(() => {

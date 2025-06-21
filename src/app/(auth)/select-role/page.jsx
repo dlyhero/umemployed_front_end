@@ -6,10 +6,13 @@ import { Briefcase, User, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/Spinner';
+import { motion } from 'framer-motion';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export default function SelectRolePage() {
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedRole, setSelectedRole] = useState('');
   const router = useRouter();
   const { data: session, update } = useSession();
 
@@ -22,7 +25,7 @@ export default function SelectRolePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ role }),
-        credentials: 'same-origin' // or 'include' if cross-origin
+        credentials: 'same-origin'
       });
   
       const data = await response.json();
@@ -31,7 +34,7 @@ export default function SelectRolePage() {
         throw new Error(data.message || 'Failed to update role');
       }
   
-      // Force a session update
+      // Update session
       await update({
         ...session,
         user: {
@@ -39,8 +42,14 @@ export default function SelectRolePage() {
           role: role
         }
       });
-  
-      router.push(data.redirectTo);
+
+      // Force a hard refresh to ensure all data is properly loaded
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
+      } else {
+        // Fallback in case redirectTo is not provided
+        window.location.reload();
+      }
   
     } catch (error) {
       console.error('Full error:', error);
@@ -60,118 +69,111 @@ export default function SelectRolePage() {
     }
   }, [session, router]);
 
+  const roles = [
+    { 
+      id: 'job_seeker', 
+      label: "I'm a Job Seeker", 
+      description: "Looking for work opportunities and want to showcase my skills to potential Recruiters.",
+      icon: <User className="h-5 w-5" />,
+      benefits: [
+        "Find work opportunities",
+        "Build your professional profile",
+        "Get paid for your skills"
+      ]
+    },
+    { 
+      id: 'recruiter', 
+      label: "I'm a Recruiter", 
+      description: "Looking to hire professionals for projects and grow my business with top talent.",
+      icon: <Briefcase className="h-5 w-5" />,
+      benefits: [
+        "Find skilled professionals",
+        "Manage projects and payments",
+        "Build your dream team"
+      ]
+    }
+  ];
+
   return (
-    <div className="max-w-5xl mx-auto  mt-5 px-4">
-      <div className="w-full max-w-4xl p-8 space-y-8 bg-white rounded-xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join as a <br className='md:hidden' /> Recruiter or Job Seeker</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Select your account type to get started. You can always switch later.
-          </p>
-        </div>
+    <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-[#0d141c] text-3xl font-bold  text-center sm:text-4xl mb-8">
+          Join as a Recruiter <br className='sm:hidden'/> or Job Seeker
+        </h1>
+        <p className="text-gray-600 text-center mb-10  mx-auto text-lg">
+         This will help us tailor your experience and connect you with the right opportunities.
+        </p>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div 
-            className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${selectedRole === 'job_seeker' ? 'border-brand bg-blue-50' : 'border-gray-200 hover:border-brand'}`}
-            onClick={() => setSelectedRole('job_seeker')}
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-blue-100 mr-4">
-                  <User className="h-6 w-6 text-brand" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">I'm a Job Seeker</h2>
-              </div>
-              <p className="text-gray-600 mb-6 flex-grow px-3">
-                Looking for work opportunities and want to showcase my skills to potential Recruiters.
-              </p>
-              <ul className="space-y-2 mb-6 list-decimal px-8">
-                <li className=" text-gray-600">
-      
-                  Find work opportunities
-                </li>
-                <li className=" text-gray-600">
-                 
-                  Build your professional profile
-                </li>
-                <li className=" text-gray-600">
-                 
-                  Get paid for your skills
-                </li>
-              </ul>
-              <Button
-                variant={selectedRole === 'job_seeker' ? 'brand' : 'outline'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRoleSelect('job_seeker');
-                }}
-                disabled={loading || selectedRole !== 'job_seeker'}
-                className="w-full mt-auto"
+        <RadioGroup 
+          value={selectedRole} 
+          onValueChange={setSelectedRole}
+          className="space-y-4 px-4 sm:flex gap-2 mx-auto"
+        >
+          {roles.map((role) => (
+            <motion.div
+              key={role.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1"
+            >
+              <Label
+                htmlFor={role.id}
+                className={`flex flex-col h-full p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedRole === role.id
+                    ? 'border-brand bg-brand/5'
+                    : 'border-[#cedae8] hover:border-blue-200'
+                }`}
               >
-                {loading && selectedRole === 'job_seeker' ? (
-                  <Spinner className="mr-2" />
-                ) : (
-                  <>
-                    Continue as Job Seeker <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div 
-            className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${selectedRole === 'recruiter' ? 'border-brand bg-blue-50' : 'border-gray-200 hover:border-brand/50'}`}
-            onClick={() => setSelectedRole('recruiter')}
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-blue-100 mr-4">
-                  <Briefcase className="h-6 w-6 text-brand" />
+                <div className="flex items-center mb-4">
+                  <RadioGroupItem 
+                    value={role.id} 
+                    id={role.id} 
+                    className="h-6 w-6 border-2 border-bg-blue-50 data-[state=checked]:border-brand mr-4"
+                  />
+                  <div className="flex items-center">
+                    <span className="text-gray-700 text-xl font-semibold">{role.label}</span>
+                  </div>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">I'm a Recruiter</h2>
-              </div>
-              <p className="text-gray-600 mb-6 flex-grow px-3">
-                Looking to hire professionals for projects and grow my business with top talent.
-              </p>
-              <ul className="space-y-2 mb-6 list-decimal px-7">
-                <li className=" text-gray-600">
-                  
-                  Find skilled professionals
-                </li>
-                <li className=" text-gray-600">
-                  
-                  Manage projects and payments
-                </li>
-                <li className=" text-gray-600">
-                  
-                  Build your dream team
-                </li>
-              </ul>
-              <Button
-                variant={selectedRole === 'recruiter' ? 'brand' : 'outline'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRoleSelect('recruiter');
-                }}
-                disabled={loading || selectedRole !== 'recruiter'}
-                className="w-full mt-auto"
-              >
-                {loading && selectedRole === 'recruiter' ? (
-                  <Spinner className="mr-2" />
-                ) : (
-                  <>
-                    Continue as Recruiter <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
+                <p className="text-gray-500 text-[18px] mb-4 ml-10">
+                  {role.description}
+                </p>
+              </Label>
+            </motion.div>
+          ))}
+        </RadioGroup>
 
-        <div className="text-center text-gray-500 text-sm">
+        <motion.div
+          className="mt-12 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: selectedRole ? 1 : 0.5 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Button
+            disabled={!selectedRole || loading}
+            className={`px-8 py-6 text-lg font-semibold hover:bg-brand/90 ${selectedRole ? 'bg-brand' : 'bg-gray-200'}`}
+            onClick={() => handleRoleSelect(selectedRole)}
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Spinner className="h-5 w-5" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+              <>
+                Continue 
+              </>
+            )}
+          </Button>
+        </motion.div>
+
+        <div className="text-center text-gray-600 font-semibold text-sm mt-8">
           <p>You can not change your account type later in settings</p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
