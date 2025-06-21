@@ -1,3 +1,4 @@
+// src/app/companies/jobs/create/description/DescriptionContent.jsx
 'use client';
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -22,6 +23,7 @@ function DescriptionInner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!jobId) {
@@ -62,6 +64,7 @@ function DescriptionInner() {
   };
 
   const handleSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       const result = await onSubmit(data);
       if (result?.error) {
@@ -69,11 +72,15 @@ function DescriptionInner() {
         return result;
       }
       toast.success('Description saved successfully!');
+      // Delay to show spinner before navigation
+      await new Promise(resolve => setTimeout(resolve, 1000));
       router.push(`/companies/jobs/create/skills?jobId=${jobId}`);
       return result;
     } catch (error) {
       toast.error('Failed to save description');
       return { error: error.message };
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -111,7 +118,7 @@ function DescriptionInner() {
           size="lg"
           className="flex items-center gap-2 bg-[#1e90ff]/10 hover:bg-[#1e90ff]/20 border border-[#1e90ff]/50 hover:border-[#1e90ff] rounded-full px-4 py-3 shadow-md hover:shadow-lg transition-all"
           onClick={handleAIGenerateClick}
-          disabled={isGeneratingDescription}
+          disabled={isGeneratingDescription || isSubmitting}
         >
           <span className="text-2xl text-[#1e90ff]">⚡️</span>
           <span className="text-sm font-medium text-[#1e90ff]">AI Generate Description</span>
